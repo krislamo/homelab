@@ -1,0 +1,35 @@
+# Copyright (C) 2019  Kris Lamoureux
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+- name: Install Moxie Server
+  hosts: all
+  become: true
+
+  # Install host requirements for playbooks
+  pre_tasks:
+
+    - name: 'Install Ansible dependency: python-apt'
+      shell: 'apt-get update && apt-get install python-apt -y'
+      args:
+        creates: /usr/lib/python2.7/dist-packages/apt
+        warn: false
+
+    - name: 'Install Ansible dependency: aptitude'
+      apt:
+        name: 'aptitude'
+        state: present
+        force_apt_get: true
+
+  roles:
+    - docker

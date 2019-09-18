@@ -1,0 +1,52 @@
+# Copyright (C) 2019  Kris Lamoureux
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+- name: Remove old versions of Docker
+  apt:
+    name: ['docker', 'docker-engine', 'docker.io', 'containerd', 'runc']
+    state: absent
+    update_cache: true
+
+- name: Install HTTPS capability for apt
+  apt:
+    name: ['apt-transport-https', 'ca-certificates',
+           'curl', 'gnupg2', 'software-properties-common']
+    state: present
+
+- name: Install Docker's signing key
+  apt_key:
+    url: https://download.docker.com/linux/debian/gpg
+    id: 9DC858229FC7DD38854AE2D88D81803C0EBFCD88
+    state: present
+
+- name: Install Docker's stable repository
+  template:
+    src: docker-ce.list
+    dest: /etc/apt/sources.list.d/docker-ce.list
+
+- name: Install Docker CE
+  apt:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io']
+    state: present
+    update_cache: true
+
+- name: Add user to docker group
+  user:
+    name: vagrant
+    groups: docker
+
+- name: Install docker-compose
+  script: install-compose.sh
+  args:
+    creates: /usr/local/bin/docker-compose
