@@ -31,5 +31,10 @@
         state: present
         force_apt_get: true
 
+    - name: 'Install Ansible dependency: python-docker'
+      apt:
+        name: python-docker
+
   roles:
     - docker
+    - wordpress

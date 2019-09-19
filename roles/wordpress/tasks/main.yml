@@ -1,0 +1,26 @@
+- name: Start MariaDB container
+  docker_container:
+    name: mariadb
+    image: mariadb:10.4.8
+    restart_policy: always
+    volumes: mariadb:/var/lib/mysql
+    env:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: Password1
+
+- name: Start WordPress container
+  docker_container:
+    name: wordpress
+    image: wordpress:5.2.3
+    restart_policy: always
+    ports: 8080:80
+    volumes: wordpress:/var/www/html
+    links:
+      - mariadb
+    env:
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_PASSWORD: Password1
+      WORDPRESS_DB_HOST: mariadb
