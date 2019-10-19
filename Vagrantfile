@@ -4,6 +4,7 @@
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
   config.vm.network "forwarded_port", host: 8080, guest: 8080
+  config.vm.network "forwarded_port", host: 8000, guest: 8000
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Machine Name

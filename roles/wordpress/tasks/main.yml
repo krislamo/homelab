@@ -15,7 +15,6 @@
     name: wordpress
     image: wordpress:5.2.3
     restart_policy: always
-    ports: 8080:80
     volumes: wordpress:/var/www/html
     links:
       - mariadb

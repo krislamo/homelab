@@ -37,4 +37,5 @@
 
   roles:
     - docker
+    - traefik
     - wordpress

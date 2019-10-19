@@ -1,0 +1,16 @@
+- name: Install Traefik Configuration
+  copy:
+    src: traefik.yml
+    dest: traefik.yml
+
+- name: Start Traefik container
+  docker_container:
+    name: traefik
+    image: traefik:2.0.2
+    restart_policy: always
+    ports:
+      - 8000:80
+      - 8080:8080
+    volumes:
+      - ./traefik.yml:/etc/traefik/traefik.yml
+      - /var/run/docker.sock:/var/run/docker.sock
