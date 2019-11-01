@@ -1,8 +1,5 @@
 .vagrant
 /*.yml
 /*.yaml
-/prod/
-/production/
-/stage/
-/staging/
 !moxie.yml
+/environments/
