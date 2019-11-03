@@ -1,3 +1,4 @@
+traefik_name: traefik
 traefik_version: latest
 traefik_port: 8000
 traefik_admin_port: 8080

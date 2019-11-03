@@ -5,7 +5,7 @@
 
 - name: Start Traefik container
   docker_container:
-    name: traefik
+    name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
     restart_policy: always
     ports:

@@ -43,8 +43,9 @@
 
 - name: Add user to docker group
   user:
-    name: vagrant
+    name: "{{ docker_user }}"
     groups: docker
+    append: yes
 
 - name: Install docker-compose
   script: install-compose.sh

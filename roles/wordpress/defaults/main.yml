@@ -1,0 +1,6 @@
+mariadb_name: mariadb
+mariadb_version: latest
+
+wordpress_version: latest
+wordpress_dbname: wordpress
+wordpress_dbuser: wordpress
