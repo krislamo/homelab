@@ -12,7 +12,7 @@
 
 - name: Start WordPress container
   docker_container:
-    name: wordpress
+    name: "{{ wordpress_name }}"
     image: wordpress:{{ wordpress_version }}
     restart_policy: always
     volumes: wordpress:/var/www/html
