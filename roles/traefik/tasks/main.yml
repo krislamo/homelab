@@ -2,11 +2,13 @@
   copy:
     src: traefik.yml
     dest: traefik.yml
+  notify: Restart Traefik container
 
 - name: Start Traefik container
   docker_container:
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
+    state: started
     restart_policy: always
     ports:
       - "{{ traefik_port }}:80"
