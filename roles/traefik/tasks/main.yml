@@ -1,5 +1,5 @@
 - name: Install Traefik Configuration
-  copy:
+  template:
     src: traefik.yml
     dest: traefik.yml
   notify: Restart Traefik container
