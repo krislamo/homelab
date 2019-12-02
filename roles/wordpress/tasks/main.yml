@@ -16,6 +16,8 @@
     image: wordpress:{{ wordpress_version }}
     restart_policy: always
     volumes: wordpress:/var/www/html
+    labels:
+      traefik.http.routers.wordpress.rule: "Host(`{{ wordpress_domain }}`)"
     links:
       - "{{ mariadb_name }}"
     env:

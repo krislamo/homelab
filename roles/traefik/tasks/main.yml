@@ -1,18 +1,12 @@
-- name: Install Traefik Configuration
-  template:
-    src: traefik.yml
-    dest: traefik.yml
-  notify: Restart Traefik container
-
 - name: Start Traefik container
   docker_container:
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
+    command: --api.insecure=true --providers.docker
     state: started
     restart_policy: always
     ports:
       - "{{ traefik_port }}:80"
       - "{{ traefik_admin_port }}:8080"
     volumes:
-      - ./traefik.yml:/etc/traefik/traefik.yml
       - /var/run/docker.sock:/var/run/docker.sock
