@@ -1,12 +1,23 @@
+- name: Create traefik network
+  docker_network:
+    name: traefik-net
+
 - name: Start Traefik container
   docker_container:
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
-    command: --api.insecure=true --providers.docker --providers.docker.exposedbydefault=false
+    command: "{{ traefik_options }}"
     state: started
     restart_policy: always
-    ports:
-      - "{{ traefik_port }}:80"
-      - "{{ traefik_admin_port }}:8080"
+    ports: "{{ traefik_ports }}"
+    networks_cli_compatible: "false"
+    networks:
+      - name: "traefik-net"
+    labels:
+      traefik.http.routers.traefik.rule: "Host(`{{ traefik_domain }}`)"
+      traefik.http.routers.traefik.service: "api@internal"
+      traefik.http.middlewares.traefik.basicauth.users: "{{ traefik_auth }}"
+      traefik.docker.network: "proxy_traefik-net"
+      traefik.enable: "true"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock

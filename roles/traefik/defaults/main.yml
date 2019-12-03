@@ -1,5 +1,9 @@
 traefik_name: traefik
 traefik_version: latest
-traefik_port: 8000
-traefik_admin_port: 8080
-traefik_domain: localhost
+traefik_options:
+  - "--providers.docker"
+  - "--providers.docker.exposedbydefault=false"
+  - "--entrypoints.web.address=:80"
+  - "--api=true"
+traefik_ports:
+  - "80:80"
