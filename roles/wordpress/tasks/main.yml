@@ -18,6 +18,7 @@
     volumes: wordpress:/var/www/html
     labels:
       traefik.http.routers.wordpress.rule: "Host(`{{ wordpress_domain }}`)"
+      traefik.enable: "true"
     links:
       - "{{ mariadb_name }}"
     env:
