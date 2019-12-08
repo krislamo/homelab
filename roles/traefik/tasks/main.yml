@@ -1,4 +1,10 @@
-- name: Create traefik network
+- name: Set default Traefik options
+  set_fact:
+    traefik_defaults:
+      - "--providers.docker"
+      - "--providers.docker.exposedbydefault=false"
+
+- name: Create Traefik network
   docker_network:
     name: traefik-net
 
@@ -6,7 +12,7 @@
   docker_container:
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
-    command: "{{ traefik_options }}"
+    command: "{{ traefik_defaults + traefik_options }}"
     state: started
     restart_policy: always
     ports: "{{ traefik_ports }}"
