@@ -1,0 +1,7 @@
+- name: Upgrade Moxie Server
+  hosts: moxietest
+  become: true
+  roles:
+    - upgrade
+    - traefik
+    - wordpress

@@ -1,0 +1,16 @@
+- name: 'Install Ansible dependency: python-apt'
+  shell: 'apt-get update && apt-get install python-apt -y'
+  args:
+    creates: /usr/lib/python2.7/dist-packages/apt
+    warn: false
+
+- name: 'Install Ansible dependency: aptitude'
+  apt:
+    name: 'aptitude'
+    state: present
+    force_apt_get: true
+
+- name: 'Install Ansible dependency: python-docker'
+  apt:
+    name: python-docker
+    state: present
