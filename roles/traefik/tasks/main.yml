@@ -21,8 +21,9 @@
       - name: "traefik-net"
     labels:
       traefik.http.routers.traefik.rule: "Host(`{{ traefik_domain }}`)"
+      traefik.http.middlewares.auth.basicauth.users: "{{ traefik_auth }}"
+      traefik.http.routers.traefik.middlewares: "auth@docker"
       traefik.http.routers.traefik.service: "api@internal"
-      traefik.http.middlewares.traefik.basicauth.users: "{{ traefik_auth }}"
       traefik.docker.network: "proxy_traefik-net"
       traefik.enable: "true"
     volumes:
