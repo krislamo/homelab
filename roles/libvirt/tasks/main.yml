@@ -1,0 +1,15 @@
+- name: Install QEMU/KVM
+  apt:
+    name: qemu-kvm
+    state: present
+
+- name: Install Libvirt
+  apt:
+    name: ["libvirt-clients", "libvirt-daemon-system"]
+    state: present
+
+- name: Add user to libvirt group
+  user:
+    name: "{{ libvirt_user }}"
+    groups: libvirt
+    append: yes
