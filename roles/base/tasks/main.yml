@@ -1,0 +1,15 @@
+- name: Install useful software
+  apt:
+    name: ["vim", "wget"]
+    state: present
+
+- name: Install network interfaces
+  template:
+    src: bridged-interface.cfg
+    dest: /etc/network/interfaces
+  notify: reboot_host
+
+- name: Install bridge utilities
+  apt:
+    name: bridge-utils
+    state: present
