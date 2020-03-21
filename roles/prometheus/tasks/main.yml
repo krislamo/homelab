@@ -2,4 +2,7 @@
   docker_container:
     name: "{{ prom_name }}"
     image: prom/prometheus:{{ prom_version }}
+    state: started
     restart_policy: always
+    ports:
+      - "80:9090"
