@@ -1,0 +1,5 @@
+- name: Start Prometheus container
+  docker_container:
+    name: "{{ prom_name }}"
+    image: prom/prometheus:{{ prom_version }}
+    restart_policy: always
