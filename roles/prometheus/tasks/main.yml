@@ -1,8 +1,15 @@
+- name: Install Prometheus configuration
+  template:
+    src: prometheus-config.yml
+    dest: /home/{{ docker_user }}/prometheus.yml
+
 - name: Start Prometheus container
   docker_container:
     name: "{{ prom_name }}"
     image: prom/prometheus:{{ prom_version }}
     state: started
     restart_policy: always
+    volumes:
+      - /home/{{ docker_user }}/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "80:9090"
