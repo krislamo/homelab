@@ -10,7 +10,7 @@
     state: present
     force_apt_get: true
 
-- name: 'Install Ansible dependency: python-docker'
+- name: 'Install Ansible dependency: python3-docker'
   apt:
-    name: python-docker
+    name: python3-docker
     state: present
