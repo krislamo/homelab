@@ -1,7 +1,22 @@
+- name: Install Prometheus node exporter
+  apt:
+    name: prometheus-node-exporter
+    state: present
+
+- name: Run Prometheus node exporter
+  service:
+    name: prometheus-node-exporter
+    state: started
+
+- name: Create Prometheus directory
+  file:
+    path: /home/{{ docker_user }}/prometheus
+    state: directory
+
 - name: Install Prometheus configuration
   template:
     src: prometheus-config.yml
-    dest: /home/{{ docker_user }}/prometheus.yml
+    dest: /home/{{ docker_user }}/prometheus/prometheus.yml
 
 - name: Start Prometheus container
   docker_container:
@@ -10,6 +25,13 @@
     state: started
     restart_policy: always
     volumes:
-      - /home/{{ docker_user }}/prometheus.yml:/etc/prometheus/prometheus.yml
+      - /home/{{ docker_user }}/prometheus:/etc/prometheus
     ports:
       - "80:9090"
+
+- name: Start Grafana container
+  docker_container:
+    name: grafana
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
