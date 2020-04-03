@@ -3,4 +3,5 @@
 /*.yaml
 !moxie.yml
 !upgrade-moxie.yml
+!dockerbox.yml
 /environments/

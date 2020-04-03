@@ -1,0 +1,39 @@
+- name: Install Ansible source
+  template:
+    src: ansible.list
+    dest: /etc/apt/sources.list.d/ansible.list
+
+- name: Add Ansible source key
+  apt_key:
+    keyserver: keyserver.ubuntu.com
+    id: 93C4A3FD7BB9C367
+
+- name: Install Ansible
+  apt:
+    name: ansible
+    state: present
+
+- name: Install Java
+  apt:
+    name: default-jre
+    state: present
+
+- name: Create Jenkin's directory
+  file:
+    path: /home/{{ docker_user }}/jenkins
+    state: directory
+    recurse: yes
+    owner: "1000"
+    group: "1000"
+
+- name: Start Jenkins Container
+  docker_container:
+    name: jenkins
+    image: jenkins/jenkins:2.228
+    state: started
+    restart_policy: always
+    ports:
+      - 8080:8080
+      - 50000:50000
+    volumes:
+      - /home/{{ docker_user }}/jenkins:/var/jenkins_home
