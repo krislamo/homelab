@@ -29,7 +29,7 @@
 - name: Start Jenkins Container
   docker_container:
     name: jenkins
-    image: jenkins/jenkins:2.228
+    image: jenkins/jenkins:{{ jenkins_version }}
     state: started
     restart_policy: always
     ports:
