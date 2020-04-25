@@ -3,8 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
-  config.vm.network "forwarded_port", host: 8080, guest: 8080
-  config.vm.network "forwarded_port", host: 8000, guest: 8000
+  config.vm.network :private_network, ip: "192.168.111.222"
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Machine Name
@@ -19,7 +18,10 @@ Vagrant.configure("2") do |config|
   # Provision with Ansible
   config.vm.provision "ansible" do |ansible|
     ansible.compatibility_mode = "2.0"
-    ansible.playbook = "moxie.yml"
+    ansible.playbook = ENV["PLAYBOOK"] + ".yml"
+    ansible.inventory_path = "environments/development/vagrant"
+    ansible.limit = ENV["PLAYBOOK"]
+
   end
 
 end
