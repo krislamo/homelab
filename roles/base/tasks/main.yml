@@ -6,6 +6,7 @@
 - name: Install network interfaces
   template:
     src: bridged-interface.cfg
+    src: {{ network_type }}-interface.cfg
     dest: /etc/network/interfaces
   notify: reboot_host
 
@@ -13,3 +14,4 @@
   apt:
     name: bridge-utils
     state: present
+  when: network_type == "bridged"
