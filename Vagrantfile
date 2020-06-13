@@ -15,6 +15,10 @@ Vagrant.configure("2") do |config|
     libvirt.default_prefix = ""
   end
 
+  config.vm.provider "virtualbox" do |vbox|
+    vbox.memory = 2048
+  end
+
   # Provision with Ansible
   config.vm.provision "ansible" do |ansible|
     ansible.compatibility_mode = "2.0"

@@ -1,0 +1,30 @@
+#!/usr/bin/expect -d
+
+set timeout -1
+
+spawn /home/{{ docker_user }}/bitwarden/bitwarden.sh install
+
+expect "Enter the domain name for your Bitwarden instance (ex. bitwarden.example.com):"
+send "{{ bitwarden_domain }}\r"
+
+expect "Do you want to use Let's Encrypt to generate a free SSL certificate? (y/n):"
+send "n\r"
+
+expect "Enter your installation id (get at https://bitwarden.com/host):"
+send "{{ bitwarden_install_id }}\r"
+
+expect "Enter your installation key:"
+send "{{ bitwarden_install_key }}\r"
+
+expect "Do you have a SSL certificate to use? (y/n):"
+send "n\r"
+
+expect "Do you want to generate a self-signed SSL certificate? (y/n):"
+send "y\r"
+
+expect "Next steps, run:\r\n`./bitwarden.sh start`"
+expect eof
+
+spawn /home/{{ docker_user }}/bitwarden/bitwarden.sh start
+expect "Bitwarden is up and running!"
+expect eof

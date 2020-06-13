@@ -1,0 +1,31 @@
+- name: Install expect
+  apt:
+    name: expect
+    state: present
+
+- name: Create Bitwarden directory
+  file:
+    path: "/home/{{ docker_user }}/bitwarden/"
+    state: directory
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+
+- name: Download Bitwarden script
+  get_url:
+    url: "https://raw.githubusercontent.com/\
+          bitwarden/server/master/scripts/bitwarden.sh"
+    dest: "/home/{{ docker_user }}/bitwarden/"
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: u+x
+
+- name: Install Bitwarden script wrapper
+  template:
+    src: bw_wrapper.j2
+    dest: "/home/{{ docker_user }}/bitwarden/bw_wrapper"
+    owner: "{{ docker_user }}"
+    group: "{{ docker_user }}"
+    mode: u+x
+
+- name: Run Bitwarden script
+  shell: /home/{{ docker_user }}/bitwarden/bw_wrapper

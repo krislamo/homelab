@@ -45,6 +45,8 @@
   user:
     name: "{{ docker_user }}"
     groups: docker
+    skeleton: /etc/skel
+    shell: /bin/bash
     append: yes
 
 - name: Install docker-compose
