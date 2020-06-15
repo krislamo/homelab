@@ -21,11 +21,9 @@ Vagrant.configure("2") do |config|
 
   # Provision with Ansible
   config.vm.provision "ansible" do |ansible|
+    ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/roles"
     ansible.compatibility_mode = "2.0"
-    ansible.playbook = ENV["PLAYBOOK"] + ".yml"
-    ansible.inventory_path = "environments/development/vagrant"
-    ansible.limit = ENV["PLAYBOOK"]
-
+    ansible.playbook = "dev/" + ENV["PLAYBOOK"] + ".yml"
   end
 
 end

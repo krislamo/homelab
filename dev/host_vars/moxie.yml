@@ -1,0 +1,9 @@
+# docker
+docker_user: vagrant
+
+# bitwarden
+# Get Installation ID & Key at https://bitwarden.com/host/
+bitwarden_domain: vault.test.krislamo.org
+bitwarden_dbpass: password
+bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
+bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
