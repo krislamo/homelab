@@ -3,7 +3,7 @@
 
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
-  config.vm.network :private_network, ip: "192.168.111.222"
+  config.vm.network "private_network", type: "dhcp"
   config.vm.synced_folder ".", "/vagrant", disabled: true
 
   # Machine Name

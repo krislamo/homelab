@@ -1,0 +1,11 @@
+- name: Install Docker Box Server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/dockerbox.yml
+  roles:
+    - ansible
+    - base
+    - docker
+    - jenkins
+    - prometheus

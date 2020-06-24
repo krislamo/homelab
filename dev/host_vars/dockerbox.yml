@@ -1,0 +1,17 @@
+# base
+manage_network: false
+network_type: static
+ip_inter: eth1
+ip_addr: 192.168.1.2/24
+ip_gateway: 192.168.1.1
+
+# docker
+docker_user: vagrant
+
+# jenkins
+jenkins_version: 2.229
+
+# prometheus
+prom_name: prometheus
+prom_version: latest
+prom_targets: "['127.0.0.1', '127.0.0.1:9100']"
