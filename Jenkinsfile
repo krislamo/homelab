@@ -6,7 +6,7 @@ pipeline {
 
                 dir ('environments') {
                     git credentialsId: 'b643c25a-d040-4692-8067-d82511509bd0',
-                        branch: 'prom', url: 'git@github.com:krislamo/moxie-env.git'
+                        url: 'git@github.com:krislamo/moxie-env.git'
                 }
 
                 ansiblePlaybook credentialsId: '4e3a5a7a-fca5-4f10-89a4-8996cf14fec7',
