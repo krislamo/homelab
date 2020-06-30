@@ -13,7 +13,7 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 - name: Install Moxie Server
-  hosts: moxietest
+  hosts: moxiehosts
   become: true
   roles:
     - ansible
