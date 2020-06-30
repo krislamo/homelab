@@ -8,7 +8,7 @@
     name: ["libvirt-clients", "libvirt-daemon-system"]
     state: present
 
-- name: Add user to libvirt group
+- name: Add users to libvirt group
   user:
     name: "{{ item }}"
     groups: libvirt
