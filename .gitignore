@@ -2,6 +2,6 @@
 /*.yml
 /*.yaml
 !moxie.yml
-!upgrade-moxie.yml
 !dockerbox.yml
+!hypervisor.yml
 /environments/
