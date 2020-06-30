@@ -1,1 +1,2 @@
-network_type: static
+manage_network: false
+allow_reboot: true

@@ -1,4 +1,5 @@
 # base
+allow_reboot: false
 manage_network: false
 network_type: static
 ip_inter: eth1
