@@ -10,6 +10,8 @@
 
 - name: Add user to libvirt group
   user:
-    name: "{{ libvirt_user }}"
+    name: "{{ item }}"
     groups: libvirt
     append: yes
+  with_items: "{{ libvirt_users }}"
+  when: libvirt_users is defined
