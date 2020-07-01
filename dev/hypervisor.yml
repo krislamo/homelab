@@ -1,0 +1,9 @@
+- name: Install Hypervisor
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/hypervisor.yml
+  roles:
+    - ansible
+    - base
+    - libvirt

@@ -15,3 +15,13 @@
     append: yes
   with_items: "{{ libvirt_users }}"
   when: libvirt_users is defined
+
+- name: Download GNU/Linux ISOs
+  get_url:
+    url: "{{ item.url }}"
+    dest: /var/lib/libvirt/images
+    checksum: "{{ item.hash }}"
+    owner: libvirt-qemu
+    group: libvirt-qemu
+  loop: "{{ libvirt_isos }}"
+  when: libvirt_isos is defined
