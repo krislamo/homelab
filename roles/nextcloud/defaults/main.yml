@@ -1,0 +1,4 @@
+# nextcloud
+mariadb_name: mariadb
+nextcloud_dbname: nextcloud
+nextcloud_dbuser: nextcloud

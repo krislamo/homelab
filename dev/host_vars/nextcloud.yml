@@ -1,0 +1,5 @@
+# nextcloud
+mariadb_version: latest
+nextcloud_name: nextcloud
+nextcloud_dbpass: password
+nextcloud_version: stable

@@ -1,0 +1,35 @@
+- name: Start MariaDB container
+  docker_container:
+    name: "{{ mariadb_name }}"
+    image: mariadb:{{ mariadb_version }}
+    restart_policy: always
+    volumes: mariadb:/var/lib/mysql
+    env:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: "{{ nextcloud_dbname }}"
+      MYSQL_USER: "{{ nextcloud_dbuser }}"
+      MYSQL_PASSWORD: "{{ nextcloud_dbpass }}"
+
+- name: Start Nextcloud container
+  docker_container:
+    name: "{{ nextcloud_name }}"
+    image: nextcloud:{{ nextcloud_version }}
+    restart_policy: always
+    volumes: nextcloud:/var/www/html
+    ports: 80:80
+    links: "{{ mariadb_name }}:mysql"
+    env:
+      MYSQL_HOST: mysql
+      MYSQL_DATABASE: "{{ nextcloud_dbname }}"
+      MYSQL_USER: "{{ nextcloud_dbuser }}"
+      MYSQL_PASSWORD: "{{ nextcloud_dbpass }}"
+  register: nextcloud_container
+
+- name: Do Nextcloud database maintenance
+  command: "docker exec --user www-data {{ nextcloud_name }} php {{ item }}"
+  loop:
+    - "occ maintenance:mode --on"
+    - "occ db:add-missing-indices"
+    - "occ db:convert-filecache-bigint"
+    - "occ maintenance:mode --off"
+  when: nextcloud_container.changed
