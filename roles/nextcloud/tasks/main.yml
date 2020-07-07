@@ -71,3 +71,8 @@
     - "php occ db:convert-filecache-bigint"
     - "php occ maintenance:mode --off"
   when: nextcloud_install.changed
+
+- name: Remove Nextcloud's CAN_INSTALL file
+  file:
+    path: "{{ nextcloud_root }}/public_html/config/CAN_INSTALL"
+    state: absent
