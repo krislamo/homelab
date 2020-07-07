@@ -1,3 +1,8 @@
+- name: Create Docker container bind mount directory
+  file:
+    path: "{{ nextcloud_root }}/public_html"
+    state: directory
+
 - name: Start MariaDB container
   docker_container:
     name: "{{ mariadb_name }}"
@@ -15,7 +20,7 @@
     name: "{{ nextcloud_name }}"
     image: nextcloud:{{ nextcloud_version }}
     restart_policy: always
-    volumes: nextcloud:/var/www/html
+    volumes: "{{ nextcloud_root }}/public_html:/var/www/html"
     ports: 80:80
     links: "{{ mariadb_name }}:mysql"
     env:
@@ -25,11 +30,44 @@
       MYSQL_PASSWORD: "{{ nextcloud_dbpass }}"
   register: nextcloud_container
 
-- name: Do Nextcloud database maintenance
-  command: "docker exec --user www-data {{ nextcloud_name }} php {{ item }}"
+- name: Grab Nextcloud container information
+  docker_container_info:
+    name: "{{ nextcloud_name }}"
+  register: nextcloud_info
+
+- name: Wait for Nextcloud to become available
+  wait_for:
+    host: "{{ nextcloud_info.container.NetworkSettings.IPAddress }}"
+    port: 80
+
+- name: Check Nextcloud status
+  command: "docker exec --user www-data {{ nextcloud_name }}
+            php occ status"
+  register: nextcloud_status
+  args:
+    removes: "{{ nextcloud_root }}/public_html/config/CAN_INSTALL"
+
+- name: Install Nextcloud
+  command: 'docker exec --user www-data {{ nextcloud_name }}
+            php occ maintenance:install
+              --admin-user "{{ nextcloud_admin }}"
+              --admin-pass "{{ nextcloud_pass }}"'
+  register: nextcloud_install
+  when:
+    - nextcloud_status.stdout[:26] == "Nextcloud is not installed"
+    - nextcloud_domain is defined
+
+- name: Set Nextcloud's Trusted Domain
+  command: 'docker exec --user www-data {{ nextcloud_name }}
+            php occ config:system:set trusted_domains 0
+              --value="{{ nextcloud_domain }}"'
+  when: nextcloud_install.changed
+
+- name: Preform Nextcloud database maintenance
+  command: "docker exec --user www-data {{ nextcloud_name }} {{ item }}"
   loop:
-    - "occ maintenance:mode --on"
-    - "occ db:add-missing-indices"
-    - "occ db:convert-filecache-bigint"
-    - "occ maintenance:mode --off"
-  when: nextcloud_container.changed
+    - "php occ maintenance:mode --on"
+    - "php occ db:add-missing-indices"
+    - "php occ db:convert-filecache-bigint"
+    - "php occ maintenance:mode --off"
+  when: nextcloud_install.changed

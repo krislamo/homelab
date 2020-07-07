@@ -3,3 +3,6 @@ mariadb_version: latest
 nextcloud_name: nextcloud
 nextcloud_dbpass: password
 nextcloud_version: stable
+nextcloud_admin: admin
+nextcloud_pass: password
+nextcloud_domain: cloud.vm.krislamo.org
