@@ -50,6 +50,11 @@
 - name: Install Nextcloud
   command: 'docker exec --user www-data {{ nextcloud_name }}
             php occ maintenance:install
+              --database "mysql"
+              --database-host "{{ mariadb_name }}"
+              --database-name "{{ nextcloud_dbname }}"
+              --database-user "{{ nextcloud_dbuser }}"
+              --database-pass "{{ nextcloud_dbpass }}"
               --admin-user "{{ nextcloud_admin }}"
               --admin-pass "{{ nextcloud_pass }}"'
   register: nextcloud_install
