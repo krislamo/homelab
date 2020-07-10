@@ -1,26 +1,9 @@
-- name: Install useful software
-  apt:
-    name: ["vim", "wget"]
-    state: present
+- import_tasks: ansible.yml
+  tags: ansible
 
-- name: Install network interfaces file
-  copy:
-    src: network-interfaces.cfg
-    dest: /etc/network/interfaces
-    owner: root
-    group: root
-    mode: '0644'
+- import_tasks: system.yml
+  tags: system
+
+- import_tasks: network.yml
+  tags: network
   when: manage_network
-
-- name: Install network interfaces
-  template:
-    src: "{{ network_type }}-interface.cfg"
-    dest: "/etc/network/interfaces.d/{{ ip_inter }}"
-  notify: reboot_host
-  when: manage_network
-
-- name: Install bridge utilities
-  apt:
-    name: bridge-utils
-    state: present
-  when: network_type == "bridged" and manage_network

@@ -16,7 +16,6 @@
   hosts: moxiehosts
   become: true
   roles:
-    - ansible
     - docker
     - traefik
     - wordpress

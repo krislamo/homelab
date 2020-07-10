@@ -16,7 +16,6 @@
   hosts: dockerhosts
   become: true
   roles:
-    - ansible
     - base
     - docker
     - jenkins

@@ -1,0 +1,19 @@
+- name: Install network interfaces file
+  copy:
+    src: network-interfaces.cfg
+    dest: /etc/network/interfaces
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install network interfaces
+  template:
+    src: "{{ network_type }}-interface.cfg"
+    dest: "/etc/network/interfaces.d/{{ ip_inter }}"
+  notify: reboot_host
+
+- name: Install bridge utilities
+  apt:
+    name: bridge-utils
+    state: present
+  when: network_type == "bridged"

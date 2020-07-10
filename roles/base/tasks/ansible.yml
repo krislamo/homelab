@@ -4,13 +4,11 @@
     creates: /usr/lib/python3/dist-packages/apt
     warn: false
 
-- name: 'Install Ansible dependency: aptitude'
+- name: Install additional Ansible dependencies
   apt:
-    name: 'aptitude'
+    name: "{{ item }}"
     state: present
     force_apt_get: true
-
-- name: 'Install Ansible dependency: python3-docker'
-  apt:
-    name: python3-docker
-    state: present
+  loop:
+    - aptitude
+    - python3-docker

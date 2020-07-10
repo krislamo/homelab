@@ -16,6 +16,5 @@
   hosts: hypervisors
   become: true
   roles:
-    - ansible
     - base
     - libvirt

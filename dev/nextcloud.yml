@@ -4,7 +4,6 @@
   vars_files:
     - host_vars/nextcloud.yml
   roles:
-    - ansible
     - base
     - docker
     - nextcloud

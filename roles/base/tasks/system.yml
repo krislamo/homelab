@@ -1,0 +1,4 @@
+- name: Install useful software
+  apt:
+    name: ["vim", "wget"]
+    state: present
