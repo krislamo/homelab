@@ -1,14 +1,15 @@
-- name: Create Docker container bind mount directory
+- name: Create Docker container bind mount directories
   file:
-    path: "{{ nextcloud_root }}/public_html"
+    path: ["{{ nextcloud_root }}",
+           "{{ nextcloud_dbroot }}"]
     state: directory
 
-- name: Start MariaDB container
+- name: Start Nextcloud's database container
   docker_container:
-    name: "{{ mariadb_name }}"
-    image: mariadb:{{ mariadb_version }}
+    name: "{{ nextcloud_dbcontainer }}"
+    image: mariadb:{{ nextcloud_dbversion }}
     restart_policy: always
-    volumes: mariadb:/var/lib/mysql
+    volumes: "{{ nextcloud_dbroot }}:/var/lib/mysql"
     env:
       MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DATABASE: "{{ nextcloud_dbname }}"
@@ -17,22 +18,16 @@
 
 - name: Start Nextcloud container
   docker_container:
-    name: "{{ nextcloud_name }}"
+    name: "{{ nextcloud_container }}"
     image: nextcloud:{{ nextcloud_version }}
     restart_policy: always
-    volumes: "{{ nextcloud_root }}/public_html:/var/www/html"
+    volumes: "{{ nextcloud_root }}:/var/www/html"
     ports: 80:80
-    links: "{{ mariadb_name }}:mysql"
-    env:
-      MYSQL_HOST: mysql
-      MYSQL_DATABASE: "{{ nextcloud_dbname }}"
-      MYSQL_USER: "{{ nextcloud_dbuser }}"
-      MYSQL_PASSWORD: "{{ nextcloud_dbpass }}"
-  register: nextcloud_container
+    links: "{{ nextcloud_dbcontainer }}:mysql"
 
 - name: Grab Nextcloud container information
   docker_container_info:
-    name: "{{ nextcloud_name }}"
+    name: "{{ nextcloud_container }}"
   register: nextcloud_info
 
 - name: Wait for Nextcloud to become available
@@ -41,17 +36,17 @@
     port: 80
 
 - name: Check Nextcloud status
-  command: "docker exec --user www-data {{ nextcloud_name }}
+  command: "docker exec --user www-data {{ nextcloud_container }}
             php occ status"
   register: nextcloud_status
   args:
-    removes: "{{ nextcloud_root }}/public_html/config/CAN_INSTALL"
+    removes: "{{ nextcloud_root }}/config/CAN_INSTALL"
 
 - name: Install Nextcloud
-  command: 'docker exec --user www-data {{ nextcloud_name }}
+  command: 'docker exec --user www-data {{ nextcloud_container }}
             php occ maintenance:install
               --database "mysql"
-              --database-host "{{ mariadb_name }}"
+              --database-host "{{ nextcloud_dbcontainer }}"
               --database-name "{{ nextcloud_dbname }}"
               --database-user "{{ nextcloud_dbuser }}"
               --database-pass "{{ nextcloud_dbpass }}"
@@ -63,13 +58,13 @@
     - nextcloud_domain is defined
 
 - name: Set Nextcloud's Trusted Domain
-  command: 'docker exec --user www-data {{ nextcloud_name }}
+  command: 'docker exec --user www-data {{ nextcloud_container }}
             php occ config:system:set trusted_domains 0
               --value="{{ nextcloud_domain }}"'
   when: nextcloud_install.changed
 
 - name: Preform Nextcloud database maintenance
-  command: "docker exec --user www-data {{ nextcloud_name }} {{ item }}"
+  command: "docker exec --user www-data {{ nextcloud_container }} {{ item }}"
   loop:
     - "php occ maintenance:mode --on"
     - "php occ db:add-missing-indices"
@@ -79,5 +74,5 @@
 
 - name: Remove Nextcloud's CAN_INSTALL file
   file:
-    path: "{{ nextcloud_root }}/public_html/config/CAN_INSTALL"
+    path: "{{ nextcloud_root }}/config/CAN_INSTALL"
     state: absent

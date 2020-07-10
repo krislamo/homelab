@@ -1,5 +1,11 @@
-# nextcloud
-mariadb_name: mariadb
-nextcloud_dbname: nextcloud
-nextcloud_dbuser: nextcloud
-nextcloud_root: "/opt/{{ nextcloud_name }}"
+# container names
+nextcloud_container: nextcloud
+nextcloud_dbcontainer: "{{ nextcloud_container }}-db"
+
+# database settings
+nextcloud_dbname: "{{ nextcloud_container }}"
+nextcloud_dbuser: "{{ nextcloud_dbname }}"
+
+# host mounts
+nextcloud_root: "/opt/{{ nextcloud_container }}/public_html"
+nextcloud_dbroot: "/opt/{{ nextcloud_container }}/database"
