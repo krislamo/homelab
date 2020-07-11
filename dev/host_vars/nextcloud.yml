@@ -1,3 +1,10 @@
+# docker
+docker_user: vagrant
+
+# traefik
+traefik_domain: traefik.vm.krislamo.org
+traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+
 # container settings
 nextcloud_version: stable
 nextcloud_admin: admin

@@ -4,12 +4,19 @@
            "{{ nextcloud_dbroot }}"]
     state: directory
 
+- name: Create Nextcloud network
+  docker_network:
+    name: "{{ nextcloud_container }}"
+
 - name: Start Nextcloud's database container
   docker_container:
     name: "{{ nextcloud_dbcontainer }}"
     image: mariadb:{{ nextcloud_dbversion }}
     restart_policy: always
     volumes: "{{ nextcloud_dbroot }}:/var/lib/mysql"
+    networks_cli_compatible: true
+    networks:
+      - name: "{{ nextcloud_container }}"
     env:
       MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DATABASE: "{{ nextcloud_dbname }}"
@@ -22,8 +29,14 @@
     image: nextcloud:{{ nextcloud_version }}
     restart_policy: always
     volumes: "{{ nextcloud_root }}:/var/www/html"
-    ports: 80:80
-    links: "{{ nextcloud_dbcontainer }}:mysql"
+    networks_cli_compatible: true
+    networks:
+      - name: "{{ nextcloud_container }}"
+      - name: traefik
+    labels:
+      traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
+      traefik.docker.network: traefik
+      traefik.enable: "true"
 
 - name: Grab Nextcloud container information
   docker_container_info:
@@ -32,7 +45,7 @@
 
 - name: Wait for Nextcloud to become available
   wait_for:
-    host: "{{ nextcloud_info.container.NetworkSettings.IPAddress }}"
+    host: "{{ nextcloud_info.container.NetworkSettings.Networks.traefik.IPAddress }}"
     port: 80
 
 - name: Check Nextcloud status
