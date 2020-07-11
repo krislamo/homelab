@@ -1,5 +1,6 @@
 traefik_name: traefik
 traefik_version: latest
+traefik_dashboard: false
 traefik_options:
   - "--entrypoints.web.address=:80"
   - "--api.dashboard=true"
