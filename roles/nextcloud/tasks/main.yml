@@ -1,9 +1,3 @@
-- name: Create Docker container bind mount directories
-  file:
-    path: ["{{ nextcloud_root }}",
-           "{{ nextcloud_dbroot }}"]
-    state: directory
-
 - name: Create Nextcloud network
   docker_network:
     name: "{{ nextcloud_container }}"
@@ -69,6 +63,12 @@
   when:
     - nextcloud_status.stdout[:26] == "Nextcloud is not installed"
     - nextcloud_domain is defined
+
+- name: Set Nextcloud's Trusted Proxy
+  command: 'docker exec --user www-data {{ nextcloud_container }}
+            php occ config:system:set trusted_proxies 0
+              --value="{{ traefik_name }}"'
+  when: nextcloud_install.changed
 
 - name: Set Nextcloud's Trusted Domain
   command: 'docker exec --user www-data {{ nextcloud_container }}
