@@ -1,8 +1,18 @@
-- name: Set default Traefik options
-  set_fact:
-    traefik_defaults:
-      - "--providers.docker"
-      - "--providers.docker.exposedbydefault=false"
+- name: Create Traefik configuration directories
+  file:
+    path: "{{ traefik_root }}/config/dynamic"
+    state: directory
+
+- name: Install static Traefik configuration
+  template:
+    src: traefik.yml.j2
+    dest: "{{ traefik_root }}/config/traefik.yml"
+
+- name: Install dynamic Traefik configuration
+  template:
+    src: tls.yml.j2
+    dest: "{{ traefik_root }}/config/dynamic/tls.yml"
+  notify: reload_traefik
 
 - name: Create Traefik network
   docker_network:
@@ -12,7 +22,6 @@
   docker_container:
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
-    command: "{{ traefik_defaults + traefik_options }}"
     state: started
     restart_policy: always
     ports: "{{ traefik_ports }}"
@@ -24,7 +33,11 @@
       traefik.http.middlewares.auth.basicauth.users: "{{ traefik_auth }}"
       traefik.http.routers.traefik.middlewares: "auth@docker"
       traefik.http.routers.traefik.service: "api@internal"
+      traefik.http.routers.traefik.entrypoints: websecure
+      traefik.http.routers.traefik.tls: "true"
       traefik.docker.network: traefik
       traefik.enable: "{{ traefik_dashboard | string }}"
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ traefik_root }}/config:/etc/traefik"
+      - "{{ traefik_root }}/letsencrypt:/etc/letsencrypt"

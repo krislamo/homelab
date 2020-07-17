@@ -1,8 +1,7 @@
 traefik_name: traefik
 traefik_version: latest
 traefik_dashboard: false
-traefik_options:
-  - "--entrypoints.web.address=:80"
-  - "--api.dashboard=true"
+traefik_root: "/opt/{{ traefik_name }}"
 traefik_ports:
   - "80:80"
+  - "443:443"
