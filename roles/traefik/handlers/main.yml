@@ -1,5 +1,5 @@
 - name: Reload Traefik container
   file:
-    path: "{{ traefik_root }}/config/dynamic/tls.yml"
+    path: "{{ traefik_root }}/config/dynamic"
     state: touch
   listen: reload_traefik
