@@ -29,6 +29,7 @@
       - name: traefik
     labels:
       traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
+      traefik.http.routers.nextcloud.entrypoints: websecure
       traefik.docker.network: traefik
       traefik.enable: "true"
 
