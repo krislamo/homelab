@@ -1,18 +1,31 @@
 # base
 allow_reboot: false
 manage_network: false
-network_type: static
-ip_inter: eth1
-ip_addr: 192.168.1.2/24
-ip_gateway: 192.168.1.1
 
 # docker
 docker_user: vagrant
 
+# traefik
+traefik_dashboard: true
+traefik_domain: traefik.vm.krislamo.org
+traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+
+# nextcloud
+nextcloud_version: stable
+nextcloud_admin: admin
+nextcloud_pass: password
+nextcloud_domain: cloud.vm.krislamo.org
+
+nextcloud_dbversion: latest
+nextcloud_dbpass: password
+
 # jenkins
-jenkins_version: 2.229
+jenkins_version: lts
+jenkins_domain: jenkins.vm.krislamo.org
 
 # prometheus
 prom_name: prometheus
 prom_version: latest
+prom_domain: prom.vm.krislamo.org
+grafana_domain: grafana.vm.krislamo.org
 prom_targets: "['127.0.0.1', '127.0.0.1:9100']"

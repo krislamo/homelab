@@ -18,6 +18,10 @@
     src: prometheus-config.yml
     dest: /home/{{ docker_user }}/prometheus/prometheus.yml
 
+- name: Create Prometheus network
+  docker_network:
+    name: "{{ prom_name }}"
+
 - name: Start Prometheus container
   docker_container:
     name: "{{ prom_name }}"
@@ -26,12 +30,26 @@
     restart_policy: always
     volumes:
       - /home/{{ docker_user }}/prometheus:/etc/prometheus
-    ports:
-      - "80:9090"
+    networks_cli_compatible: true
+    networks:
+      - name: "{{ prom_name }}"
+      - name: traefik
+    labels:
+      traefik.http.routers.prometheus.rule: "Host(`{{ prom_domain }}`)"
+      traefik.http.routers.prometheus.entrypoints: websecure
+      traefik.docker.network: traefik
+      traefik.enable: "true"
 
 - name: Start Grafana container
   docker_container:
     name: grafana
     image: grafana/grafana:latest
-    ports:
-      - "3000:3000"
+    networks_cli_compatible: true
+    networks:
+      - name: "{{ prom_name }}"
+      - name: traefik
+    labels:
+      traefik.http.routers.grafana.rule: "Host(`{{ grafana_domain }}`)"
+      traefik.http.routers.grafana.entrypoints: websecure
+      traefik.docker.network: traefik
+      traefik.enable: "true"

@@ -6,5 +6,7 @@
   roles:
     - base
     - docker
+    - traefik
+    - nextcloud
     - jenkins
     - prometheus

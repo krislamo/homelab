@@ -33,7 +33,13 @@
     state: started
     restart_policy: always
     ports:
-      - 8080:8080
       - 50000:50000
-    volumes:
-      - /home/{{ docker_user }}/jenkins:/var/jenkins_home
+    volumes: "/home/{{ docker_user }}/jenkins:/var/jenkins_home"
+    networks_cli_compatible: true
+    networks:
+      - name: traefik
+    labels:
+      traefik.http.routers.jenkins.rule: "Host(`{{ jenkins_domain }}`)"
+      traefik.http.routers.jenkins.entrypoints: websecure
+      traefik.docker.network: traefik
+      traefik.enable: "true"
