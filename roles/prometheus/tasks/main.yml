@@ -8,15 +8,15 @@
     name: prometheus-node-exporter
     state: started
 
-- name: Create Prometheus directory
+- name: Create Prometheus directories
   file:
-    path: /home/{{ docker_user }}/prometheus
+    path: "{{ prom_root }}"
     state: directory
 
 - name: Install Prometheus configuration
   template:
-    src: prometheus-config.yml
-    dest: /home/{{ docker_user }}/prometheus/prometheus.yml
+    src: prometheus.yml.j2
+    dest: "{{ prom_root }}/prometheus.yml"
 
 - name: Create Prometheus network
   docker_network:
@@ -28,8 +28,7 @@
     image: prom/prometheus:{{ prom_version }}
     state: started
     restart_policy: always
-    volumes:
-      - /home/{{ docker_user }}/prometheus:/etc/prometheus
+    volumes: "{{ prom_root }}:/etc/prometheus"
     networks_cli_compatible: true
     networks:
       - name: "{{ prom_name }}"
@@ -42,8 +41,8 @@
 
 - name: Start Grafana container
   docker_container:
-    name: grafana
-    image: grafana/grafana:latest
+    name: "{{ grafana_name }}"
+    image: grafana/grafana:{{ grafana_version }}
     networks_cli_compatible: true
     networks:
       - name: "{{ prom_name }}"

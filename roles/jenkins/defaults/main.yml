@@ -1,0 +1,2 @@
+jenkins_name: jenkins
+jenkins_root: "/opt/{{ jenkins_name }}/jenkins_home"

@@ -20,21 +20,20 @@
 
 - name: Create Jenkin's directory
   file:
-    path: /home/{{ docker_user }}/jenkins
+    path: "{{ jenkins_root }}"
     state: directory
-    recurse: yes
     owner: "1000"
     group: "1000"
 
 - name: Start Jenkins Container
   docker_container:
-    name: jenkins
+    name: "{{ jenkins_name }}"
     image: jenkins/jenkins:{{ jenkins_version }}
     state: started
     restart_policy: always
     ports:
       - 50000:50000
-    volumes: "/home/{{ docker_user }}/jenkins:/var/jenkins_home"
+    volumes: "{{ jenkins_root }}:/var/jenkins_home"
     networks_cli_compatible: true
     networks:
       - name: traefik

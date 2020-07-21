@@ -23,9 +23,9 @@ nextcloud_dbpass: password
 jenkins_version: lts
 jenkins_domain: jenkins.vm.krislamo.org
 
-# prometheus
-prom_name: prometheus
+# prometheus (includes grafana)
 prom_version: latest
 prom_domain: prom.vm.krislamo.org
+grafana_version: latest
 grafana_domain: grafana.vm.krislamo.org
 prom_targets: "['127.0.0.1', '127.0.0.1:9100']"
