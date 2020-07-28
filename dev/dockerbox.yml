@@ -8,5 +8,6 @@
     - docker
     - traefik
     - nextcloud
+    - gitea
     - jenkins
     - prometheus

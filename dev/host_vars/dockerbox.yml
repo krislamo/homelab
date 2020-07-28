@@ -19,6 +19,12 @@ nextcloud_domain: cloud.vm.krislamo.org
 nextcloud_dbversion: latest
 nextcloud_dbpass: password
 
+# gitea
+gitea_domain: git.vm.krislamo.org
+gitea_version: 1
+gitea_dbversion: latest
+gitea_dbpass: password
+
 # jenkins
 jenkins_version: lts
 jenkins_domain: jenkins.vm.krislamo.org
