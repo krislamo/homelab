@@ -30,6 +30,9 @@
     labels:
       traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
       traefik.http.routers.nextcloud.entrypoints: websecure
+      traefik.http.middlewares.nextcloud-webdav.redirectregex.regex: "https://(.*)/.well-known/(card|cal)dav"
+      traefik.http.middlewares.nextcloud-webdav.redirectregex.replacement: "https://${1}/remote.php/dav/"
+      traefik.http.middlewares.nextcloud-webdav.redirectregex.permanent: "true"
       traefik.docker.network: traefik
       traefik.enable: "true"
 
