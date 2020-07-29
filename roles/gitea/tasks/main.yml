@@ -6,6 +6,7 @@
   docker_container:
     name: "{{ gitea_dbname }}"
     image: mariadb:{{ gitea_dbversion }}
+    state: started
     restart_policy: always
     volumes: "{{ gitea_dbroot }}:/var/lib/mysql"
     networks_cli_compatible: true
@@ -21,6 +22,7 @@
   docker_container:
     name: "{{ gitea_name }}"
     image: gitea/gitea:{{ gitea_version }}
+    state: started
     restart_policy: always
     networks_cli_compatible: true
     networks:

@@ -6,6 +6,7 @@
   docker_container:
     name: "{{ nextcloud_dbcontainer }}"
     image: mariadb:{{ nextcloud_dbversion }}
+    state: started
     restart_policy: always
     volumes: "{{ nextcloud_dbroot }}:/var/lib/mysql"
     networks_cli_compatible: true
@@ -21,6 +22,7 @@
   docker_container:
     name: "{{ nextcloud_container }}"
     image: nextcloud:{{ nextcloud_version }}
+    state: started
     restart_policy: always
     volumes: "{{ nextcloud_root }}:/var/www/html"
     networks_cli_compatible: true

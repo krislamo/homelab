@@ -43,6 +43,8 @@
   docker_container:
     name: "{{ grafana_name }}"
     image: grafana/grafana:{{ grafana_version }}
+    state: started
+    restart_policy: always
     networks_cli_compatible: true
     networks:
       - name: "{{ prom_name }}"
