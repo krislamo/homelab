@@ -18,5 +18,8 @@
   roles:
     - base
     - docker
+    - traefik
+    - nextcloud
+    - gitea
     - jenkins
     - prometheus
