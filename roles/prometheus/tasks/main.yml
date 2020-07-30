@@ -8,15 +8,21 @@
     name: prometheus-node-exporter
     state: started
 
-- name: Create Prometheus directories
+- name: Create Prometheus data directory
   file:
-    path: "{{ prom_root }}"
+    path: "{{ prom_root }}/prometheus"
+    state: directory
+    owner: nobody
+
+- name: Create Prometheus config directory
+  file:
+    path: "{{ prom_root }}/config"
     state: directory
 
 - name: Install Prometheus configuration
   template:
     src: prometheus.yml.j2
-    dest: "{{ prom_root }}/prometheus.yml"
+    dest: "{{ prom_root }}/config/prometheus.yml"
 
 - name: Create Prometheus network
   docker_network:
@@ -28,7 +34,9 @@
     image: prom/prometheus:{{ prom_version }}
     state: started
     restart_policy: always
-    volumes: "{{ prom_root }}:/etc/prometheus"
+    volumes:
+      - "{{ prom_root }}/config:/etc/prometheus"
+      - "{{ prom_root }}/prometheus:/prometheus"
     networks_cli_compatible: true
     networks:
       - name: "{{ prom_name }}"
