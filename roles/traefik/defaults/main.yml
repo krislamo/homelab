@@ -1,5 +1,4 @@
 traefik_name: traefik
-traefik_version: latest
 traefik_dashboard: false
 traefik_root: "/opt/{{ traefik_name }}"
 traefik_ports:
