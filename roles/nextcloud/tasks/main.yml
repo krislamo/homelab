@@ -38,6 +38,11 @@
       traefik.docker.network: traefik
       traefik.enable: "true"
 
+- name: Grab Nextcloud database container information
+  docker_container_info:
+    name: "{{ nextcloud_dbcontainer }}"
+  register: nextcloud_dbinfo
+
 - name: Grab Nextcloud container information
   docker_container_info:
     name: "{{ nextcloud_container }}"
@@ -54,6 +59,11 @@
   register: nextcloud_status
   args:
     removes: "{{ nextcloud_root }}/config/CAN_INSTALL"
+
+- name: Wait for Nextcloud database to become available
+  wait_for:
+    host: "{{ nextcloud_dbinfo.container.NetworkSettings.Networks.nextcloud.IPAddress }}"
+    port: 3306
 
 - name: Install Nextcloud
   command: 'docker exec --user www-data {{ nextcloud_container }}
