@@ -47,9 +47,15 @@
     groups: docker
     skeleton: /etc/skel
     shell: /bin/bash
-    append: yes
+    append: true
 
 - name: Install docker-compose
   script: install-compose.sh
   args:
     creates: /usr/local/bin/docker-compose
+
+- name: Start Docker and enable on boot
+  service:
+    name: docker
+    state: started
+    enabled: true
