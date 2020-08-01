@@ -1,3 +1,4 @@
 prom_name: prometheus
 grafana_name: grafana
 prom_root: "/opt/{{ prom_name }}"
+grafana_root: "/opt/{{ prom_name }}/grafana"

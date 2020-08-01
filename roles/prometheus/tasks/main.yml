@@ -53,6 +53,7 @@
     image: grafana/grafana:{{ grafana_version }}
     state: started
     restart_policy: always
+    volumes: "{{ grafana_root }}:/var/lib/grafana"
     networks_cli_compatible: true
     networks:
       - name: "{{ prom_name }}"
