@@ -1,6 +1,6 @@
 - name: Install useful software
   apt:
-    name: ["vim", "wget"]
+    name: "{{ packages }}"
     state: present
 
 - name: Manage root authorized_keys
