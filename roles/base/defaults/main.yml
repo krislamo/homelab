@@ -5,6 +5,7 @@ allow_reboot: true
 packages:
   - htop
   - kpartx
+  - rsync
   - screen
   - vim
   - wget
