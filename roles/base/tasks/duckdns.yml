@@ -1,0 +1,11 @@
+- name: Install DuckDNS script
+  template:
+    src: duckdns.sh.j2
+    dest: /usr/local/bin/update-duckdns
+    mode: 0700
+
+- name: Install DuckDNS cron
+  cron:
+    name: Update DuckDNS
+    minute: "*/5"
+    job: /usr/local/bin/update-duckdns

@@ -7,3 +7,7 @@
 - import_tasks: network.yml
   tags: network
   when: manage_network
+
+- import_tasks: duckdns.yml
+  tags: duckdns
+  when: duckdns is defined
