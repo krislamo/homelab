@@ -11,7 +11,7 @@ token="{{ duckdns.token }}"
 url="https://www.duckdns.org/update?domains=$domains&token=$token&ip="
 
 time=$(date '+%Y%m%d-%H%M%S')
-result=$(curl $url)
+result=$(curl --silent $url)
 
 if [ "$result" = "OK" ];  then
   echo "[$time] OK" >> $log
