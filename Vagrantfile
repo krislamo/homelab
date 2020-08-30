@@ -23,6 +23,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible" do |ansible|
     ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/roles"
     ansible.compatibility_mode = "2.0"
+    ansible.galaxy_role_file = ENV['ANSIBLE_ROLES_PATH'] + "/requirements.yml"
     ansible.playbook = "dev/" + ENV["PLAYBOOK"] + ".yml"
   end
 

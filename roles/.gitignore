@@ -1,0 +1,13 @@
+/*
+!.gitignore
+!requirements.yml
+!base*/
+!bitwarden*/
+!docker*/
+!gitea*/
+!jenkins*/
+!libvirt*/
+!nextcloud*/
+!prometheus*/
+!traefik*/
+!wordpress*/

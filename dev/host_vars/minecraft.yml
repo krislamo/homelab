@@ -1,0 +1,6 @@
+# base
+allow_reboot: false
+manage_network: false
+
+# minecraft
+minecraft_eula: true
