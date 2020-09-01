@@ -8,3 +8,12 @@
     src: authorized_keys.j2
     dest: /root/.ssh/authorized_keys
   when: authorized_keys is defined
+
+- name: Manage filesystem mounts
+  mount:
+    path: "{{ item.path }}"
+    src: "UUID={{ item.uuid }}"
+    fstype: "{{ item.fstype }}"
+    state: mounted
+  loop: "{{ mounts }}"
+  when: mounts is defined
