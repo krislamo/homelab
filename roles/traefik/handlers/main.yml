@@ -3,3 +3,11 @@
     path: "{{ traefik_root }}/config/dynamic"
     state: touch
   listen: reload_traefik
+
+- name: Restart Traefik container
+  docker_container:
+    name: "{{ traefik_name }}"
+    image: traefik:{{ traefik_version }}
+    state: started
+    restart: yes
+  listen: restart_traefik

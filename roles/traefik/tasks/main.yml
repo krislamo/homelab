@@ -7,12 +7,7 @@
   template:
     src: traefik.yml.j2
     dest: "{{ traefik_root }}/config/traefik.yml"
-
-- name: Install dynamic Traefik configuration
-  template:
-    src: tls.yml.j2
-    dest: "{{ traefik_root }}/config/dynamic/tls.yml"
-  notify: reload_traefik
+  notify: restart_traefik
 
 - name: Create Traefik network
   docker_network:
@@ -40,4 +35,3 @@
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - "{{ traefik_root }}/config:/etc/traefik"
-      - "{{ traefik_root }}/letsencrypt:/etc/letsencrypt"
