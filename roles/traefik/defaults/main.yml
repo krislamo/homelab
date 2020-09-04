@@ -2,6 +2,8 @@ traefik_name: traefik
 traefik_dashboard: false
 traefik_root: "/opt/{{ traefik_name }}"
 traefik_production: false
+traefik_hsts_preload: false
+traefik_hsts_seconds: 0
 traefik_ports:
   - "80:80"
   - "443:443"

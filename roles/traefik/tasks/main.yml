@@ -9,10 +9,10 @@
     dest: "{{ traefik_root }}/config/traefik.yml"
   notify: restart_traefik
 
-- name: Install dynamic Traefik configuration
-  copy:
-    src: tls.yml
-    dest: "{{ traefik_root }}/config/dynamic/tls.yml"
+- name: Install dynamic security configuration
+  template:
+    src: security.yml.j2
+    dest: "{{ traefik_root }}/config/dynamic/security.yml"
     owner: root
     group: root
     mode: 0600

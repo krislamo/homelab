@@ -1,0 +1,15 @@
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+
+http:
+  middlewares:
+    securehttps:
+      headers:
+        frameDeny: true
+        sslRedirect: true
+        browserXssFilter: true
+        contentTypeNosniff: true
+        stsPreload: {{ traefik_hsts_preload }}
+        stsSeconds: {{ traefik_hsts_seconds }}
