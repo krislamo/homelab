@@ -62,5 +62,7 @@
     labels:
       traefik.http.routers.grafana.rule: "Host(`{{ grafana_domain }}`)"
       traefik.http.routers.grafana.entrypoints: websecure
+      traefik.http.routers.grafana.tls.certresolver: letsencrypt
+      traefik.http.routers.grafana.middlewares: "securehttps@file"
       traefik.docker.network: traefik
       traefik.enable: "true"
