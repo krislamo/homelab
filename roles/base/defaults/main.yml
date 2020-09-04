@@ -3,10 +3,13 @@ network_type: static
 allow_reboot: true
 
 packages:
+  - cryptsetup
   - curl
   - htop
+  - jq
   - kpartx
   - rsync
   - screen
+  - tree
   - vim
   - wget
