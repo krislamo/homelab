@@ -9,6 +9,15 @@
     dest: "{{ traefik_root }}/config/traefik.yml"
   notify: restart_traefik
 
+- name: Install dynamic Traefik configuration
+  copy:
+    src: tls.yml
+    dest: "{{ traefik_root }}/config/dynamic/tls.yml"
+    owner: root
+    group: root
+    mode: 0600
+  notify: reload_traefik
+
 - name: Create Traefik network
   docker_network:
     name: traefik
