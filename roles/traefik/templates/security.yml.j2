@@ -5,6 +5,9 @@ tls:
 
 http:
   middlewares:
+    nextcloud:
+      headers:
+        customFrameOptionsValue: SAMEORIGIN
     securehttps:
       headers:
         frameDeny: true
