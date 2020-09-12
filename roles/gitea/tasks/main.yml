@@ -25,6 +25,7 @@
     state: started
     restart_policy: always
     networks_cli_compatible: true
+    ports: "{{ gitea_ports }}"
     networks:
       - name: "{{ gitea_name }}"
       - name: traefik

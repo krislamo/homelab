@@ -1,6 +1,7 @@
 # container settings
 gitea_name: gitea
 gitea_dbname: "{{ gitea_name }}-db"
+gitea_ports: "222:22"
 
 # database settings
 gitea_dbuser: "{{ gitea_dbname }}"
