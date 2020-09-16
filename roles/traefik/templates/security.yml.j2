@@ -5,9 +5,6 @@ tls:
 
 http:
   middlewares:
-    nextcloud:
-      headers:
-        customFrameOptionsValue: SAMEORIGIN
     securehttps:
       headers:
         frameDeny: true
@@ -16,3 +13,4 @@ http:
         contentTypeNosniff: true
         stsPreload: {{ traefik_hsts_preload }}
         stsSeconds: {{ traefik_hsts_seconds }}
+        customFrameOptionsValue: SAMEORIGIN
