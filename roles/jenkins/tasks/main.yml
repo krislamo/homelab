@@ -14,8 +14,15 @@
     key: "{{ jenkins_sshkey }}"
   when: jenkins_sshkey is defined
 
-- name: Install Ansible source
+- name: Give Jenkins user passwordless sudo
   template:
+    src: jenkins_sudoers.j2
+    dest: /etc/sudoers.d/{{ jenkins_user }}
+    validate: "visudo -cf %s"
+    mode: 0440
+
+- name: Install Ansible source
+  copy:
     src: ansible.list
     dest: /etc/apt/sources.list.d/ansible.list
 
