@@ -1,3 +1,19 @@
+- name: Create Jenkins user
+  user:
+    name: "{{ jenkins_user }}"
+    state: present
+    shell: /bin/bash
+    skeleton: /etc/skel
+    generate_ssh_key: true
+
+- name: Set Jenkins authorized key
+  authorized_key:
+    user: jenkins
+    state: present
+    exclusive: true
+    key: "{{ jenkins_sshkey }}"
+  when: jenkins_sshkey is defined
+
 - name: Install Ansible source
   template:
     src: ansible.list
