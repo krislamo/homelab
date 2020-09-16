@@ -5,13 +5,13 @@ pipeline {
             steps {
 
                 dir ('environments') {
-                    git credentialsId: 'b643c25a-d040-4692-8067-d82511509bd0',
-                        url: 'git@github.com:krislamo/moxie-env.git'
+                    git branch: "${env.BRANCH}",
+                        credentialsId: "${env.AUTHID}",
+                        url: "${env.URL}"
                 }
 
-                ansiblePlaybook credentialsId: '4e3a5a7a-fca5-4f10-89a4-8996cf14fec7',
-                    playbook: 'dockerbox.yml'
-
+                ansiblePlaybook playbook: "${env.PLAYBOOK}",
+                    inventory: "${env.INVENTORY}"
             }
         }
     }
