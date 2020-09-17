@@ -15,4 +15,12 @@ pipeline {
             }
         }
     }
+    post {
+        failure {
+            mail to: "${env.EMAIL}",
+                 subject: "$JOB_NAME - Build # $BUILD_NUMBER -  ${currentBuild.result}!",
+                 body: "Check console output at $BUILD_URL to view the results."
+
+        }
+    }
 }
