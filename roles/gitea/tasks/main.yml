@@ -41,6 +41,9 @@
       DB_NAME: "{{ gitea_dbname }}"
       DB_USER: "{{ gitea_dbuser }}"
       DB_PASSWD: "{{ gitea_dbpass }}"
+      ROOT_URL: "https://{{ gitea_domain }}/"
+      SSH_DOMAIN: "{{ gitea_domain }}"
+      DOMAIN: "{{ gitea_domain }}"
     labels:
       traefik.http.routers.gitea.rule: "Host(`{{ gitea_domain }}`)"
       traefik.http.routers.gitea.entrypoints: websecure
