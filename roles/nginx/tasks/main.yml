@@ -1,0 +1,37 @@
+- name: Create nginx root
+  file:
+    path: "{{ nginx_root }}"
+    state: directory
+
+- name: Generate deploy keys
+  openssh_keypair:
+    path: "{{ nginx_repo_key }}"
+    state: present
+
+- name: Clone static website files
+  git:
+    repo: "{{ nginx_repo_url }}"
+    dest: "{{ nginx_html }}"
+    version: "{{ nginx_repo_branch }}"
+    key_file: "{{ nginx_repo_key }}"
+    separate_git_dir: "{{ nginx_repo_dest }}"
+
+- name: Start nginx container
+  docker_container:
+    name: "{{ nginx_name }}"
+    image: nginx:{{ nginx_version }}
+    state: started
+    restart_policy: always
+    networks_cli_compatible: true
+    networks:
+      - name: traefik
+    volumes:
+      - "{{ nginx_html }}:/usr/share/nginx/html:ro"
+    labels:
+      traefik.http.routers.nginx.rule: "Host(`{{ nginx_domain }}`)"
+      traefik.http.middlewares.nginxauth.basicauth.users: "{{ nginx_auth }}"
+      traefik.http.routers.nginx.entrypoints: websecure
+      traefik.http.routers.nginx.tls.certresolver: letsencrypt
+      traefik.http.routers.nginx.middlewares: "securehttps@file,nginxauth"
+      traefik.docker.network: traefik
+      traefik.enable: "true"

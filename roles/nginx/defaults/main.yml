@@ -1,0 +1,6 @@
+nginx_name: "{{ nginx_domain }}"
+nginx_repo_branch: master
+nginx_repo_dest: "{{ nginx_root }}/repository"
+nginx_repo_key: "{{ nginx_root }}/id_rsa"
+nginx_root: /opt/nginx/{{ nginx_name }}
+nginx_html: "{{ nginx_root }}/html"

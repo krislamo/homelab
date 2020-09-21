@@ -1,0 +1,10 @@
+- name: Install nginx server (docker)
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/nginx.yml
+  roles:
+    - base
+    - docker
+    - traefik
+    - nginx
