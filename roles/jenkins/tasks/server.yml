@@ -1,0 +1,26 @@
+- name: Create Jenkin's directory
+  file:
+    path: "{{ jenkins_root }}"
+    state: directory
+    owner: "1000"
+    group: "1000"
+
+- name: Start Jenkins Container
+  docker_container:
+    name: "{{ jenkins_name }}"
+    image: jenkins/jenkins:{{ jenkins_version }}
+    state: started
+    restart_policy: always
+    ports:
+      - 50000:50000
+    volumes: "{{ jenkins_root }}:/var/jenkins_home"
+    networks_cli_compatible: true
+    networks:
+      - name: traefik
+    labels:
+      traefik.http.routers.jenkins.rule: "Host(`{{ jenkins_domain }}`)"
+      traefik.http.routers.jenkins.entrypoints: websecure
+      traefik.http.routers.jenkins.tls.certresolver: letsencrypt
+      traefik.http.routers.jenkins.middlewares: "securehttps@file"
+      traefik.docker.network: traefik
+      traefik.enable: "true"

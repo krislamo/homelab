@@ -17,4 +17,5 @@
   become: true
   roles:
     - base
+    - jenkins
     - libvirt
