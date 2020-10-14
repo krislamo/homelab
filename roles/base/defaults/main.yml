@@ -5,12 +5,14 @@ allow_reboot: true
 packages:
   - cryptsetup
   - curl
+  - hashdeep
   - htop
   - jq
   - kpartx
   - ncdu
   - rsync
   - screen
+  - strace
   - tree
   - vim
   - wget
