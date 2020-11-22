@@ -47,7 +47,7 @@
     groups: docker
     append: true
   loop: "{{ docker_users }}"
-  when: users is defined
+  when: docker_users is defined
 
 - name: Install docker-compose
   script: install-compose.sh
