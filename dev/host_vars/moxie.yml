@@ -1,9 +1,22 @@
+# base
+allow_reboot: false
+manage_network: false
+
 # docker
 docker_user: vagrant
 
+# traefik
+traefik_version: latest
+traefik_dashboard: true
+traefik_domain: traefik.vm.krislamo.org
+traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+#traefik_acme_email: realemail@example.com # Let's Encrypt settings
+#traefik_production: true
+
 # bitwarden
 # Get Installation ID & Key at https://bitwarden.com/host/
-bitwarden_domain: vault.test.krislamo.org
+bitwarden_domain: vault.vm.krislamo.org
 bitwarden_dbpass: password
 bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
 bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
+#bitwarden_prod: true

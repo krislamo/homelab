@@ -5,27 +5,72 @@
 
 - name: Create Bitwarden directory
   file:
-    path: "/home/{{ docker_user }}/bitwarden/"
+    path: "{{ bitwarden_root }}"
     state: directory
-    owner: "{{ docker_user }}"
-    group: "{{ docker_user }}"
 
 - name: Download Bitwarden script
   get_url:
     url: "https://raw.githubusercontent.com/\
           bitwarden/server/master/scripts/bitwarden.sh"
-    dest: "/home/{{ docker_user }}/bitwarden/"
-    owner: "{{ docker_user }}"
-    group: "{{ docker_user }}"
+    dest: "{{ bitwarden_root }}"
     mode: u+x
 
 - name: Install Bitwarden script wrapper
   template:
     src: bw_wrapper.j2
-    dest: "/home/{{ docker_user }}/bitwarden/bw_wrapper"
-    owner: "{{ docker_user }}"
-    group: "{{ docker_user }}"
+    dest: "{{ bitwarden_root }}/bw_wrapper"
     mode: u+x
 
-- name: Run Bitwarden script
-  shell: /home/{{ docker_user }}/bitwarden/bw_wrapper
+- name: Run Bitwarden installation script
+  shell: "{{ bitwarden_root }}/bw_wrapper"
+  args:
+    creates: "{{ bitwarden_root }}/bwdata/config.yml"
+  notify: start_bitwarden
+
+- name: Install docker-compose override
+  template:
+    src: compose.override.yml.j2
+    dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
+  notify:
+    - rebuild_bitwarden
+    - start_bitwarden
+
+- name: Disable bitwarden-nginx HTTP on 80
+  replace:
+    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    regexp: "^http_port: 80$"
+    replace: "http_port: 8080"
+  when: not bitwarden_standalone
+  notify:
+    - rebuild_bitwarden
+    - start_bitwarden
+
+- name: Disable bitwarden-nginx HTTPS on 443
+  replace:
+    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    regexp: "^https_port: 443$"
+    replace: "https_port: 8443"
+  when: not bitwarden_standalone
+  notify:
+    - rebuild_bitwarden
+    - start_bitwarden
+
+- name: Disable Bitwarden managed Lets Encrypt
+  replace:
+    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    regexp: "^ssl_managed_lets_encrypt: true$"
+    replace: "ssl_managed_lets_encrypt: false"
+  when: not bitwarden_standalone or not bitwarden_production
+  notify:
+    - rebuild_bitwarden
+    - start_bitwarden
+
+- name: Disable Bitwarden managed SSL
+  replace:
+    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    regexp: "^ssl: true$"
+    replace: "ssl: false"
+  when: not bitwarden_standalone
+  notify:
+    - rebuild_bitwarden
+    - start_bitwarden

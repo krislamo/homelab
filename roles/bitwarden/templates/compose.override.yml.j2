@@ -1,0 +1,16 @@
+services:
+  nginx:
+    networks:
+      - traefik
+    labels:
+      traefik.http.routers.bitwarden.rule: "Host(`{{ bitwarden_domain }}`)"
+      traefik.http.routers.bitwarden.entrypoints: websecure
+      traefik.http.routers.bitwarden.tls.certresolver: letsencrypt
+      traefik.http.routers.bitwarden.middlewares: "securehttps@file"
+      traefik.http.services.bitwarden.loadbalancer.server.port: 8080
+      traefik.docker.network: traefik
+      traefik.enable: "true"
+
+networks:
+  traefik:
+    external: true

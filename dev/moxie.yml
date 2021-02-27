@@ -4,5 +4,7 @@
   vars_files:
     - host_vars/moxie.yml
   roles:
+    - base
     - docker
+    - traefik
     - bitwarden

@@ -1,0 +1,4 @@
+bitwarden_name: bitwarden
+bitwarden_root: "/opt/{{ bitwarden_name }}"
+bitwarden_standalone: false
+bitwarden_production: false
