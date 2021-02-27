@@ -12,10 +12,9 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-- name: Install Moxie Server
-  hosts: moxiehosts
+- name: Install Bitwarden Server
+  hosts: bitwardenhosts
   become: true
   roles:
     - docker
-    - traefik
-    - wordpress
+    - bitwarden

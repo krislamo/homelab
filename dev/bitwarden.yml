@@ -1,8 +1,8 @@
-- name: Install Moxie Server
+- name: Install Bitwarden Server
   hosts: all
   become: true
   vars_files:
-    - host_vars/moxie.yml
+    - host_vars/bitwarden.yml
   roles:
     - base
     - docker

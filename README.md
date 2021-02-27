@@ -18,7 +18,7 @@ Vagrant and VirtualBox are used to develop Project Moxie. You will need to insta
    ```
 2. Set the `PLAYBOOK` environmental variable to a development playbook name in the `dev/` directory
 
-   The following `PLAYBOOK` names are available: `dockerbox`, `hypervisor`, `minecraft`, `moxie`, `nextcloud`, `nginx`
+   The following `PLAYBOOK` names are available: `dockerbox`, `hypervisor`, `minecraft`, `bitwarden`, `nextcloud`, `nginx`
 
    ```
    export PLAYBOOK=dockerbox
