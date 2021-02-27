@@ -16,5 +16,7 @@
   hosts: bitwardenhosts
   become: true
   roles:
+    - base
     - docker
+    - traefik
     - bitwarden

@@ -3,7 +3,8 @@ allow_reboot: false
 manage_network: false
 
 # docker
-docker_user: vagrant
+docker_users:
+  - vagrant
 
 # traefik
 traefik_version: latest
@@ -19,4 +20,4 @@ bitwarden_domain: vault.vm.krislamo.org
 bitwarden_dbpass: password
 bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
 bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
-#bitwarden_prod: true
+#bitwarden_prodution: true
