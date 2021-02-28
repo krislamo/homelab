@@ -17,6 +17,7 @@
   become: true
   roles:
     - base
+    - jenkins
     - docker
     - traefik
     - bitwarden
