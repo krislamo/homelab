@@ -1,0 +1,11 @@
+# Configuration file for ddclient managed by Ansible
+#
+# /etc/ddclient.conf
+
+verbose={{ ddclient_verbose }}
+use=web, web={{ ddclient_web }}
+protocol={{ ddclient_protocol }}
+server={{ ddclient_server }}
+login={{ ddclient_login }}
+password={{ ddclient_password }}
+{{ ddclient_host }}

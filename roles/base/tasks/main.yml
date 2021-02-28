@@ -11,3 +11,7 @@
 - import_tasks: duckdns.yml
   tags: duckdns
   when: duckdns is defined
+
+- import_tasks: ddclient.yml
+  tags: ddclient
+  when: ddclient_password is defined

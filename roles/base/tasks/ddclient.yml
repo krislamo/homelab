@@ -1,0 +1,22 @@
+- name: Install ddclient
+  apt:
+    name: ddclient
+    state: present
+
+- name: Install ddclient settings
+  template:
+    src: ddclient.conf.j2
+    dest: /etc/ddclient.conf
+  register: ddclient
+
+- name: Start ddclient and enable on boot
+  service:
+    name: ddclient
+    state: started
+    enabled: true
+
+- name: Restart ddclient
+  service:
+    name: ddclient
+    state: restarted
+  when: ddclient.changed

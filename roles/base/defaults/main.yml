@@ -2,6 +2,11 @@ manage_network: false
 network_type: static
 allow_reboot: true
 
+ddclient_web: dynamicdns.park-your-domain.com/getip
+ddclient_server: dynamicdns.park-your-domain.com
+ddclient_protocol: namecheap
+ddclient_verbose: "yes"
+
 packages:
   - cryptsetup
   - curl
