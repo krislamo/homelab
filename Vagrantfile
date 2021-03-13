@@ -1,6 +1,20 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
+PLAYBOOK=ENV["PLAYBOOK"]
+
+if !PLAYBOOK
+  if File.exist?('.playbook')
+    PLAYBOOK = IO.read('.playbook').split("\n")[0]
+  end
+
+  if !PLAYBOOK || PLAYBOOK.empty?
+    PLAYBOOK = "\nERROR: Set env PLAYBOOK"
+  end
+else
+  File.write(".playbook", PLAYBOOK)
+end
+
 Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
   config.vm.network "private_network", type: "dhcp"
@@ -24,7 +38,7 @@ Vagrant.configure("2") do |config|
     ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/roles"
     ansible.compatibility_mode = "2.0"
     ansible.galaxy_role_file = ENV['ANSIBLE_ROLES_PATH'] + "/requirements.yml"
-    ansible.playbook = "dev/" + ENV["PLAYBOOK"] + ".yml"
+    ansible.playbook = "dev/" + PLAYBOOK + ".yml"
   end
 
 end

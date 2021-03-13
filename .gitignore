@@ -1,4 +1,5 @@
 .vagrant
+.playbook
 /*.yml
 /*.yaml
 !moxie.yml
