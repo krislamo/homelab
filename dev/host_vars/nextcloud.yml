@@ -1,5 +1,6 @@
 # docker
-docker_user: vagrant
+docker_users:
+  - vagrant
 
 # traefik
 traefik_version: latest
