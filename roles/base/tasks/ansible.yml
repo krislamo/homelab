@@ -9,6 +9,7 @@
     name: "{{ item }}"
     state: present
     force_apt_get: true
+    update_cache: true
   loop:
     - aptitude
     - python3-docker
