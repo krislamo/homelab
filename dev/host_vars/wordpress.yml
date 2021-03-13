@@ -17,7 +17,17 @@ traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
 # container settings
 wordpress_version: latest
 wordpress_domain: wordpress.vm.krislamo.org
+wordpress_multisite: true
 
 # database settings
 wordpress_dbversion: latest
 wordpress_dbpass: password
+
+# multisite (enable in admin panel then uncomment)
+#wordpress_config_extra: |
+#  define('MULTISITE', {{ wordpress_multisite | string }});
+#  define('SUBDOMAIN_INSTALL', true);
+#  define('DOMAIN_CURRENT_SITE', '{{ wordpress_domain }}');
+#  define('PATH_CURRENT_SITE', '/');
+#  define('SITE_ID_CURRENT_SITE', 1);
+#  define('BLOG_ID_CURRENT_SITE', 1);

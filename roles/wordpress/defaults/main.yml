@@ -1,3 +1,8 @@
+# settings
+wordpress_multisite: false
+wordpress_config_extra: |
+  define('WP_ALLOW_MULTISITE', {{ wordpress_multisite | string }} );
+
 # container names
 wordpress_container: wordpress
 wordpress_dbcontainer: "{{ wordpress_container }}-db"

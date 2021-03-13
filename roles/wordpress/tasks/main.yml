@@ -31,3 +31,4 @@
       WORDPRESS_DB_USER: "{{ wordpress_dbuser }}"
       WORDPRESS_DB_PASSWORD: "{{ wordpress_dbpass }}"
       WORDPRESS_DB_HOST: "{{ wordpress_dbcontainer }}"
+      WORDPRESS_CONFIG_EXTRA: "{{ wordpress_config_extra }}"
