@@ -10,6 +10,7 @@ HOST[4]="prom.${DOMAIN}"
 HOST[5]="grafana.${DOMAIN}"
 HOST[6]="nginx.${DOMAIN}"
 HOST[7]="vault.${DOMAIN}"
+HOST[8]="wordpress.${DOMAIN}"
 
 # Get Vagrantbox guest IP
 VAGRANT_OUTPUT=$(vagrant ssh -c "hostname -I | cut -d' ' -f2" 2>/dev/null)

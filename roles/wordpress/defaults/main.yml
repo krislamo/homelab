@@ -1,6 +1,12 @@
-mariadb_name: mariadb
-mariadb_version: latest
+# container names
+wordpress_container: wordpress
+wordpress_dbcontainer: "{{ wordpress_container }}-db"
 
-wordpress_version: latest
-wordpress_dbname: wordpress
-wordpress_dbuser: wordpress
+# database settings
+wordpress_dbname: "{{ wordpress_container }}"
+wordpress_dbuser: "{{ wordpress_dbname }}"
+
+# host mounts
+wordpress_root: "/opt/wordpress"
+wordpress_docroot: "{{ wordpress_root }}/public_html"
+wordpress_dbroot: "{{ wordpress_root }}/database"

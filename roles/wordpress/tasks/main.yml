@@ -1,9 +1,9 @@
-- name: Start MariaDB container
+- name: Start WordPress database container
   docker_container:
-    name: "{{ mariadb_name }}"
-    image: mariadb:{{ mariadb_version }}
+    name: "{{ wordpress_dbcontainer }}"
+    image: mariadb:{{ wordpress_dbversion }}
     restart_policy: always
-    volumes: mariadb:/var/lib/mysql
+    volumes: "{{ wordpress_dbroot }}:/var/lib/mysql"
     env:
       MYSQL_RANDOM_ROOT_PASSWORD: "true"
       MYSQL_DATABASE: "{{ wordpress_dbname }}"
@@ -12,17 +12,22 @@
 
 - name: Start WordPress container
   docker_container:
-    name: "{{ wordpress_name }}"
+    name: "{{ wordpress_container }}"
     image: wordpress:{{ wordpress_version }}
     restart_policy: always
-    volumes: wordpress:/var/www/html
+    volumes:
+      - "{{ wordpress_docroot }}:/var/www/html"
     labels:
       traefik.http.routers.wordpress.rule: "Host(`{{ wordpress_domain }}`)"
+      traefik.http.routers.wordpress.entrypoints: websecure
+      traefik.http.routers.wordpress.tls.certresolver: letsencrypt
+      traefik.http.routers.wordpress.middlewares: securehttps@file
+      traefik.docker.network: traefik
       traefik.enable: "true"
     links:
-      - "{{ mariadb_name }}"
+      - "{{ wordpress_dbcontainer }}"
     env:
       WORDPRESS_DB_NAME: "{{ wordpress_dbname }}"
       WORDPRESS_DB_USER: "{{ wordpress_dbuser }}"
       WORDPRESS_DB_PASSWORD: "{{ wordpress_dbpass }}"
-      WORDPRESS_DB_HOST: "{{ mariadb_name }}"
+      WORDPRESS_DB_HOST: "{{ wordpress_dbcontainer }}"

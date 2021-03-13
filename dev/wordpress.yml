@@ -1,0 +1,10 @@
+- name: Install WordPress server (docker)
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/wordpress.yml
+  roles:
+    - base
+    - docker
+    - traefik
+    - wordpress
