@@ -11,3 +11,5 @@
     - gitea
     - jenkins
     - prometheus
+    - nginx
+    - wordpress
