@@ -1,5 +1,6 @@
 # settings
 wordpress_multisite: false
+wordpress_rule: "Host(`{{ wordpress_domain }}`)"
 wordpress_config_extra: |
   define('WP_ALLOW_MULTISITE', {{ wordpress_multisite | string }} );
 

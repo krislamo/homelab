@@ -24,6 +24,10 @@ wordpress_dbversion: latest
 wordpress_dbpass: password
 
 # multisite (enable in admin panel then uncomment)
+#wordpress_rule: "Host(`{{ wordpress_domain }}`) ||
+#                 Host(`site1.{{ wordpress_domain }}`) ||
+#                 Host(`site2.{{ wordpress_domain }}`)"
+#
 #wordpress_config_extra: |
 #  define('MULTISITE', {{ wordpress_multisite | string }});
 #  define('SUBDOMAIN_INSTALL', true);

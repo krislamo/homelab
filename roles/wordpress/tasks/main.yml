@@ -18,7 +18,7 @@
     volumes:
       - "{{ wordpress_docroot }}:/var/www/html"
     labels:
-      traefik.http.routers.wordpress.rule: "Host(`{{ wordpress_domain }}`)"
+      traefik.http.routers.wordpress.rule: "{{ wordpress_rule }}"
       traefik.http.routers.wordpress.entrypoints: websecure
       traefik.http.routers.wordpress.tls.certresolver: letsencrypt
       traefik.http.routers.wordpress.middlewares: securehttps@file
