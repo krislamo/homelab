@@ -3,16 +3,8 @@
 # /etc/ddclient.conf
 
 {% for domain in ddclient %}
-{% if domain.verbose is sameas true or domain.verbose is not defined %}
-verbose=yes
-{% else %}
-verbose=no
-{% endif %}
-use=web, web={{ domain.web | default('dynamicdns.park-your-domain.com/getip')}}
-protocol={{ domain.protocol | default('namecheap')}}
-{% if domain.server is defined %}
-server={{ domain.server }}
-{% endif %}
+protocol={{ domain.protocol | default('namecheap')}}, verbose=yes
+ssl=yes, use=web, web={{ domain.web | default('https://dynamicdns.park-your-domain.com/getip')}}
 {% if domain.name is defined %}
 login={{ domain.name }}
 {% endif %}
