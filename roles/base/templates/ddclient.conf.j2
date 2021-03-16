@@ -10,8 +10,12 @@ verbose=no
 {% endif %}
 use=web, web={{ domain.web | default('dynamicdns.park-your-domain.com/getip')}}
 protocol={{ domain.protocol | default('namecheap')}}
-server={{ domain.server | default('dynamicdns.park-your-domain.com')}}
+{% if domain.server is defined %}
+server={{ domain.server }}
+{% endif %}
+{% if domain.name is defined %}
 login={{ domain.name }}
+{% endif %}
 password={{ domain.pass }}
 {{ domain.host }}
 
