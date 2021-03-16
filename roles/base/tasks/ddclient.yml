@@ -7,7 +7,7 @@
   template:
     src: ddclient.conf.j2
     dest: /etc/ddclient.conf
-  register: ddclient
+  register: ddclient_settings
 
 - name: Start ddclient and enable on boot
   service:
@@ -19,4 +19,4 @@
   service:
     name: ddclient
     state: restarted
-  when: ddclient.changed
+  when: ddclient_settings.changed

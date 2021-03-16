@@ -2,10 +2,17 @@
 #
 # /etc/ddclient.conf
 
-verbose={{ ddclient_verbose }}
-use=web, web={{ ddclient_web }}
-protocol={{ ddclient_protocol }}
-server={{ ddclient_server }}
-login={{ ddclient_login }}
-password={{ ddclient_password }}
-{{ ddclient_host }}
+{% for domain in ddclient %}
+{% if domain.verbose is sameas true or domain.verbose is not defined %}
+verbose=yes
+{% else %}
+verbose=no
+{% endif %}
+use=web, web={{ domain.web | default('dynamicdns.park-your-domain.com/getip')}}
+protocol={{ domain.protocol | default('namecheap')}}
+server={{ domain.server | default('dynamicdns.park-your-domain.com')}}
+login={{ domain.name }}
+password={{ domain.pass }}
+{{ domain.host }}
+
+{% endfor %}

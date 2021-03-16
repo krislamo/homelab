@@ -14,4 +14,4 @@
 
 - import_tasks: ddclient.yml
   tags: ddclient
-  when: ddclient_password is defined
+  when: ddclient is defined
