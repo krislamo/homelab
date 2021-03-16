@@ -5,6 +5,7 @@ allow_reboot: true
 packages:
   - cryptsetup
   - curl
+  - dnsutils
   - hashdeep
   - htop
   - jq
