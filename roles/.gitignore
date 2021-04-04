@@ -11,4 +11,5 @@
 !nginx*/
 !prometheus*/
 !traefik*/
+!unifi*/
 !wordpress*/
