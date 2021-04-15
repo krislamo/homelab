@@ -1,8 +1,12 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-PLAYBOOK=ENV["PLAYBOOK"]
+SSH_FORWARD=ENV["SSH_FORWARD"]
+if !(SSH_FORWARD == "true")
+  SSH_FORWARD = false
+end
 
+PLAYBOOK=ENV["PLAYBOOK"]
 if !PLAYBOOK
   if File.exist?('.playbook')
     PLAYBOOK = IO.read('.playbook').split("\n")[0]
@@ -19,6 +23,7 @@ Vagrant.configure("2") do |config|
   config.vm.box = "debian/buster64"
   config.vm.network "private_network", type: "dhcp"
   config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.ssh.forward_agent = SSH_FORWARD
 
   # Machine Name
   config.vm.define :moxie do |moxie| #
