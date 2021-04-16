@@ -8,13 +8,12 @@
 
 - name: Install network interfaces
   template:
-    src: "{{ network_type }}-interface.cfg"
+    src: "interface.j2"
     dest: "/etc/network/interfaces.d/{{ item.name }}"
-  notify: reboot_host
   loop: "{{ interfaces }}"
+  notify: reboot_host
 
 - name: Install bridge utilities
   apt:
     name: bridge-utils
     state: present
-  when: network_type == "bridged"

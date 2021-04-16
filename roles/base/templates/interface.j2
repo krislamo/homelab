@@ -1,0 +1,16 @@
+# {{ ansible_managed }}
+
+{% if item.bridge is defined %}
+auto br1
+iface br1 inet static
+{% else %}
+auto {{ item.name }}
+iface {{ item.name }} inet static
+{% endif %}
+   address {{ item.address }}
+{% if item.gateway is defined %}
+   gateway {{ item.gateway }}
+{% endif %}
+{% if item.bridge is defined %}
+   bridge_ports {{ item.name }}
+{% endif %}
