@@ -9,8 +9,9 @@
 - name: Install network interfaces
   template:
     src: "{{ network_type }}-interface.cfg"
-    dest: "/etc/network/interfaces.d/{{ ip_inter }}"
+    dest: "/etc/network/interfaces.d/{{ item.name }}"
   notify: reboot_host
+  loop: "{{ interfaces }}"
 
 - name: Install bridge utilities
   apt:
