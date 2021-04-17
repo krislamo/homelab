@@ -1,0 +1,40 @@
+http:
+  routers:
+    {{ item.name }}:
+      rule: "Host(`{{ item.domain }}`)"
+      service: {{ item.name }}-service
+{% if item.basicauth is defined and item.middlewares is defined %}
+      middlewares: "{{ item.middlewares }},{{ item.name }}-auth@file"
+{% elif item.basicauth is defined %}
+      middlewares: "{{ item.name }}-auth@file"
+{% elif item.middlewares is defined %}
+      middlewares: "{{ item.middlewares }}"
+{% endif %}
+      tls:
+        certResolver: letsencrypt
+        domains:
+          - main: "{{ item.domain }}"
+      entryPoints:
+        - "websecure"
+  services:
+    {{ item.name }}-service:
+      loadBalancer:
+{% if item.httpsbackend is defined %}
+        serversTransport: {{ item.name }}-httpsbackend
+        servers:
+          - url: "{{ item.backend }}"
+{% endif %}
+{% if item.httpsbackend is defined %}
+  serversTransports:
+      {{ item.name }}-httpsbackend:
+        insecureSkipVerify: true
+{% endif %}
+{% if item.basicauth is defined %}
+  middlewares:
+    {{ item.name }}-auth:
+      basicAuth:
+        users:
+{% for user in item.basicauth %}
+          - "{{ user }}"
+{% endfor %}
+{% endif %}

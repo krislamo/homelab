@@ -18,6 +18,13 @@
     mode: 0600
   notify: reload_traefik
 
+- name: Install dynamic non-docker configuration
+  template:
+    src: "external.yml.j2"
+    dest: "{{ traefik_root }}/config/dynamic/{{ item.name }}.yml"
+  loop: "{{ traefik_external }}"
+  when: traefik_external is defined
+
 - name: Create Traefik network
   docker_network:
     name: traefik
