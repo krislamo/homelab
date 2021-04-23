@@ -10,7 +10,9 @@ pipeline {
                         url: "${env.URL}"
                 }
                 ansiblePlaybook playbook: "${env.PLAYBOOK}",
-                    inventory: "${env.INVENTORY}"
+                    inventory: "${env.INVENTORY}",
+                    limit: params.getOrDefault('LIMIT', 'all'),
+                    tags: params.getOrDefault('TAGS', 'all')
             }
         }
     }
