@@ -1,0 +1,49 @@
+# Copyright (C) 2021  Kris Lamoureux
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+- name: Add Debian Buster backports
+  copy:
+    src: buster-backports.list
+    dest: /etc/apt/sources.list.d/buster-backports.list
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Install WireGuard
+  apt:
+    name: wireguard
+    state: present
+    update_cache: true
+
+- name: Generate WireGuard keys
+  shell: wg genkey | tee privatekey | wg pubkey > publickey
+  args:
+    chdir: /etc/wireguard/
+    creates: /etc/wireguard/privatekey
+
+- name: Grab WireGuard private key for configuration
+  slurp:
+    src: /etc/wireguard/privatekey
+  register: wgkey
+
+- name: Install WireGuard configuration
+  template:
+    src: wireguard.j2
+    dest: /etc/wireguard/wg0.conf
+
+- name: Start WireGuard interface
+  service:
+    name: wg-quick@wg0
+    state: started
+    enabled: true

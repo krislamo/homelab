@@ -11,3 +11,7 @@
 - import_tasks: ddclient.yml
   tags: ddclient
   when: ddclient is defined
+
+- import_tasks: wireguard.yml
+  tags: wireguard
+  when: wireguard is defined

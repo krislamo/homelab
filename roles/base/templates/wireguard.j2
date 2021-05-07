@@ -1,0 +1,19 @@
+[Interface]
+PrivateKey = {{ wgkey['content'] | b64decode | trim }}
+Address = {{ wireguard.address }}
+{% if wireguard.listenport is defined %}
+ListenPort = {{ wireguard.listenport }}
+{% endif %}
+
+{% for peer in wireguard.peers %}
+[Peer]
+PublicKey = {{ peer.publickey }}
+{% if peer.endpoint is defined %}
+Endpoint = {{ peer.endpoint }}
+{% endif %}
+AllowedIPs = {{ peer.allowedips }}
+{% if peer.keepalive is defined %}
+PersistentKeepalive = {{ peer.keepalive }}
+{% endif %}
+
+{% endfor %}
