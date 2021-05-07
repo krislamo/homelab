@@ -4,3 +4,9 @@
     connect_timeout: 5
   listen: reboot_host
   when: allow_reboot
+
+- name: Restart WireGuard
+  service:
+    name: wg-quick@wg0
+    state: restarted
+  listen: restart_wireguard

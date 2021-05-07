@@ -41,6 +41,8 @@
   template:
     src: wireguard.j2
     dest: /etc/wireguard/wg0.conf
+  notify:
+    - restart_wireguard
 
 - name: Start WireGuard interface
   service:
