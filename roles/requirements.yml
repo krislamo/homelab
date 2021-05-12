@@ -1,4 +1,0 @@
-- src: https://github.com/krislamo/ansible-minecraft
-  scm: git
-  version: master
-  name: minecraft
