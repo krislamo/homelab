@@ -1,0 +1,55 @@
+- name: Install Screen
+  apt:
+    name: screen
+    state: present
+
+- name: Install Java
+  apt:
+    name: default-jre
+    state: present
+
+- name: Create Minecraft user
+  user:
+    name: "{{ minecraft_user }}"
+    state: present
+    shell: /bin/bash
+
+- name: Create Minecraft directory
+  file:
+    path: "{{ minecraft_home }}"
+    state: directory
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+
+- name: Download Minecraft
+  get_url:
+    url: "{{ minecraft_url }}"
+    dest: "{{ minecraft_home }}/minecraft_server.jar"
+    checksum: "sha1:{{ minecraft_sha1 }}"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+    mode: 0700
+
+- name: Deploy Minecraft systemd service
+  template:
+    src: minecraft.service.j2
+    dest: "/etc/systemd/system/minecraft.service"
+  register: minecraft_systemd
+
+- name: Answer to Mojang's EULA
+  template:
+    src: eula.txt.j2
+    dest: "{{ minecraft_home }}/eula.txt"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+
+- name: Reload systemd manager configuration
+  systemd:
+    daemon_reload: true
+  when: minecraft_systemd.changed
+
+- name: Start Service
+  service:
+    name: minecraft
+    state: started
+  when: minecraft_eula

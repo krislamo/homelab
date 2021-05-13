@@ -3,4 +3,7 @@ allow_reboot: false
 manage_network: false
 
 # minecraft
-minecraft_eula: true
+# Agree to EULA to start service in Vagrant
+# i.e. sed -i 's/^#minecraft_eula/minecraft_eula/' ./dev/host_vars/minecraft.yml
+#minecraft_eula: true
+minecraft_sha1: 1b557e7b033b583cd9f66746b7a9ab1ec1673ced # 1.16.5
