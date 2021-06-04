@@ -44,8 +44,8 @@ cmd_rsnapshot_diff	/usr/bin/rsnapshot-diff
 # backup intervals #
 ####################
 
-{% for backup in item.intervals %}
-retain	{{ backup }}	{{ item.intervals[backup] }}
+{% for interval in item.intervals %}
+retain	{{ interval.name }}	{{ interval.count }}
 {% endfor %}
 
 ############################################
