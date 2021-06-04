@@ -2,6 +2,7 @@
 .playbook
 /*.yml
 /*.yaml
+!backup.yml
 !moxie.yml
 !docker.yml
 !dockerbox.yml
