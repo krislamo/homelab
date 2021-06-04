@@ -11,6 +11,7 @@
 !nextcloud*/
 !nginx*/
 !prometheus*/
+!rsnapshot*/
 !traefik*/
 !unifi*/
 !wordpress*/

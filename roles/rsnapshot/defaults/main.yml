@@ -1,0 +1,3 @@
+rsnapshot_confdir: /etc/rsnapshot.d
+rsnapshot_logdir: /var/log/rsnapshot
+rsnapshot_root: /srv/backups/{{ item.name }}

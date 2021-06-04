@@ -1,0 +1,11 @@
+- name: Install rsnapshot backup server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/rsnapshot.yml
+  roles:
+    - base
+    - docker
+    - traefik
+    - nginx
+    - rsnapshot

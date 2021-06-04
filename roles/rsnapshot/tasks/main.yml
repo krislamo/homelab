@@ -1,0 +1,53 @@
+# Copyright (C) 2021  Kris Lamoureux
+#
+# This program is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, version 3 of the License.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+- name: Install rsnapshot
+  apt:
+    name: rsnapshot
+    state: present
+
+- name: Create rsnapshot system directories
+  file:
+    path: "{{ item }}"
+    state: directory
+  loop:
+    - "{{ rsnapshot_confdir }}"
+    - "{{ rsnapshot_logdir }}"
+
+- name: Create snapshot_root directories
+  file:
+    path: "{{ item.root | default(rsnapshot_root) }}"
+    state: directory
+  loop: "{{ rsnapshot }}"
+
+- name: Install rsnapshot configuration
+  template:
+    src: rsnapshot.conf.j2
+    dest: "{{ rsnapshot_confdir }}/{{ item.name }}.conf"
+  loop: "{{ rsnapshot }}"
+
+- name: Install rsnapshot crons
+  cron:
+    name: "{{ item.1.interval }} rsnapshot of {{ item.0.name }}"
+    job: "/usr/bin/rsnapshot -c {{ rsnapshot_confdir }}/{{ item.0.name }}.conf {{ item.1.interval }}"
+    user: "root"
+    minute: "{{ item.1.minute | default('*') }}"
+    hour: "{{ item.1.hourly | default('*') }}"
+    day: "{{ item.1.day | default('*') }}"
+    weekday: "{{ item.1.weekday | default('*') }}"
+    month: "{{ item.1.month | default('*') }}"
+    cron_file: "rsnapshot-{{ item.0.name }}"
+  with_subelements:
+    - "{{ rsnapshot }}"
+    - cron

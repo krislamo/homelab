@@ -1,0 +1,110 @@
+# {{ ansible_managed }}
+# rsnapshot.conf - rsnapshot configuration file
+# This file requires tabs between elements
+
+#######################
+# CONFIG FILE VERSION #
+#######################
+
+config_version	1.2
+
+###########################
+# SNAPSHOT ROOT DIRECTORY #
+###########################
+
+# All snapshots will be stored under this root directory.
+{% if item.root is defined %}
+snapshot_root	{{ item.root }}
+{% else %}
+snapshot_root	{{ rsnapshot_root }}
+{% endif %}
+
+# if no_create_root is enabled, rsnapshot will not automatically create the
+# snapshot_root directory. this is particularly useful if you are backing
+# up to removable media, such as a firewire or usb drive.
+{% if item.nocreateroot is defined and not item.nocreateroot %}
+no_create_root	0
+{% else %}
+no_create_root	1
+{% endif %}
+
+#################################
+# external program dependencies #
+#################################
+
+cmd_cp			/bin/cp
+cmd_rm			/bin/rm
+cmd_rsync		/usr/bin/rsync
+cmd_ssh			/usr/bin/ssh
+cmd_logger		/usr/bin/logger
+cmd_du			/usr/bin/du
+cmd_rsnapshot_diff	/usr/bin/rsnapshot-diff
+
+####################
+# backup intervals #
+####################
+
+{% for backup in item.intervals %}
+retain	{{ backup }}	{{ item.intervals[backup] }}
+{% endfor %}
+
+############################################
+#              global options              #
+# all are optional, with sensible defaults #
+############################################
+
+# verbose level, 1 through 5.
+# 1     quiet           print fatal errors only
+# 2     default         print errors and warnings only
+# 3     verbose         show equivalent shell commands being executed
+# 4     extra verbose   show extra verbose information
+# 5     debug mode      everything
+{% if item.verbose is defined %}
+verbose		{{ item.verbose }}
+{% else %}
+verbose		3
+{% endif %}
+
+# same as "verbose" above, but controls the amount of data sent to the
+# logfile, if one is being used. the default is 3.
+# if you want the rsync output, you have to set it to 4
+{% if item.loglevel is defined %}
+loglevel	{{ item.loglevel }}
+{% else %}
+loglevel	3
+{% endif %}
+
+# If you enable this, data will be written to the file you specify. The
+# amount of data written is controlled by the "loglevel" parameter.
+logfile		/var/log/rsnapshot/{{ item.name }}.log
+
+# If enabled, rsnapshot will write a lockfile to prevent two instances
+# from running simultaneously (and messing up the snapshot_root).
+# If you enable this, make sure the lockfile directory is not world
+# writable. Otherwise anyone can prevent the program from running.
+lockfile	/var/run/rsnapshot-{{ item.name }}.pid
+
+# When sync_first is enabled, it changes the default behaviour of rsnapshot.
+# Normally, when rsnapshot is called with its lowest interval
+# (i.e.: "rsnapshot alpha"), it will sync files AND rotate the lowest
+# intervals. With sync_first enabled, "rsnapshot sync" handles the file sync,
+# and all interval calls simply rotate files.
+{% if item.syncfirst is defined and item.syncfirst %}
+sync_first	1
+{% else %}
+sync_first	0
+{% endif %}
+
+# Number of rsync re-tries. If you experience any network problems or
+# network card issues that tend to cause ssh to fail with errors like
+# "Corrupted MAC on input", for example, set this to a non-zero value
+# to have the rsync operation re-tried.
+rsync_numtries	3
+
+###############################
+### BACKUP POINTS / SCRIPTS ###
+###############################
+
+{% for backup in item.backups %}
+backup	{{ backup.source }}	{{ backup.name }}/
+{% endfor %}
