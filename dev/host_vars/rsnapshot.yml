@@ -36,7 +36,7 @@ rsnapshot:
       - interval: daily
         minute: "1-59/2" # every odd minute
         #minute: 0
-        #hourly: 0
+        #hour: 0
     backups:
       - name: staticsite
         source: "/opt/nginx/{{ nginx_name }}/"

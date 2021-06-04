@@ -43,7 +43,7 @@
     job: "/usr/bin/rsnapshot -c {{ rsnapshot_confdir }}/{{ item.0.name }}.conf {{ item.1.interval }}"
     user: "root"
     minute: "{{ item.1.minute | default('*') }}"
-    hour: "{{ item.1.hourly | default('*') }}"
+    hour: "{{ item.1.hour | default('*') }}"
     day: "{{ item.1.day | default('*') }}"
     weekday: "{{ item.1.weekday | default('*') }}"
     month: "{{ item.1.month | default('*') }}"
