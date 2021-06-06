@@ -2,28 +2,9 @@
 allow_reboot: false
 manage_network: false
 
-# docker
-docker_users:
-  - vagrant
-
-# traefik
-traefik_version: latest
-traefik_dashboard: true
-traefik_domain: traefik.vm.krislamo.org
-traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
-#traefik_acme_email: realemail@example.com # Let's Encrypt settings
-#traefik_production: true
-
-# nginx
-nginx_domain: nginx.vm.krislamo.org
-nginx_name: staticsite
-nginx_repo_url: https://git.krislamo.org/kris/example-website/
-nginx_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
-nginx_version: latest
-
 # rsnapshot
 rsnapshot:
-  - name: webserver
+  - name: localhost
     intervals:
       - name: hourly
         count: 6
@@ -38,7 +19,7 @@ rsnapshot:
         #minute: 0
         #hour: 0
     backups:
-      - name: staticsite
-        source: "/opt/nginx/{{ nginx_name }}/"
+      - name: config
+        source: /etc/
       - name: logs
         source: /var/log/

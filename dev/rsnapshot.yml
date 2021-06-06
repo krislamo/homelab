@@ -5,7 +5,4 @@
     - host_vars/rsnapshot.yml
   roles:
     - base
-    - docker
-    - traefik
-    - nginx
     - rsnapshot
