@@ -40,7 +40,7 @@
 - name: Install rsnapshot crons
   cron:
     name: "{{ item.1.interval }} rsnapshot of {{ item.0.name }}"
-    job: "/usr/bin/rsnapshot -c {{ rsnapshot_confdir }}/{{ item.0.name }}.conf {{ item.1.interval }}"
+    job: "/usr/bin/rsnapshot -c {{ rsnapshot_confdir }}/{{ item.0.name }}.conf {{ item.1.interval }} >/dev/null"
     user: "root"
     minute: "{{ item.1.minute | default('*') }}"
     hour: "{{ item.1.hour | default('*') }}"
@@ -51,3 +51,21 @@
   with_subelements:
     - "{{ rsnapshot }}"
     - cron
+
+- name: Install rsnapshot report script
+  template:
+    src: rsnapshot-report.sh.j2
+    dest: /usr/local/bin/rsnapshot-report
+    mode: '0750'
+
+- name: Install rsnapshot report crons
+  cron:
+    name: "{{ item.name }} rsnapshot report email"
+    job: "/usr/local/bin/rsnapshot-report {{ rsnapshot_reportlog }}
+          | mail -s '{{ item.report.subject | default('Backup Report') }}' {{ item.report.to }}"
+    user: "root"
+    minute: '0'
+    hour: '0'
+    cron_file: "rsnapshot-{{ item.name }}"
+  loop: "{{ rsnapshot }}"
+  when: item.report is defined

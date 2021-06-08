@@ -8,6 +8,10 @@
   tags: network
   when: manage_network
 
+- import_tasks: mail.yml
+  tags: mail
+  when: mail is defined
+
 - import_tasks: ddclient.yml
   tags: ddclient
   when: ddclient is defined

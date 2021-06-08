@@ -2,6 +2,13 @@
 allow_reboot: false
 manage_network: false
 
+#mail:
+#  host: smtp.gmail.com
+#  from: automated@example.com
+#  user: automated
+#  password: password123
+#  rootalias: personal@example.com
+
 # rsnapshot
 rsnapshot:
   - name: localhost
@@ -18,6 +25,9 @@ rsnapshot:
         minute: "1-59/2" # every odd minute
         #minute: 0
         #hour: 0
+    #report:
+    #  to: personal@example.com
+    #  subject: Localhost Backup Report
     backups:
       - name: config
         source: /etc/

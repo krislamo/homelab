@@ -1,0 +1,17 @@
+# Set default values for all accounts.
+defaults
+port 587
+tls on
+tls_trust_file /etc/ssl/certs/ca-certificates.crt
+aliases /etc/aliases
+logfile ~/.msmtp.log
+
+account main
+host {{ mail.host }}
+from {{ mail.from }}
+auth on
+user {{ mail.user }}
+password {{ mail.password }}
+
+# Set a default account
+account default : main

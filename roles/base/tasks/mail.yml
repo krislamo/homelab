@@ -1,0 +1,19 @@
+- name: Install msmtp
+  apt:
+    name: "{{ item }}"
+    state: present
+  loop:
+    - msmtp
+    - msmtp-mta
+    - mailutils
+
+- name: Install msmtp configuration
+  template:
+    src: msmtprc.j2
+    dest: /root/.msmtprc
+    mode: 0700
+
+- name: Install /etc/aliases
+  copy:
+    dest: /etc/aliases
+    content: "root: {{ mail.rootalias }}"

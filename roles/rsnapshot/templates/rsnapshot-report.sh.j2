@@ -1,0 +1,4 @@
+#/bin/bash
+LOG_LOCATION={{ rsnapshot_logdir }}/*.log
+[ $# -gt 0 ] && LOG_LOCATION=$1
+grep -e ^\\[$(date --date="yesterday" '+%F').*\/usr\/bin\/rsnapshot $LOG_LOCATION
