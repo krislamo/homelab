@@ -1,0 +1,33 @@
+- name: Download Minecraft modpack installer
+  get_url:
+    url: "{{ minecraft_modpack_url }}"
+    dest: "{{ minecraft_home }}/{{ item.name }}/serverinstall_{{ item.modpack | replace ('/', '_') }}"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+    mode: 0700
+  loop: "{{ minecraft }}"
+  when: item.modpack is defined and item.sha1 is not defined
+
+- name: Run Minecraft modpack installer
+  command: "sudo -u {{ minecraft_user }} ./serverinstall_{{ item.modpack | replace ('/', '_') }} --auto"
+  args:
+    creates: "{{ minecraft_home }}/{{ item.name }}/mods"
+    chdir: "{{ minecraft_home }}/{{ item.name }}"
+  loop: "{{ minecraft }}"
+  when: item.modpack is defined and item.sha1 is not defined
+
+- name: Find Minecraft Forge
+  find:
+    paths: "{{ minecraft_home }}/{{ item.name }}"
+    patterns: "forge*.jar"
+  register: minecraft_forge
+  loop: "{{ minecraft }}"
+  when: item.modpack is defined and item.sha1 is not defined
+
+- name: Link to Minecraft Forge
+  file:
+    src: "{{ item.files[0].path }}"
+    dest: "{{ minecraft_home }}/{{ item.item.name }}/minecraft_server.jar"
+    state: link
+  loop: "{{ minecraft_forge.results }}"
+  when: minecraft_forge is defined and item.files[0].path is defined

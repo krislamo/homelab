@@ -1,26 +1,26 @@
 [Unit]
-Description=Minecraft Server
+Description=Minecraft Server: %i
 After=network.target
 
 [Service]
 Type=simple
-WorkingDirectory={{ minecraft_home }}
+WorkingDirectory={{ minecraft_home }}/%i
 User={{ minecraft_user }}
 Group={{ minecraft_user }}
 Restart=always
 
-ExecStart=/usr/bin/screen -DmS minecraft \
+ExecStart=/usr/bin/screen -DmS minecraft-%i \
   /usr/bin/java -Xms{{ minecraft_xms }} -Xmx{{ minecraft_xmx }} -jar minecraft_server.jar nogui
-ExecReload=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "reload"\\015'
-ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "say SERVER SHUTDOWN IN 30 SECONDS"\015'
+ExecReload=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "reload"\\015'
+ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "say SERVER SHUTDOWN IN 30 SECONDS"\015'
 ExecStop=/bin/sleep 15
-ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "say SERVER SHUTDOWN IN 15 SECONDS"\015'
+ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "say SERVER SHUTDOWN IN 15 SECONDS"\015'
 ExecStop=/bin/sleep 10
-ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "say SERVER SHUTDOWN IN 5 SECONDS"\015'
+ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "say SERVER SHUTDOWN IN 5 SECONDS"\015'
 ExecStop=/bin/sleep 5
-ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "save-all"\015'
+ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "save-all"\015'
 ExecStop=/bin/sleep 1
-ExecStop=/usr/bin/screen -p 0 -S minecraft -X eval 'stuff "stop"\015'
+ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "stop"\015'
 ExecStop=/bin/sleep 3
 
 [Install]

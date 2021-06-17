@@ -1,0 +1,26 @@
+- name: Install Screen
+  apt:
+    name: screen
+    state: present
+
+- name: Create Minecraft user
+  user:
+    name: "{{ minecraft_user }}"
+    state: present
+    shell: /bin/bash
+
+- name: Create Minecraft directory
+  file:
+    path: "{{ minecraft_home }}/{{ item.name }}"
+    state: directory
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+  loop: "{{ minecraft }}"
+
+- name: Answer to Mojang's EULA
+  template:
+    src: eula.txt.j2
+    dest: "{{ minecraft_home }}/{{ item.name }}/eula.txt"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+  loop: "{{ minecraft }}"

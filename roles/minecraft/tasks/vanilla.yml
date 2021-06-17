@@ -1,0 +1,10 @@
+- name: Download Minecraft
+  get_url:
+    url: "{{ minecraft_url }}"
+    dest: "{{ minecraft_home }}/{{ item.name }}/minecraft_server.jar"
+    checksum: "sha1:{{ item.sha1 }}"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+    mode: 0700
+  loop: "{{ minecraft }}"
+  when: item.sha1 is defined

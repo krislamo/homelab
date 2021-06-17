@@ -1,6 +1,8 @@
 minecraft_eula: false
 minecraft_home: "/opt/minecraft"
-minecraft_url: "https://launcher.mojang.com/v1/objects/{{ minecraft_sha1 }}/server.jar"
+minecraft_java: 11
+minecraft_modpack_url: "https://api.modpacks.ch/public/modpack/{{ item.modpack }}/server/linux"
+minecraft_url: "https://launcher.mojang.com/v1/objects/{{ item.sha1 }}/server.jar"
 minecraft_user: minecraft
 minecraft_xms: 1G
 minecraft_xmx: "{{ minecraft_xms }}"
