@@ -28,6 +28,8 @@
   file:
     src: "{{ item.files[0].path }}"
     dest: "{{ minecraft_home }}/{{ item.item.name }}/minecraft_server.jar"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
     state: link
   loop: "{{ minecraft_forge.results }}"
   when: minecraft_forge is defined and item.files[0].path is defined

@@ -8,9 +8,16 @@ manage_network: false
 #minecraft_eula: true
 
 minecraft_onboot: vanilla
+minecraft_onboot_run: true
 minecraft:
   - name: vanilla # 1.16.5 (https://mcversions.net/download/1.16.5)
     sha1: 1b557e7b033b583cd9f66746b7a9ab1ec1673ced
+    java:
+      Xms: 1G
+      Xmx: 1G
   - name: revelation # 3.4.0 (https://api.modpacks.ch/public/modpack/35/174)
     modpack: 35/174
-    java: 8
+    java:
+      version: 8
+      Xms: 4G
+      Xmx: 4G

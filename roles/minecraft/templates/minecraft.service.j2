@@ -8,9 +8,10 @@ WorkingDirectory={{ minecraft_home }}/%i
 User={{ minecraft_user }}
 Group={{ minecraft_user }}
 Restart=always
+EnvironmentFile={{ minecraft_home }}/%i/environment.conf
 
 ExecStart=/usr/bin/screen -DmS minecraft-%i \
-  /usr/bin/java -Xms{{ minecraft_xms }} -Xmx{{ minecraft_xmx }} -jar minecraft_server.jar nogui
+  ${JAVA_HOME}/bin/java -Xms${JAVA_XMS} -Xmx${JAVA_XMX} -jar minecraft_server.jar nogui
 ExecReload=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "reload"\\015'
 ExecStop=/usr/bin/screen -p 0 -S minecraft-%i -X eval 'stuff "say SERVER SHUTDOWN IN 30 SECONDS"\015'
 ExecStop=/bin/sleep 15

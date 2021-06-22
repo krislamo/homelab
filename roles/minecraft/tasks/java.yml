@@ -2,14 +2,14 @@
   apt:
     name: gpg
     state: present
-  when: item.java is defined and item.java == 8
+  when: item.java.version is defined and item.java.version == 8
   loop: "{{ minecraft }}"
 
 - name: Add AdoptOpenJDK's signing key
   apt_key:
     id: 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03
     url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
-  when: item.java is defined and item.java == 8
+  when: item.java.version is defined and item.java.version == 8
   loop: "{{ minecraft }}"
 
 - name: Install AdoptOpenJDK repository
@@ -17,21 +17,21 @@
     repo: deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main
     mode: 0644
     state: present
-  when: item.java is defined and item.java == 8
+  when: item.java.version is defined and item.java.version == 8
   loop: "{{ minecraft }}"
 
 - name: Install Java 8
   apt:
     name: adoptopenjdk-8-hotspot
     state: present
-  when: item.java is defined and item.java == 8
+  when: item.java.version is defined and item.java.version == 8
   loop: "{{ minecraft }}"
 
 - name: Install Java 11
   apt:
     name: openjdk-11-jre
     state: present
-  when: item.java is not defined or item.java == 11
+  when: item.java.version is not defined or item.java.version == 11
   loop: "{{ minecraft }}"
 
 - name: Activate Java 8

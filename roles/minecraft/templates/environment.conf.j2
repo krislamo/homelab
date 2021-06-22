@@ -1,0 +1,8 @@
+{% if item.java.version is defined and item.java.version == 8 %}
+JAVA_HOME=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/jre
+{% else %}
+JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+{% endif %}
+JAVA_XMS={{ item.java.Xms }}
+JAVA_XMX={{ item.java.Xmx }}
+

@@ -4,14 +4,34 @@
     dest: "/etc/systemd/system/minecraft@.service"
   register: minecraft_systemd
 
+- name: Deploy service environmental variables
+  template:
+    src: environment.conf.j2
+    dest: "{{ minecraft_home }}/{{ item.name }}/environment.conf"
+    owner: "{{ minecraft_user }}"
+    group: "{{ minecraft_user }}"
+  loop: "{{ minecraft }}"
+
 - name: Reload systemd manager configuration
   systemd:
     daemon_reload: true
   when: minecraft_systemd.changed
 
-- name: Start Service
+- name: Disable non-default service instances
+  service:
+    name: "minecraft@{{ item.name }}"
+    enabled: false
+  loop: "{{ minecraft }}"
+  when: item.name != minecraft_onboot
+
+- name: Enable default service instance
+  service:
+    name: "minecraft@{{ minecraft_onboot }}"
+    enabled: true
+  when: minecraft_eula and minecraft_onboot is defined
+
+- name: Run default service instance
   service:
     name: "minecraft@{{ minecraft_onboot }}"
     state: started
-    enabled: true
-  when: minecraft_eula and minecraft_onboot is defined
+  when: minecraft_eula and minecraft_onboot is defined and minecraft_onboot_run
