@@ -10,6 +10,12 @@
     dest: /root/.ssh/authorized_keys
   when: authorized_keys is defined
 
+- name: Install btrfs-tools
+  apt:
+    name: btrfs-tools
+    state: present
+  when: btrfs_support is defined and btrfs_support | bool == true
+
 - name: Manage filesystem mounts
   mount:
     path: "{{ item.path }}"
