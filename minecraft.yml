@@ -17,5 +17,6 @@
   become: true
   roles:
     - base
+    - jenkins
     - minecraft
 
