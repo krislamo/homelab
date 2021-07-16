@@ -20,9 +20,10 @@ else
 end
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/buster64"
+  config.vm.box = "debian/contrib-buster64"
   config.vm.network "private_network", type: "dhcp"
   config.vm.synced_folder ".", "/vagrant", disabled: true
+  config.vm.synced_folder "./scratch", "/vagrant/scratch"
   config.ssh.forward_agent = SSH_FORWARD
 
   # Machine Name
