@@ -10,8 +10,8 @@ manage_network: false
 minecraft_onboot: vanilla
 minecraft_onboot_run: true
 minecraft:
-  - name: vanilla # 1.16.5 (https://mcversions.net/download/1.16.5)
-    sha1: 1b557e7b033b583cd9f66746b7a9ab1ec1673ced
+  - name: vanilla # 1.17.1 (https://mcversions.net/download/1.17.1)
+    sha1: a16d67e5807f57fc4e550299cf20226194497dc2
     java:
       Xms: 1G
       Xmx: 1G

@@ -1,8 +1,7 @@
-{% if item.java.version is defined and item.java.version == 8 %}
-JAVA_HOME=/usr/lib/jvm/adoptopenjdk-8-hotspot-amd64/jre
+{% if item.java.version is defined %}
+JAVA_HOME=/usr/lib/jvm/adoptopenjdk-{{ item.java.version }}-hotspot-amd64
 {% else %}
-JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+JAVA_HOME=/usr/lib/jvm/{{ minecraft_java_pkg }}-amd64
 {% endif %}
 JAVA_XMS={{ item.java.Xms }}
 JAVA_XMX={{ item.java.Xmx }}
-

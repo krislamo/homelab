@@ -1,6 +1,7 @@
 minecraft_eula: false
 minecraft_home: "/opt/minecraft"
-minecraft_java: 11
+minecraft_java: 16
+minecraft_java_pkg: "adoptopenjdk-{{ minecraft_java }}-hotspot"
 minecraft_modpack_url: "https://api.modpacks.ch/public/modpack/{{ item.modpack }}/server/linux"
 minecraft_onboot_run: false
 minecraft_url: "https://launcher.mojang.com/v1/objects/{{ item.sha1 }}/server.jar"
