@@ -17,5 +17,5 @@
   become: true
   roles:
     - base
+    - jenkins
     - rsnapshot
-
