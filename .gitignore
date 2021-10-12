@@ -8,5 +8,7 @@
 !dockerbox.yml
 !hypervisor.yml
 !minecraft.yml
+!mkdocs.yml
 !unifi.yml
 /environments/
+/site/

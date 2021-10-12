@@ -1,0 +1,23 @@
+site_name: moxie
+site_author: Kris Lamoureux
+copyright: Copyright &copy; 2021 Kris Lamoureux
+
+# Repository
+repo_name: krislamo/moxie
+repo_url: https://github.com/krislamo/moxie
+
+theme:
+  name: material
+  palette:
+    primary: black
+  icon:
+    logo: material/server
+
+extra:
+  generator: false
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/krislamo
+
+#nav:
+#  - Home: index.md
