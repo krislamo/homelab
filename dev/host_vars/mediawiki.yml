@@ -1,0 +1,17 @@
+# base
+allow_reboot: false
+manage_network: false
+
+# docker
+docker_users:
+  - vagrant
+
+# traefik
+traefik_version: latest
+traefik_dashboard: true
+traefik_domain: traefik.vm.krislamo.org
+traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+#traefik_acme_email: realemail@example.com # Let's Encrypt settings
+#traefik_production: true
+
+# mediawiki

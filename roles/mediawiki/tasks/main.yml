@@ -1,0 +1,51 @@
+- name: Create MediaWiki Network
+  docker_network:
+    name: "{{ mediawiki_name }}"
+
+- name: Start MediaWiki's database container
+  docker_container:
+    name: "{{ mediawiki_dbname }}"
+    image: mariadb:{{ mediawiki_dbversion }}
+    state: started
+    restart_policy: always
+    volumes: "{{ mediawiki_dbroot }}:/var/lib/mysql"
+    networks_cli_compatible: true
+    networks:
+      - name: "{{ mediawiki_name }}"
+    env:
+      MYSQL_RANDOM_ROOT_PASSWORD: "true"
+      MYSQL_DATABASE: "{{ mediawiki_dbname }}"
+      MYSQL_USER: "{{ mediawiki_dbuser }}"
+      MYSQL_PASSWORD: "{{ mediawiki_dbpass }}"
+
+- name: Start mediawiki container
+  docker_container:
+    name: "{{ mediawiki_name }}"
+    image: mediawiki/mediawiki:{{ mediawiki_version }}
+    state: started
+    restart_policy: always
+    networks_cli_compatible: true
+    ports: "{{ mediawiki_ports }}"
+    networks:
+      - name: "{{ mediawiki_name }}"
+      - name: traefik
+#    volumes:
+#    env:
+#      USER_UID: "1000"
+#      USER_GID: "1000"
+#      DB_TYPE: mysql
+#      DB_HOST: "{{ gitea_dbname }}"
+#      DB_NAME: "{{ gitea_dbname }}"
+#      DB_USER: "{{ gitea_dbuser }}"
+#      DB_PASSWD: "{{ gitea_dbpass }}"
+#      ROOT_URL: "https://{{ gitea_domain }}/"
+#      SSH_DOMAIN: "{{ gitea_domain }}"
+#      DOMAIN: "{{ gitea_domain }}"
+#    labels:
+#      traefik.http.routers.gitea.rule: "Host(`{{ gitea_domain }}`)"
+#      traefik.http.routers.gitea.entrypoints: websecure
+#      traefik.http.routers.gitea.tls.certresolver: letsencrypt
+#      traefik.http.routers.gitea.middlewares: "securehttps@file"
+#      traefik.http.services.gitea.loadbalancer.server.port: "3000"
+#      traefik.docker.network: traefik
+#      traefik.enable: "true"

@@ -1,0 +1,10 @@
+- name: Install MediaWiki Server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/mediawiki.yml
+  roles:
+    - base
+    - docker
+    - traefik
+    - mediawiki
