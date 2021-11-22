@@ -1,0 +1,11 @@
+- name: Install Jekyll server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/jekyll.yml
+  roles:
+    - base
+    - docker
+    #- traefik
+    - jekyll
+    #- nginx
