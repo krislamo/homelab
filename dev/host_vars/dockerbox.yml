@@ -46,23 +46,3 @@ nginx_name: staticsite
 nginx_repo_url: https://git.krislamo.org/kris/example-website/
 nginx_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
 nginx_version: latest
-
-# wordpress
-wordpress_version: latest
-wordpress_domain: wordpress.vm.krislamo.org
-wordpress_multisite: true
-wordpress_dbversion: latest
-wordpress_dbpass: password
-
-# multisite (enable in admin panel then uncomment)
-#wordpress_rule: "Host(`{{ wordpress_domain }}`) ||
-#                 Host(`site1.{{ wordpress_domain }}`) ||
-#                 Host(`site2.{{ wordpress_domain }}`)"
-#
-#wordpress_config_extra: |
-#  define('MULTISITE', {{ wordpress_multisite | string }});
-#  define('SUBDOMAIN_INSTALL', true);
-#  define('DOMAIN_CURRENT_SITE', '{{ wordpress_domain }}');
-#  define('PATH_CURRENT_SITE', '/');
-#  define('SITE_ID_CURRENT_SITE', 1);
-#  define('BLOG_ID_CURRENT_SITE', 1);
