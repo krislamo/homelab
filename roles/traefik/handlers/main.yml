@@ -9,5 +9,6 @@
     name: "{{ traefik_name }}"
     image: traefik:{{ traefik_version }}
     state: started
+    container_default_behavior: "no_defaults"
     restart: yes
   listen: restart_traefik

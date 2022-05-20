@@ -36,6 +36,7 @@
     state: started
     restart_policy: always
     ports: "{{ traefik_ports }}"
+    container_default_behavior: "no_defaults"
     networks_cli_compatible: "false"
     networks:
       - name: traefik

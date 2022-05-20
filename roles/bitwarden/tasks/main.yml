@@ -11,7 +11,7 @@
 - name: Download Bitwarden script
   get_url:
     url: "https://raw.githubusercontent.com/\
-          bitwarden/server/master/scripts/bitwarden.sh"
+          bitwarden/self-host/master/bitwarden.sh"
     dest: "{{ bitwarden_root }}"
     mode: u+x
 

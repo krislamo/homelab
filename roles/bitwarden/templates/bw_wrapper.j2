@@ -14,6 +14,9 @@ send "y\r"
 send "n\r"
 {% endif %}
 
+expect "Enter the database name for your Bitwarden instance (ex. vault):"
+send "{{ bitwarden_database }}\r"
+
 expect "Enter your installation id (get at https://bitwarden.com/host):"
 send "{{ bitwarden_install_id }}\r"
 

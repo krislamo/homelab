@@ -30,8 +30,9 @@ Vagrant.configure("2") do |config|
   config.vm.define :moxie do |moxie| #
   end
 
-  # Disable Machine Name Prefix
   config.vm.provider :libvirt do |libvirt|
+    libvirt.cpus = 2
+    libvirt.memory = 4096
     libvirt.default_prefix = ""
   end
 
