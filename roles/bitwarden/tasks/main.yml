@@ -31,6 +31,7 @@
   template:
     src: compose.override.yml.j2
     dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
+  when: traefik_version is defined
   notify:
     - rebuild_bitwarden
     - start_bitwarden

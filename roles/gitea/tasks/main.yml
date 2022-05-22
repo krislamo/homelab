@@ -9,6 +9,7 @@
     state: started
     restart_policy: always
     volumes: "{{ gitea_dbroot }}:/var/lib/mysql"
+    container_default_behavior: "no_defaults"
     networks_cli_compatible: true
     networks:
       - name: "{{ gitea_name }}"
@@ -18,12 +19,13 @@
       MYSQL_USER: "{{ gitea_dbuser }}"
       MYSQL_PASSWORD: "{{ gitea_dbpass }}"
 
-- name: Start Gitea container
+- name: Start Gitea container (traefik routing)
   docker_container:
     name: "{{ gitea_name }}"
     image: gitea/gitea:{{ gitea_version }}
     state: started
     restart_policy: always
+    container_default_behavior: "no_defaults"
     networks_cli_compatible: true
     ports: "{{ gitea_ports }}"
     networks:
@@ -52,3 +54,32 @@
       traefik.http.services.gitea.loadbalancer.server.port: "3000"
       traefik.docker.network: traefik
       traefik.enable: "true"
+  when: traefik_version is defined
+
+- name: Start Gitea container
+  docker_container:
+    name: "{{ gitea_name }}"
+    image: gitea/gitea:{{ gitea_version }}
+    state: started
+    restart_policy: always
+    container_default_behavior: "no_defaults"
+    networks_cli_compatible: true
+    ports: "{{ gitea_ports }}"
+    networks:
+      - name: "{{ gitea_name }}"
+    volumes:
+      - "{{ gitea_root }}:/data"
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+    env:
+      USER_UID: "1000"
+      USER_GID: "1000"
+      DB_TYPE: mysql
+      DB_HOST: "{{ gitea_dbname }}"
+      DB_NAME: "{{ gitea_dbname }}"
+      DB_USER: "{{ gitea_dbuser }}"
+      DB_PASSWD: "{{ gitea_dbpass }}"
+      ROOT_URL: "https://{{ gitea_domain }}/"
+      SSH_DOMAIN: "{{ gitea_domain }}"
+      DOMAIN: "{{ gitea_domain }}"
+  when: traefik_version is not defined

@@ -1,0 +1,35 @@
+- name: Install nginx
+  apt:
+    name: nginx
+    state: present
+    update_cache: true
+
+- name: Install nginx base configuration
+  template:
+    src: nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    mode: '0644'
+  notify: reload_nginx
+
+- name: Install nginx sites configuration
+  template:
+    src: server-nginx.conf.j2
+    dest: "/etc/nginx/conf.d/{{ item.name }}.conf"
+    mode: '0644'
+  loop: "{{ proxy }}"
+  notify: reload_nginx
+
+- name: Generate self-signed certificate
+  shell: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
+          -subj   "/C=US/ST=Local/L=Local/O=Org/OU=IT/CN=example.com" \
+          -keyout /etc/ssl/private/nginx-selfsigned.key \
+          -out    /etc/ssl/certs/nginx-selfsigned.crt'
+  args:
+    creates: /etc/ssl/certs/nginx-selfsigned.crt
+  notify: reload_nginx
+
+- name: Start nginx and enable on boot
+  service:
+    name: nginx
+    state: started
+    enabled: true

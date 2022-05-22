@@ -1,0 +1,35 @@
+# base
+allow_reboot: false
+manage_network: false
+
+# proxy
+proxy:
+  - name: bitwarden
+    domain: "{{ bitwarden_domain }}"
+    proxy_pass: "http://127.0.0.1:8080"
+    production: false
+  - name: gitea
+    domain: "{{ gitea_domain }}"
+    proxy_pass: "http://127.0.0.1:3080"
+    production: false
+
+# docker
+docker_users:
+  - vagrant
+
+# bitwarden
+# Get Installation ID & Key at https://bitwarden.com/host/
+bitwarden_domain: vault.vm.krislamo.org
+bitwarden_dbpass: password
+bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
+bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
+#bitwarden_prodution: true
+
+# gitea
+gitea_domain: git.vm.krislamo.org
+gitea_version: 1
+gitea_dbversion: latest
+gitea_dbpass: password
+gitea_ports:
+  - "222:22"
+  - "3080:3000"
