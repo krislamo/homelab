@@ -4,6 +4,12 @@
     state: present
     update_cache: true
 
+- name: Start nginx and enable on boot
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
 - name: Install nginx base configuration
   template:
     src: nginx.conf.j2
@@ -14,9 +20,9 @@
 - name: Install nginx sites configuration
   template:
     src: server-nginx.conf.j2
-    dest: "/etc/nginx/conf.d/{{ item.name }}.conf"
+    dest: "/etc/nginx/conf.d/{{ item.domain }}.conf"
     mode: '0644'
-  loop: "{{ proxy }}"
+  loop: "{{ proxy.servers }}"
   notify: reload_nginx
 
 - name: Generate self-signed certificate
@@ -26,10 +32,44 @@
           -out    /etc/ssl/certs/nginx-selfsigned.crt'
   args:
     creates: /etc/ssl/certs/nginx-selfsigned.crt
+  when: not proxy.production
   notify: reload_nginx
 
-- name: Start nginx and enable on boot
-  service:
-    name: nginx
-    state: started
-    enabled: true
+- name: Install LE's certbot
+  apt:
+    name: ['certbot', 'python3-certbot-dns-cloudflare']
+    state: present
+  when: proxy.production
+
+- name: Install Cloudflare API token
+  template:
+    src: cloudflare.ini.j2
+    dest: /root/.cloudflare.ini
+    mode: '0600'
+  when: proxy.production and proxy.dns_cloudflare is defined
+
+- name: Create nginx post renewal hook directory
+  file:
+    path: /etc/letsencrypt/renewal-hooks/post
+    state: directory
+
+- name: Install nginx post renewal hook
+  copy:
+    src: restart-nginx.sh
+    dest: /etc/letsencrypt/renewal-hooks/post/nginx.sh
+    mode: '0755'
+  when: proxy.production
+
+- name: Run Cloudflare DNS-01 challenges on wildcard domains
+  shell: '/usr/bin/certbot certonly \
+            --non-interactive \
+            --agree-tos \
+            --email "{{ proxy.dns_cloudflare.email }}" \
+            --dns-cloudflare \
+            --dns-cloudflare-credentials /root/.cloudflare.ini \
+            -d "*.{{ item }}"'
+  args:
+    creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
+  loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
+  when: proxy.production and proxy.dns_cloudflare is defined
+  notify: reload_nginx

@@ -2,7 +2,13 @@ server {
   listen              443 ssl;
   server_name         {{ item.domain }};
   access_log          /var/log/nginx/{{ item.domain }}.log main;
-{% if not item.production %}
+{% if proxy.production and item.tls.cert is not defined %}
+  ssl_certificate     /etc/letsencrypt/live/{{ item.domain }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ item.domain }}/privkey.pem;
+{% elif proxy.production and item.tls.cert is defined %}
+  ssl_certificate     {{ item.tls.cert }};
+  ssl_certificate_key {{ item.tls.key }};
+{% else %}
   ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
   ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 {% endif %}
