@@ -2,10 +2,18 @@ server {
   listen              443 ssl;
   server_name         {{ item.domain }};
   access_log          /var/log/nginx/{{ item.domain }}.log main;
-{% if proxy.production and item.tls.cert is not defined %}
+{% if proxy.production is defined and proxy.production and proxy.dns_cloudflare.wildcard_domains is defined and item.tls.cert is not defined %}
+{% for wildcard in proxy.dns_cloudflare.wildcard_domains %}
+{% set domain_regex = '^\*\.' + wildcard + '$' %}
+{% if item.domain | regex_search(wildcard) %}
+  ssl_certificate     /etc/letsencrypt/live/{{ wildcard }}/fullchain.pem;
+  ssl_certificate_key /etc/letsencrypt/live/{{ wildcard }}/privkey.pem;
+{% endif %}
+{% endfor %}
+{% elif proxy.production is defined and proxy.production and item.tls.cert is not defined %}
   ssl_certificate     /etc/letsencrypt/live/{{ item.domain }}/fullchain.pem;
   ssl_certificate_key /etc/letsencrypt/live/{{ item.domain }}/privkey.pem;
-{% elif proxy.production and item.tls.cert is defined %}
+{% elif proxy.production is defined and proxy.production and item.tls.cert is defined %}
   ssl_certificate     {{ item.tls.cert }};
   ssl_certificate_key {{ item.tls.key }};
 {% else %}

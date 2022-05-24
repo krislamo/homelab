@@ -20,9 +20,19 @@
 - name: Install nginx sites configuration
   template:
     src: server-nginx.conf.j2
-    dest: "/etc/nginx/conf.d/{{ item.domain }}.conf"
+    dest: "/etc/nginx/sites-available/{{ item.domain }}.conf"
     mode: '0644'
   loop: "{{ proxy.servers }}"
+  notify: reload_nginx
+  register: nginx_sites
+
+- name: Enable nginx sites configuration
+  file:
+    src: "/etc/nginx/sites-available/{{ item.item.domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.item.domain }}.conf"
+    state: link
+  loop: "{{ nginx_sites.results }}"
+  when: item.changed
   notify: reload_nginx
 
 - name: Generate self-signed certificate
@@ -32,21 +42,21 @@
           -out    /etc/ssl/certs/nginx-selfsigned.crt'
   args:
     creates: /etc/ssl/certs/nginx-selfsigned.crt
-  when: not proxy.production
+  when: proxy.production is not defined or not proxy.production
   notify: reload_nginx
 
 - name: Install LE's certbot
   apt:
     name: ['certbot', 'python3-certbot-dns-cloudflare']
     state: present
-  when: proxy.production
+  when: proxy.production is defined and proxy.production
 
 - name: Install Cloudflare API token
   template:
     src: cloudflare.ini.j2
     dest: /root/.cloudflare.ini
     mode: '0600'
-  when: proxy.production and proxy.dns_cloudflare is defined
+  when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Create nginx post renewal hook directory
   file:
@@ -55,10 +65,10 @@
 
 - name: Install nginx post renewal hook
   copy:
-    src: restart-nginx.sh
-    dest: /etc/letsencrypt/renewal-hooks/post/nginx.sh
+    src: reload-nginx.sh
+    dest: /etc/letsencrypt/renewal-hooks/post/reload-nginx.sh
     mode: '0755'
-  when: proxy.production
+  when: proxy.production is defined and proxy.production
 
 - name: Run Cloudflare DNS-01 challenges on wildcard domains
   shell: '/usr/bin/certbot certonly \
@@ -67,9 +77,9 @@
             --email "{{ proxy.dns_cloudflare.email }}" \
             --dns-cloudflare \
             --dns-cloudflare-credentials /root/.cloudflare.ini \
-            -d "*.{{ item }}"'
+            -d "*.{{ item }}" {{ proxy.dns_cloudflare.opts | default("") }}'
   args:
     creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
-  when: proxy.production and proxy.dns_cloudflare is defined
+  when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
   notify: reload_nginx
