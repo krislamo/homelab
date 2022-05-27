@@ -1,0 +1,34 @@
+- name: Install PostgreSQL
+  apt:
+    name: postgresql
+    state: present
+
+- name: Trust connections to PostgreSQL from Docker
+  postgresql_pg_hba:
+    dest: "{{ postgresql_config }}"
+    contype: host
+    databases: all
+    users: all
+    address: "172.16.0.0/12"
+    method: trust
+  register: postgresql_hba
+
+- name: Change PostgreSQL listen addresses
+  postgresql_set:
+    name: listen_addresses
+    value: "{{ postgresql_listen }}"
+  become: true
+  become_user: postgres
+  register: postgresql_config
+
+- name: Reload PostgreSQL
+  service:
+    name: postgresql
+    state: reloaded
+  when: postgresql_hba.changed and not postgresql_config.changed
+
+- name: Restart PostgreSQL
+  service:
+    name: postgresql
+    state: restarted
+  when: postgresql_config.changed

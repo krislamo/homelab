@@ -13,3 +13,10 @@
   loop:
     - aptitude
     - python3-docker
+    - python3-psycopg2
+
+- name: Create Ansible's temporary remote directory
+  file:
+    path: "~/.ansible/tmp"
+    state: directory
+    mode: 0700

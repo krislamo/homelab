@@ -5,7 +5,8 @@
     - host_vars/proxy.yml
   roles:
     - base
+    - postgresql
     - proxy
     - docker
-    - bitwarden
     - gitea
+    - bitwarden

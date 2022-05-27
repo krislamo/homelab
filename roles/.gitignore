@@ -10,6 +10,7 @@
 !minecraft*/
 !nextcloud*/
 !nginx*/
+!postgresql*/
 !prometheus*/
 !proxy*/
 !rsnapshot*/
