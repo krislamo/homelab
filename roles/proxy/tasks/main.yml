@@ -62,6 +62,7 @@
   file:
     path: /etc/letsencrypt/renewal-hooks/post
     state: directory
+  when: proxy.production is defined and proxy.production
 
 - name: Install nginx post renewal hook
   copy:
