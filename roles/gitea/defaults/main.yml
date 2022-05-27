@@ -1,7 +1,9 @@
 # container settings
 gitea_name: gitea
-gitea_sshport: "127.0.0.1:222"
-gitea_webport: "127.0.0.1:3000"
+gitea_sshport: "222"
+gitea_webport: "3000"
+gitea_ssh: "127.0.0.1:{{ gitea_sshport }}"
+gitea_web: "127.0.0.1:{{ gitea_webport }}"
 gitea_volume: "{{ gitea_name }}"
 gitea_rooturl: "http://{{ gitea_domain }}"
 gitea_signup: true

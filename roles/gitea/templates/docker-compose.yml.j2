@@ -5,13 +5,13 @@ services:
     image: "gitea/gitea:${gitea_version}"
     container_name: "${gitea_name}"
     ports:
-      - "${gitea_sshport}:22"
-      - "${gitea_webport}:3000"
+      - "${gitea_ssh}:22"
+      - "${gitea_web}:3000"
     extra_hosts:
       - "host.docker.internal:host-gateway"
     environment:
-      - USER_UID=1000
-      - USER_GID=1000
+      - USER_UID={{ getent_passwd.git[1] }}
+      - USER_GID={{ getent_group.git[1] }}
       - GITEA__server__ROOT_URL=${gitea_rooturl}
       - GITEA__server__DOMAIN=${gitea_domain}
       - GITEA__server__SSH_DOMAIN=${gitea_domain}
@@ -23,6 +23,7 @@ services:
       - GITEA__service__DISABLE_REGISTRATION=${gitea_disable_registration}
     volumes:
       - {{ gitea_volume }}:/data
+      - /home/git/.ssh/:/data/git/.ssh
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 

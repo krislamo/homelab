@@ -17,6 +17,52 @@
   become: true
   become_user: postgres
 
+- name: Create git user
+  user:
+    name: git
+    state: present
+
+- name: Git user uid
+  getent:
+    database: passwd
+    key: git
+
+- name: Git user gid
+  getent:
+    database: group
+    key: git
+
+- name: Create git's .ssh directory
+  file:
+    path: /home/git/.ssh
+    state: directory
+
+- name: Generate git's SSH keys
+  openssh_keypair:
+    path: /home/git/.ssh/id_rsa
+
+- name: Find git's public SSH key
+  slurp:
+    src: /home/git/.ssh/id_rsa.pub
+  register: git_rsapub
+
+- name: Create git's authorized_keys file
+  file:
+    path: /home/git/.ssh/authorized_keys
+    state: touch
+
+- name: Add git's public SSH key to authorized_keys
+  lineinfile:
+    path: /home/git/.ssh/authorized_keys
+    line: "{{ git_rsapub['content'] | b64decode }}"
+    insertbefore: BOF
+
+- name: Create Gitea host script for SSH
+  template:
+    src: gitea.sh.j2
+    dest: /usr/local/bin/gitea
+    mode: 0755
+
 - name: Install Gitea's docker-compose file
   template:
     src: docker-compose.yml.j2
