@@ -1,0 +1,3 @@
+docker_root: /var/lib/docker-compose
+docker_compose: /usr/bin/docker-compose
+docker_compose_service: compose
