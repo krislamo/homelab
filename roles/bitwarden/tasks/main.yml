@@ -25,36 +25,29 @@
   shell: "{{ bitwarden_root }}/bw_wrapper"
   args:
     creates: "{{ bitwarden_root }}/bwdata/config.yml"
-  notify: start_bitwarden
 
 - name: Install docker-compose override
   template:
     src: compose.override.yml.j2
     dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
   when: traefik_version is defined
-  notify:
-    - rebuild_bitwarden
-    - start_bitwarden
+  notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTP on 80
   replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^http_port: 80$"
-    replace: "http_port: 8080"
+    replace: "http_port: 127.0.0.1:8080"
   when: not bitwarden_standalone
-  notify:
-    - rebuild_bitwarden
-    - start_bitwarden
+  notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTPS on 443
   replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^https_port: 443$"
-    replace: "https_port: 8443"
+    replace: "https_port: 127.0.0.1:8443"
   when: not bitwarden_standalone
-  notify:
-    - rebuild_bitwarden
-    - start_bitwarden
+  notify: rebuild_bitwarden
 
 - name: Disable Bitwarden managed Lets Encrypt
   replace:
@@ -62,9 +55,7 @@
     regexp: "^ssl_managed_lets_encrypt: true$"
     replace: "ssl_managed_lets_encrypt: false"
   when: not bitwarden_standalone or not bitwarden_production
-  notify:
-    - rebuild_bitwarden
-    - start_bitwarden
+  notify: rebuild_bitwarden
 
 - name: Disable Bitwarden managed SSL
   replace:
@@ -72,6 +63,17 @@
     regexp: "^ssl: true$"
     replace: "ssl: false"
   when: not bitwarden_standalone
-  notify:
-    - rebuild_bitwarden
-    - start_bitwarden
+  notify: rebuild_bitwarden
+
+- name: Install Bitwarden systemd service
+  template:
+    src: bitwarden.service.j2
+    dest: "/etc/systemd/system/{{ bitwarden_name }}.service"
+  register: bitwarden_systemd
+  notify: rebuild_bitwarden
+
+- name: Reload systemd manager configuration
+  systemd:
+    daemon_reload: true
+  when: bitwarden_systemd.changed
+  notify: rebuild_bitwarden

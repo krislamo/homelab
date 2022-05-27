@@ -1,0 +1,13 @@
+[Unit]
+Description=Bitwarden Password Manager Server
+PartOf=docker.service
+After=docker.service
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+ExecStart={{ bitwarden_root }}/bitwarden.sh start
+ExecStop={{ bitwarden_root }}/bitwarden.sh stop
+
+[Install]
+WantedBy=multi-user.target
