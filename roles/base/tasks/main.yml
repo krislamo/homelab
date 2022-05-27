@@ -4,6 +4,9 @@
 - import_tasks: system.yml
   tags: system
 
+- import_tasks: firewall.yml
+  tags: firewall
+
 - import_tasks: network.yml
   tags: network
   when: manage_network

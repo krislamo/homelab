@@ -1,0 +1,23 @@
+- name: Install the Uncomplicated Firewall
+  apt:
+    name: ufw
+    state: present
+
+- name: Deny incoming traffic by default
+  ufw:
+    default: deny
+    direction: incoming
+
+- name: Allow outgoing traffic by default
+  ufw:
+    default: allow
+    direction: outgoing
+
+- name: Allow OpenSSH with rate limiting
+  ufw:
+    name: ssh
+    rule: limit
+
+- name: Enable firewall
+  ufw:
+    state: enabled

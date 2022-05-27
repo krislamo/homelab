@@ -32,3 +32,10 @@
     name: postgresql
     state: restarted
   when: postgresql_config.changed
+
+- name: Allow database connections from Docker
+  ufw:
+    rule: allow
+    port: "5432"
+    proto: tcp
+    src: "172.16.0.0/12"

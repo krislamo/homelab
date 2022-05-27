@@ -84,3 +84,12 @@
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
   notify: reload_nginx
+
+- name: Add HTTP and HTTPS firewall rule
+  ufw:
+    rule: allow
+    port: "{{ item }}"
+    proto: tcp
+  loop:
+    - "80"
+    - "443"
