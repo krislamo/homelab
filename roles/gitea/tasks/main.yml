@@ -1,85 +1,34 @@
-- name: Create Gitea Network
-  docker_network:
-    name: "{{ gitea_name }}"
+- name: Create Gitea directory
+  file:
+    path: "{{ gitea_root }}"
+    state: directory
 
-- name: Start Gitea's database container
-  docker_container:
+- name: Create Gitea database
+  postgresql_db:
     name: "{{ gitea_dbname }}"
-    image: mariadb:{{ gitea_dbversion }}
-    state: started
-    restart_policy: always
-    volumes: "{{ gitea_dbroot }}:/var/lib/mysql"
-    container_default_behavior: "no_defaults"
-    networks_cli_compatible: true
-    networks:
-      - name: "{{ gitea_name }}"
-    env:
-      MYSQL_RANDOM_ROOT_PASSWORD: "true"
-      MYSQL_DATABASE: "{{ gitea_dbname }}"
-      MYSQL_USER: "{{ gitea_dbuser }}"
-      MYSQL_PASSWORD: "{{ gitea_dbpass }}"
+  become: true
+  become_user: postgres
 
-- name: Start Gitea container (traefik routing)
-  docker_container:
-    name: "{{ gitea_name }}"
-    image: gitea/gitea:{{ gitea_version }}
-    state: started
-    restart_policy: always
-    container_default_behavior: "no_defaults"
-    networks_cli_compatible: true
-    ports: "{{ gitea_ports }}"
-    networks:
-      - name: "{{ gitea_name }}"
-      - name: traefik
-    volumes:
-      - "{{ gitea_root }}:/data"
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env:
-      USER_UID: "1000"
-      USER_GID: "1000"
-      DB_TYPE: mysql
-      DB_HOST: "{{ gitea_dbname }}"
-      DB_NAME: "{{ gitea_dbname }}"
-      DB_USER: "{{ gitea_dbuser }}"
-      DB_PASSWD: "{{ gitea_dbpass }}"
-      ROOT_URL: "https://{{ gitea_domain }}/"
-      SSH_DOMAIN: "{{ gitea_domain }}"
-      DOMAIN: "{{ gitea_domain }}"
-    labels:
-      traefik.http.routers.gitea.rule: "Host(`{{ gitea_domain }}`)"
-      traefik.http.routers.gitea.entrypoints: websecure
-      traefik.http.routers.gitea.tls.certresolver: letsencrypt
-      traefik.http.routers.gitea.middlewares: "securehttps@file"
-      traefik.http.services.gitea.loadbalancer.server.port: "3000"
-      traefik.docker.network: traefik
-      traefik.enable: "true"
-  when: traefik_version is defined
+- name: Create Gitea database user
+  postgresql_user:
+    db: "{{ gitea_dbname }}"
+    name: "{{ gitea_dbuser }}"
+    password: "{{ gitea_dbpass }}"
+  become: true
+  become_user: postgres
 
-- name: Start Gitea container
-  docker_container:
-    name: "{{ gitea_name }}"
-    image: gitea/gitea:{{ gitea_version }}
+- name: Install Gitea's docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ gitea_root }}/docker-compose.yml"
+
+- name: Install Gitea's docker-compose variables
+  template:
+    src: compose-env.j2
+    dest: "{{ gitea_root }}/.env"
+
+- name: Start and enable Gitea service
+  service:
+    name: "{{ docker_compose_service }}@{{ gitea_name }}"
     state: started
-    restart_policy: always
-    container_default_behavior: "no_defaults"
-    networks_cli_compatible: true
-    ports: "{{ gitea_ports }}"
-    networks:
-      - name: "{{ gitea_name }}"
-    volumes:
-      - "{{ gitea_root }}:/data"
-      - /etc/timezone:/etc/timezone:ro
-      - /etc/localtime:/etc/localtime:ro
-    env:
-      USER_UID: "1000"
-      USER_GID: "1000"
-      DB_TYPE: mysql
-      DB_HOST: "{{ gitea_dbname }}"
-      DB_NAME: "{{ gitea_dbname }}"
-      DB_USER: "{{ gitea_dbuser }}"
-      DB_PASSWD: "{{ gitea_dbpass }}"
-      ROOT_URL: "https://{{ gitea_domain }}/"
-      SSH_DOMAIN: "{{ gitea_domain }}"
-      DOMAIN: "{{ gitea_domain }}"
-  when: traefik_version is not defined
+    enabled: true

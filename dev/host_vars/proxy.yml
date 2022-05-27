@@ -17,7 +17,7 @@ proxy:
     - domain: "{{ bitwarden_domain }}"
       proxy_pass: "http://127.0.0.1:8080"
     - domain: "{{ gitea_domain }}"
-      proxy_pass: "http://127.0.0.1:3080"
+      proxy_pass: "http://127.0.0.1:3000"
 
 # docker
 docker_users:
@@ -34,8 +34,4 @@ bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
 # gitea
 gitea_domain: "git.{{ base_domain }}"
 gitea_version: 1
-gitea_dbversion: latest
 gitea_dbpass: password
-gitea_ports:
-  - "222:22"
-  - "3080:3000"

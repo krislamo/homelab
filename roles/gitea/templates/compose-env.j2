@@ -1,0 +1,17 @@
+# {{ ansible_managed }}
+gitea_version={{ gitea_version }}
+gitea_name={{ gitea_name }}
+gitea_domain={{ gitea_domain }}
+gitea_rooturl={{ gitea_rooturl }}
+gitea_webport={{ gitea_webport }}
+gitea_sshport={{ gitea_sshport }}
+gitea_dbtype={{ gitea_dbtype }}
+gitea_dbhost={{ gitea_dbhost }}
+gitea_dbname={{ gitea_dbname }}
+gitea_dbuser={{ gitea_dbuser }}
+gitea_dbpass={{ gitea_dbpass }}
+{% if not gitea_signup %}
+gitea_disable_registration=true
+{% else %}
+gitea_disable_registration=false
+{% endif %}

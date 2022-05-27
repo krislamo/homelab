@@ -1,0 +1,30 @@
+version: '3.7'
+
+services:
+  gitea:
+    image: "gitea/gitea:${gitea_version}"
+    container_name: "${gitea_name}"
+    ports:
+      - "${gitea_sshport}:22"
+      - "${gitea_webport}:3000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    environment:
+      - USER_UID=1000
+      - USER_GID=1000
+      - GITEA__server__ROOT_URL=${gitea_rooturl}
+      - GITEA__server__DOMAIN=${gitea_domain}
+      - GITEA__server__SSH_DOMAIN=${gitea_domain}
+      - GITEA__database__DB_TYPE=${gitea_dbtype}
+      - GITEA__database__HOST=${gitea_dbhost}
+      - GITEA__database__NAME=${gitea_dbname}
+      - GITEA__database__USER=${gitea_dbuser}
+      - GITEA__database__PASSWD=${gitea_dbpass}
+      - GITEA__service__DISABLE_REGISTRATION=${gitea_disable_registration}
+    volumes:
+      - {{ gitea_volume }}:/data
+      - /etc/timezone:/etc/timezone:ro
+      - /etc/localtime:/etc/localtime:ro
+
+volumes:
+  {{ gitea_volume }}:
