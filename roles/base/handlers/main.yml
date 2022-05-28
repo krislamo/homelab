@@ -10,3 +10,9 @@
     name: wg-quick@wg0
     state: restarted
   listen: restart_wireguard
+
+- name: Restart Fail2ban
+  service:
+    name: fail2ban
+    state: restarted
+  listen: restart_fail2ban

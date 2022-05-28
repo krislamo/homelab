@@ -1,0 +1,18 @@
+# {{ ansible_managed }}
+[gitea]
+enabled = true
+filter = gitea
+logpath = /var/log/gitea/gitea.log
+maxretry = 10
+findtime = 3600
+bantime = 900
+action = iptables-allports
+
+[gitea-docker]
+enabled = true
+filter = gitea
+logpath = /var/log/gitea/gitea.log
+maxretry = 10
+findtime = 3600
+bantime = 900
+action = iptables-allports[chain="FORWARD"]

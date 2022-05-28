@@ -78,6 +78,12 @@
   register: bitwarden_systemd
   notify: rebuild_bitwarden
 
+- name: Install Bitwarden's Fail2ban jail
+  template:
+    src: fail2ban-jail.conf.j2
+    dest: /etc/fail2ban/jail.d/bitwarden.conf
+  notify: restart_fail2ban
+
 - name: Reload systemd manager configuration
   systemd:
     daemon_reload: true

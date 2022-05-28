@@ -12,6 +12,7 @@ services:
     environment:
       - USER_UID={{ getent_passwd.git[1] }}
       - USER_GID={{ getent_group.git[1] }}
+      - GITEA__log__MODE=file
       - GITEA__server__ROOT_URL=${gitea_rooturl}
       - GITEA__server__DOMAIN=${gitea_domain}
       - GITEA__server__SSH_DOMAIN=${gitea_domain}
@@ -25,7 +26,8 @@ services:
       - GITEA__service__DISABLE_REGISTRATION=${gitea_disable_registration}
     volumes:
       - {{ gitea_volume }}:/data
-      - /home/git/.ssh/:/data/git/.ssh
+      - /home/git/.ssh:/data/git/.ssh
+      - /var/log/gitea:/data/gitea/log
       - /etc/timezone:/etc/timezone:ro
       - /etc/localtime:/etc/localtime:ro
 

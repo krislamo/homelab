@@ -81,6 +81,18 @@
     dest: "{{ gitea_root }}/.env"
   notify: restart_gitea
 
+- name: Install Gitea's Fail2ban filter
+  template:
+    src: fail2ban-filter.conf.j2
+    dest: /etc/fail2ban/filter.d/gitea.conf
+  notify: restart_fail2ban
+
+- name: Install Gitea's Fail2ban jail
+  template:
+    src: fail2ban-jail.conf.j2
+    dest: /etc/fail2ban/jail.d/gitea.conf
+  notify: restart_fail2ban
+
 - name: Start and enable Gitea service
   service:
     name: "{{ docker_compose_service }}@{{ gitea_name }}"
