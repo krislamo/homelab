@@ -6,7 +6,7 @@ After=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=true
-WorkingDirectory={{ docker_root }}/%i
+WorkingDirectory={{ docker_compose_root }}/%i
 ExecStart={{ docker_compose }} up -d --remove-orphans
 ExecStop={{ docker_compose }} down
 

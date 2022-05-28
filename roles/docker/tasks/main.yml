@@ -6,7 +6,7 @@
 
 - name: Create docker-compose root
   file:
-    path: "{{ docker_root }}"
+    path: "{{ docker_compose_root }}"
     state: directory
 
 - name: Install docker-compose systemd service

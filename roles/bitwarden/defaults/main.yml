@@ -1,5 +1,5 @@
 bitwarden_name: bitwarden
-bitwarden_root: "{{ docker_root }}/{{ bitwarden_name }}"
+bitwarden_root: "/var/lib/{{ bitwarden_name }}"
 bitwarden_database: "{{ bitwarden_name }}"
 bitwarden_standalone: false
 bitwarden_production: false

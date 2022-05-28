@@ -46,16 +46,22 @@
     src: /home/git/.ssh/id_rsa.pub
   register: git_rsapub
 
+- name: Get stats on git's authorized_keys file
+  stat:
+    path: /home/git/.ssh/authorized_keys
+  register: git_authkeys
+
 - name: Create git's authorized_keys file
   file:
     path: /home/git/.ssh/authorized_keys
     state: touch
+  when: not git_authkeys.stat.exists
 
 - name: Add git's public SSH key to authorized_keys
   lineinfile:
     path: /home/git/.ssh/authorized_keys
+    regex: "^ssh-rsa"
     line: "{{ git_rsapub['content'] | b64decode }}"
-    insertbefore: BOF
 
 - name: Create Gitea host script for SSH
   template:
