@@ -65,6 +65,12 @@
   when: not bitwarden_standalone
   notify: rebuild_bitwarden
 
+- name: Define reverse proxy servers
+  lineinfile:
+    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    line: "- {{ bitwarden_realips }}"
+    insertafter: "^real_ips"
+
 - name: Install Bitwarden systemd service
   template:
     src: bitwarden.service.j2

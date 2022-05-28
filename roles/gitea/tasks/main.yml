@@ -73,11 +73,13 @@
   template:
     src: docker-compose.yml.j2
     dest: "{{ gitea_root }}/docker-compose.yml"
+  notify: restart_gitea
 
 - name: Install Gitea's docker-compose variables
   template:
     src: compose-env.j2
     dest: "{{ gitea_root }}/.env"
+  notify: restart_gitea
 
 - name: Start and enable Gitea service
   service:

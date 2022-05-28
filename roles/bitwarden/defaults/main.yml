@@ -1,5 +1,6 @@
 bitwarden_name: bitwarden
 bitwarden_root: "/var/lib/{{ bitwarden_name }}"
 bitwarden_database: "{{ bitwarden_name }}"
+bitwarden_realips: "172.16.0.0/12"
 bitwarden_standalone: false
 bitwarden_production: false

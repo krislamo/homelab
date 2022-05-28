@@ -14,5 +14,9 @@ gitea_dbhost: host.docker.internal
 gitea_dbname: "{{ gitea_name }}"
 gitea_dbuser: "{{ gitea_name }}"
 
+# proxy settings
+gitea_proxy_limit: "1"
+gitea_trusted_proxies: "172.16.0.0/12"
+
 # host
 gitea_root: "{{ docker_compose_root }}/{{ gitea_name }}"
