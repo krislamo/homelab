@@ -21,6 +21,7 @@ services:
       - GITEA__database__NAME=${gitea_dbname}
       - GITEA__database__USER=${gitea_dbuser}
       - GITEA__database__PASSWD=${gitea_dbpass}
+      - GITEA__security__INSTALL_LOCK=true
       - GITEA__security__REVERSE_PROXY_LIMIT=${gitea_proxy_limit}
       - GITEA__security__REVERSE_PROXY_TRUSTED_PROXIES=${gitea_trusted_proxies}
       - GITEA__service__DISABLE_REGISTRATION=${gitea_disable_registration}

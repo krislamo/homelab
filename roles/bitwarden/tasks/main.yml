@@ -78,6 +78,18 @@
   register: bitwarden_systemd
   notify: rebuild_bitwarden
 
+- name: Create Bitwarden's initial logging directory
+  file:
+    path: "{{ bitwarden_logs_identity }}"
+    state: directory
+  register: bitwarden_logs
+
+- name: Create Bitwarden's initial log file
+  file:
+    path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
+    state: touch
+  when: bitwarden_logs.changed
+
 - name: Install Bitwarden's Fail2ban jail
   template:
     src: fail2ban-jail.conf.j2

@@ -81,6 +81,16 @@
     dest: "{{ gitea_root }}/.env"
   notify: restart_gitea
 
+- name: Create Gitea's logging directory
+  file:
+    name: /var/log/gitea
+    state: directory
+
+- name: Create Gitea's initial log file
+  file:
+    name: /var/log/gitea/gitea.log
+    state: touch
+
 - name: Install Gitea's Fail2ban filter
   template:
     src: fail2ban-filter.conf.j2
