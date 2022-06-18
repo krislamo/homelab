@@ -23,6 +23,17 @@
     name: ssh
     rule: limit
 
+- name: Remove Fail2ban defaults-debian.conf
+  file:
+    path: /etc/fail2ban/jail.d/defaults-debian.conf
+    state: absent
+
+- name: Install OpenSSH's Fail2ban jail
+  template:
+    src: fail2ban-ssh.conf.j2
+    dest: /etc/fail2ban/jail.d/sshd.conf
+  notify: restart_fail2ban
+
 - name: Enable firewall
   ufw:
     state: enabled
