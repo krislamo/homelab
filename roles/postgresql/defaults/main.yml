@@ -1,2 +1,5 @@
 postgresql_config: /etc/postgresql/13/main/pg_hba.conf
 postgresql_listen: "*"
+postgresql_trust:
+  - "172.16.0.0/12"
+  - "192.168.0.0/16"

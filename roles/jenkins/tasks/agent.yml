@@ -1,8 +1,3 @@
-- name: Install GnuPG
-  apt:
-    name: gnupg
-    state: present
-
 - name: Create Jenkins user
   user:
     name: "{{ jenkins_user }}"
@@ -24,16 +19,6 @@
     dest: /etc/sudoers.d/{{ jenkins_user }}
     validate: "visudo -cf %s"
     mode: 0440
-
-- name: Install Ansible source
-  copy:
-    src: ansible.list
-    dest: /etc/apt/sources.list.d/ansible.list
-
-- name: Add Ansible source key
-  apt_key:
-    keyserver: keyserver.ubuntu.com
-    id: 93C4A3FD7BB9C367
 
 - name: Install Ansible
   apt:

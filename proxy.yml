@@ -1,0 +1,11 @@
+- name: Install Proxy Server
+  hosts: proxyhosts
+  become: true
+  roles:
+    - base
+    - jenkins
+    - postgresql
+    - proxy
+    - docker
+    - gitea
+    - bitwarden

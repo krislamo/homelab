@@ -8,5 +8,6 @@
 !dockerbox.yml
 !hypervisor.yml
 !minecraft.yml
+!proxy.yml
 !unifi.yml
 /environments/

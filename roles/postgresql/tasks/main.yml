@@ -3,15 +3,16 @@
     name: postgresql
     state: present
 
-- name: Trust connections to PostgreSQL from Docker
+- name: Trust connections to PostgreSQL
   postgresql_pg_hba:
     dest: "{{ postgresql_config }}"
     contype: host
     databases: all
     users: all
-    address: "172.16.0.0/12"
+    address: "{{ item }}"
     method: trust
   register: postgresql_hba
+  loop: "{{ postgresql_trust }}"
 
 - name: Change PostgreSQL listen addresses
   postgresql_set:
@@ -33,9 +34,10 @@
     state: restarted
   when: postgresql_config.changed
 
-- name: Allow database connections from Docker
+- name: Allow database connections
   ufw:
     rule: allow
     port: "5432"
     proto: tcp
-    src: "172.16.0.0/12"
+    src: "{{ item }}"
+  loop: "{{ postgresql_trust }}"
