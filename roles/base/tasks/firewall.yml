@@ -34,6 +34,13 @@
     dest: /etc/fail2ban/jail.d/sshd.conf
   notify: restart_fail2ban
 
+- name: Install Fail2ban IP allow list
+  template:
+    src: fail2ban-allowlist.conf.j2
+    dest: /etc/fail2ban/jail.d/allowlist.conf
+  when: fail2ban_ignoreip is defined
+  notify: restart_fail2ban
+
 - name: Enable firewall
   ufw:
     state: enabled
