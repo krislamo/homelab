@@ -7,6 +7,7 @@
 !gitea*/
 !jenkins*/
 !libvirt*/
+!mariadb*/
 !minecraft*/
 !nextcloud*/
 !nginx*/

@@ -13,6 +13,7 @@
   loop:
     - aptitude
     - python3-docker
+    - python3-pymysql
     - python3-psycopg2
 
 - name: Create Ansible's temporary remote directory

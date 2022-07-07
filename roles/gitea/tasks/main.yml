@@ -4,18 +4,19 @@
     state: directory
 
 - name: Create Gitea database
-  postgresql_db:
+  mysql_db:
     name: "{{ gitea_dbname }}"
-  become: true
-  become_user: postgres
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Create Gitea database user
-  postgresql_user:
-    db: "{{ gitea_dbname }}"
+  mysql_user:
     name: "{{ gitea_dbuser }}"
     password: "{{ gitea_dbpass }}"
-  become: true
-  become_user: postgres
+    host: '%'
+    state: present
+    priv: "{{ gitea_dbname }}.*:ALL"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Create git user
   user:

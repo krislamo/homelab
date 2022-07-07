@@ -1,0 +1,25 @@
+- name: Install MariaDB
+  apt:
+    name: mariadb-server
+    state: present
+
+- name: Change the bind-address to allow Docker
+  lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regex: "^bind-address"
+    line: "bind-address            = 0.0.0.0"
+  register: mariadb_conf
+
+- name: Restart MariaDB
+  service:
+    name: mariadb
+    state: restarted
+  when: mariadb_conf.changed
+
+- name: Allow database connections
+  ufw:
+    rule: allow
+    port: "3306"
+    proto: tcp
+    src: "{{ item }}"
+  loop: "{{ mariadb_trust }}"
