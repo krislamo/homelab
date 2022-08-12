@@ -9,7 +9,7 @@ gitea_rooturl: "http://{{ gitea_domain }}"
 gitea_signup: true
 
 # database settings
-gitea_dbtype: postgres
+gitea_dbtype: mysql
 gitea_dbhost: host.docker.internal
 gitea_dbname: "{{ gitea_name }}"
 gitea_dbuser: "{{ gitea_name }}"

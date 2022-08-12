@@ -4,7 +4,7 @@
   roles:
     - base
     - jenkins
-    - postgresql
+    - mariadb
     - proxy
     - docker
     - gitea
