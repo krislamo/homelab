@@ -27,3 +27,10 @@
     name: wg-quick@wg0
     state: started
     enabled: true
+
+- name: Add WireGuard firewall rule
+  ufw:
+    rule: allow
+    port: "{{ wireguard.listenport }}"
+    proto: tcp
+  when: wireguard.listenport is defined
