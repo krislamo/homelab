@@ -78,7 +78,9 @@
             --email "{{ proxy.dns_cloudflare.email }}" \
             --dns-cloudflare \
             --dns-cloudflare-credentials /root/.cloudflare.ini \
-            -d "*.{{ item }}" {{ proxy.dns_cloudflare.opts | default("") }}'
+            -d "*.{{ item }}" \
+            -d "{{ item }}" \
+            {{ proxy.dns_cloudflare.opts | default("") }}'
   args:
     creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
