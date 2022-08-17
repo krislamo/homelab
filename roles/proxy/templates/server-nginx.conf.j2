@@ -28,9 +28,16 @@ server {
   ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 {% endif %}
   location / {
+{% if item.restrict is defined and item.restrict  %}
+    auth_basic "{{ item.restrict_name | default('Restricted Access') }}";
+    auth_basic_user_file {{ item.restrict_file | default('/etc/nginx/.htpasswd') }};
+{% endif %}
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
     proxy_pass {{ item.proxy_pass }};
+{% if item.proxy_ssl_verify is defined and item.proxy_ssl_verify is false %}
+    proxy_ssl_verify off;
+{% endif %}
   }
 }

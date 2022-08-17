@@ -3,6 +3,7 @@ network_type: static
 allow_reboot: true
 
 packages:
+  - apache2-utils
   - cryptsetup
   - curl
   - dnsutils
