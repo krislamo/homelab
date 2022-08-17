@@ -29,7 +29,7 @@
       - "{{ nginx_html }}:/usr/share/nginx/html:ro"
     labels:
       traefik.http.routers.nginx.rule: "Host(`{{ nginx_domain }}`)"
-      traefik.http.middlewares.nginxauth.basicauth.users: "{{ nginx_auth }}"
+      #traefik.http.middlewares.nginxauth.basicauth.users: "{{ nginx_auth }}"
       traefik.http.routers.nginx.entrypoints: websecure
       traefik.http.routers.nginx.tls.certresolver: letsencrypt
       traefik.http.routers.nginx.middlewares: "securehttps@file,nginxauth"
