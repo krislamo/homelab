@@ -31,7 +31,7 @@
       traefik.http.routers.nginx.rule: "Host(`{{ nginx_domain }}`)"
       #traefik.http.middlewares.nginxauth.basicauth.users: "{{ nginx_auth }}"
       traefik.http.routers.nginx.entrypoints: websecure
-      traefik.http.routers.nginx.tls.certresolver: letsencrypt
-      traefik.http.routers.nginx.middlewares: "securehttps@file,nginxauth"
+      #traefik.http.routers.nginx.tls.certresolver: letsencrypt
+      #traefik.http.routers.nginx.middlewares: "securehttps@file,nginxauth"
       traefik.docker.network: traefik
       traefik.enable: "true"
