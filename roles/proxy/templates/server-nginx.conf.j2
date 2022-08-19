@@ -27,6 +27,9 @@ server {
   ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
   ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
 {% endif %}
+{% if item.client_max_body_size is defined %}
+  client_max_body_size {{ item.client_max_body_size }};
+{% endif %}
   location / {
 {% if item.restrict is defined and item.restrict  %}
     auth_basic "{{ item.restrict_name | default('Restricted Access') }}";
