@@ -11,6 +11,8 @@ http:
         sslRedirect: true
         browserXssFilter: true
         contentTypeNosniff: true
+{% if traefik_hsts_enable is defined and traefik_hsts_enable %}
         stsPreload: {{ traefik_hsts_preload }}
         stsSeconds: {{ traefik_hsts_seconds }}
+{% endif %}
         customFrameOptionsValue: SAMEORIGIN

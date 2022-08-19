@@ -3,8 +3,10 @@ traefik_dashboard: false
 traefik_root: "/opt/{{ traefik_name }}"
 traefik_localonly: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8"
 traefik_production: false
+traefik_hsts_enable: false
 traefik_hsts_preload: false
 traefik_hsts_seconds: 0
+traefik_http_redirect: false
 traefik_ports:
   - "80:80"
   - "443:443"

@@ -10,12 +10,14 @@ providers:
 entrypoints:
   web:
     address: ':80'
+{% if traefik_http_redirect is defined and traefik_http_redirect %}
     http:
       redirections:
         entrypoint:
           to: websecure
           scheme: https
           permanent: true
+{% endif %}
   websecure:
     address: ':443'
     http:
