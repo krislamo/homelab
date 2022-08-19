@@ -31,6 +31,7 @@ server {
 {% if item.restrict is defined and item.restrict  %}
     auth_basic "{{ item.restrict_name | default('Restricted Access') }}";
     auth_basic_user_file {{ item.restrict_file | default('/etc/nginx/.htpasswd') }};
+    proxy_set_header Authorization "";
 {% endif %}
     proxy_set_header Host $host;
     proxy_set_header X-Real-IP $remote_addr;

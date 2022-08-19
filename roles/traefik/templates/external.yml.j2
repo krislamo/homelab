@@ -10,10 +10,12 @@ http:
 {% elif item.middlewares is defined %}
       middlewares: "{{ item.middlewares }}"
 {% endif %}
+{% if traefik_acme_email is defined %}
       tls:
         certResolver: letsencrypt
         domains:
           - main: "{{ item.domain }}"
+{% endif %}
       entryPoints:
         - "websecure"
   services:
