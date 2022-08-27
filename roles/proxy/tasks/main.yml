@@ -10,6 +10,11 @@
     state: started
     enabled: true
 
+- name: Generate DH Parameters
+  openssl_dhparam:
+    path: /etc/ssl/dhparams.pem
+    size: 4096
+
 - name: Install nginx base configuration
   template:
     src: nginx.conf.j2

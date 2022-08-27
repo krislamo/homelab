@@ -1,12 +1,13 @@
 server {
-    listen 80;
-
-    server_name {{ item.domain }};
-    return 301 https://{{ item.domain }}$request_uri;
+  listen 80;
+  listen [::]:80;
+  server_name {{ item.domain }};
+  return 301 https://{{ item.domain }}$request_uri;
 }
 
 server {
-  listen              443 ssl;
+  listen              443      ssl http2;
+  listen              [::]:443 ssl http2;
   server_name         {{ item.domain }};
   access_log          /var/log/nginx/{{ item.domain }}.log main;
 {% if proxy.production is defined and proxy.production and proxy.dns_cloudflare.wildcard_domains is defined and item.tls.cert is not defined %}
@@ -26,6 +27,9 @@ server {
 {% else %}
   ssl_certificate     /etc/ssl/certs/nginx-selfsigned.crt;
   ssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;
+{% endif %}
+{% if item.hsts is defined %}
+  add_header Strict-Transport-Security "max-age={{ item.hsts }}" always;
 {% endif %}
 {% if item.client_max_body_size is defined %}
   client_max_body_size {{ item.client_max_body_size }};
