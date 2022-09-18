@@ -5,7 +5,7 @@ gitea_webport: "3000"
 gitea_ssh: "127.0.0.1:{{ gitea_sshport }}"
 gitea_web: "127.0.0.1:{{ gitea_webport }}"
 gitea_volume: "{{ gitea_name }}"
-gitea_rooturl: "http://{{ gitea_domain }}"
+gitea_rooturl: "https://{{ gitea_domain }}"
 gitea_signup: true
 
 # database settings
