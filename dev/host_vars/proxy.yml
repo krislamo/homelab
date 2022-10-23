@@ -18,6 +18,8 @@ proxy:
       proxy_pass: "http://127.0.0.1:8080"
     - domain: "{{ gitea_domain }}"
       proxy_pass: "http://127.0.0.1:3000"
+    - domain: "{{ kutt_domain }}"
+      proxy_pass: "http://127.0.0.1:3030"
 
 # docker
 docker_users:
@@ -35,3 +37,16 @@ bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
 gitea_domain: "git.{{ base_domain }}"
 gitea_version: 1
 gitea_dbpass: password
+
+# kutt
+kutt_version: latest
+kutt_redis_version: 6
+kutt_postgres_version: 12
+kutt_domain: "kutt.{{ base_domain }}"
+kutt_dbpass: password
+kutt_jwt_secret: long&random
+kutt_mail_user: kutt-noreply@example.com
+kutt_mail_host: smtp.example.com
+kutt_mail_password: realpassword
+kutt_report_email: realemail@example.com
+kutt_admin_emails: realemail@example.com

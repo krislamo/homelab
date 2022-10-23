@@ -1,0 +1,46 @@
+version: "3.7"
+
+services:
+  kutt:
+    image: kutt/kutt:${kutt_version}
+    depends_on:
+      - postgres
+      - redis
+    command: ["./wait-for-it.sh", "postgres:5432", "--", "npm", "start"]
+    ports:
+      - ${kutt_web}:3000
+    environment:
+      SITE_NAME: ${kutt_domain}
+      DEFAULT_DOMAIN: ${kutt_default_domain}
+      JWT_SECRET: ${kutt_jwt_secret}
+
+      DB_HOST: postgres
+      DB_NAME: ${kutt_dbname}
+      DB_USER: ${kutt_dbuser}
+      DB_PASSWORD: ${kutt_dbpass}
+      REDIS_HOST: redis
+
+      MAIL_USER: ${kutt_mail_user}
+      MAIL_HOST: ${kutt_mail_host}
+      MAIL_PORT: ${kutt_mail_port}
+      MAIL_PASSWORD: ${kutt_mail_password}
+      REPORT_EMAIL: ${kutt_report_email}
+      ADMIN_EMAILS: ${kutt_admin_emails}
+
+  redis:
+    image: redis:${kutt_redis_version}
+    volumes:
+      - {{ kutt_redis_volume }}:/data
+
+  postgres:
+    image: postgres:${kutt_postgres_version}
+    environment:
+      POSTGRES_USER: ${kutt_dbuser}
+      POSTGRES_PASSWORD: ${kutt_dbpass}
+      POSTGRES_DB: ${kutt_dbname}
+    volumes:
+      - {{ kutt_postgres_volume }}:/var/lib/postgresql/data
+
+volumes:
+  {{ kutt_redis_volume }}:
+  {{ kutt_postgres_volume }}:

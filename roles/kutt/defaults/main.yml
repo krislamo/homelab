@@ -1,0 +1,16 @@
+# container settings
+kutt_name: kutt
+kutt_default_domain: "{{ kutt_domain }}"
+kutt_webport: 3030
+kutt_web: "127.0.0.1:{{ kutt_webport }}"
+
+# database settings
+kutt_dbname: "{{ kutt_name }}"
+kutt_dbuser: "{{ kutt_name }}"
+kutt_postgres_volume: postgres_data
+
+# redis
+kutt_redis_volume: redis_data
+
+# host
+kutt_root: "{{ docker_compose_root }}/{{ kutt_name }}"

@@ -1,0 +1,5 @@
+- name: Restart Kutt
+  service:
+    name: "{{ docker_compose_service }}@{{ kutt_name }}"
+    state: restarted
+  listen: restart_kutt

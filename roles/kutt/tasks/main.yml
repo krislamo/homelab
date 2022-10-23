@@ -1,0 +1,22 @@
+- name: Create Kutt directory
+  file:
+    path: "{{ kutt_root }}"
+    state: directory
+
+- name: Install Kutt's docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ kutt_root }}/docker-compose.yml"
+  notify: restart_kutt
+
+- name: Install Kutt's docker-compose variables
+  template:
+    src: compose-env.j2
+    dest: "{{ kutt_root }}/.env"
+  notify: restart_kutt
+
+- name: Start and enable Gitea service
+  service:
+    name: "{{ docker_compose_service }}@{{ kutt_name }}"
+    state: started
+    enabled: true
