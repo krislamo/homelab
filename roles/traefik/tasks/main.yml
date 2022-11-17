@@ -41,7 +41,7 @@
       - name: traefik
     labels:
       traefik.http.routers.traefik.rule: "Host(`{{ traefik_domain }}`)"
-      traefik.http.middlewares.auth.basicauth.users: "{{ traefik_auth }}"
+      #traefik.http.middlewares.auth.basicauth.users: "{{ traefik_auth }}"
       traefik.http.middlewares.localonly.ipwhitelist.sourcerange: "{{ traefik_localonly }}"
       traefik.http.routers.traefik.tls.certresolver: letsencrypt
       traefik.http.routers.traefik.middlewares: "securehttps@file,auth@docker,localonly"
