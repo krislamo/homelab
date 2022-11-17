@@ -45,7 +45,6 @@
       traefik.http.routers.prometheus.rule: "Host(`{{ prom_domain }}`)"
       traefik.http.routers.prometheus.entrypoints: websecure
       traefik.http.routers.prometheus.middlewares: "securehttps@file,localonly"
-      traefik.http.routers.prometheus.tls.certresolver: letsencrypt
       traefik.http.middlewares.localonly.ipwhitelist.sourcerange: "{{ traefik_localonly }}"
       traefik.docker.network: traefik
       traefik.enable: "true"
@@ -65,7 +64,6 @@
     labels:
       traefik.http.routers.grafana.rule: "Host(`{{ grafana_domain }}`)"
       traefik.http.routers.grafana.entrypoints: websecure
-      traefik.http.routers.grafana.tls.certresolver: letsencrypt
       traefik.http.routers.grafana.middlewares: "securehttps@file"
       traefik.docker.network: traefik
       traefik.enable: "true"

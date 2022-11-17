@@ -32,7 +32,6 @@
     labels:
       traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
       traefik.http.routers.nextcloud.entrypoints: websecure
-      traefik.http.routers.nextcloud.tls.certresolver: letsencrypt
       traefik.http.routers.nextcloud.middlewares: "securehttps@file,nextcloud-webdav"
       traefik.http.middlewares.nextcloud-webdav.redirectregex.regex: "https://(.*)/.well-known/(card|cal)dav"
       traefik.http.middlewares.nextcloud-webdav.redirectregex.replacement: "https://${1}/remote.php/dav/"

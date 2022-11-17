@@ -20,7 +20,6 @@
     labels:
       traefik.http.routers.jenkins.rule: "Host(`{{ jenkins_domain }}`)"
       traefik.http.routers.jenkins.entrypoints: websecure
-      traefik.http.routers.jenkins.tls.certresolver: letsencrypt
       traefik.http.routers.jenkins.middlewares: "securehttps@file"
       traefik.docker.network: traefik
       traefik.enable: "true"
