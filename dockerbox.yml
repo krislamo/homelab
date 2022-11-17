@@ -20,7 +20,7 @@
     - docker
     - traefik
     - nextcloud
-    - gitea
+#    - gitea
     - jenkins
     - prometheus
     - nginx
