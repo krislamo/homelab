@@ -1,13 +1,3 @@
 .vagrant
 .playbook
-/*.yml
-/*.yaml
-!backup.yml
-!moxie.yml
-!docker.yml
-!dockerbox.yml
-!hypervisor.yml
-!minecraft.yml
-!proxy.yml
-!unifi.yml
 /environments/

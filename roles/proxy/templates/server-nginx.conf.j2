@@ -47,5 +47,11 @@ server {
 {% if item.proxy_ssl_verify is defined and item.proxy_ssl_verify is false %}
     proxy_ssl_verify off;
 {% endif %}
+{% if item.websockets is defined and item.websockets %}
+    proxy_http_version 1.1;
+    proxy_set_header Connection $http_connection;
+    proxy_set_header Origin http://$host;
+    proxy_set_header Upgrade $http_upgrade;
+{% endif %}
   }
 }
