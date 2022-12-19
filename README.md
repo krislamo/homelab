@@ -1,25 +1,39 @@
-# Project Moxie
+# Homelab
+This repository contains Ansible to automate Debian GNU/Linux servers, deploying
+server technologies that are either useful in a personal capacity or provide
+educational value on automating enterprise infrastructure.
 
-Project Moxie is a personal IT homelab project written in Ansible and executed by Jenkins. It is a growing collection of infrastructure as code (IaC) I write out of curiosity and for reference purposes, keeping a handful of beneficial projects managed and secured.
+Development is accomplished using Vagrant to allow easy reproducibility in an
+isolated virtual environment that be ran on your local machine.
 
 ## Quick Start
-
-To configure a local virtual machine for testing, follow these simple steps.
+These steps assume a basic understanding of GNU/Linux, Hypervisors, Vagrant, and Ansible.
 
 ### Prerequisites
-
-Vagrant and VirtualBox are used to develop Project Moxie. You will need to install these before continuing.
+- [Vagrant](https://developer.hashicorp.com/vagrant/docs/installation)
+- [Supported hypervisor](https://developer.hashicorp.com/vagrant/docs/providers)
+- Ansible
 
 ### Installation
 
 1. Clone this repository
    ```
-   git clone https://github.com/krislamo/moxie
+   git clone https://git.krislamo.org/kris/homelab
    ```
-2. Set the `PLAYBOOK` environmental variable to a development playbook name in the `dev/` directory
+   OR download from the mirror on GitHub:
+   ```
+   git clone https://github.com/krislamo/homelab
+   ```
 
-   The following `PLAYBOOK` names are available: `dockerbox`, `hypervisor`, `minecraft`, `bitwarden`, `nextcloud`, `nginx`
+2. Find available playbooks for development
+   ```
+   cd homelab
+   ```
+   ```
+   find dev -maxdepth 1 -name "*.yml" -exec basename {} .yml \;
+   ```
 
+3. Set the `PLAYBOOK` environmental variable to a value listed in the last step, e.g.,
    ```
    export PLAYBOOK=dockerbox
    ```
@@ -29,10 +43,9 @@ Vagrant and VirtualBox are used to develop Project Moxie. You will need to insta
    ```
 
 #### Copyright and License
-Copyright (C) 2020-2021  Kris Lamoureux
+Copyright (C) 2020-2022  Kris Lamoureux
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
-
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, version 3 of the License.
 
