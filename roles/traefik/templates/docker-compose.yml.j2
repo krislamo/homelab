@@ -1,0 +1,25 @@
+version: '3.7'
+
+networks:
+  traefik:
+    name: traefik
+
+services:
+  traefik:
+    image: "traefik:${traefik_version}"
+    container_name: "${traefik_name}"
+    ports:
+      - "${traefik_web_entry:-80:80}"
+{% if traefik_standalone and not traefik_http_only %}
+      - "${traefik_websecure_entry:-443:443}"
+{% endif %}
+    networks:
+      - traefik
+    labels:
+      - "traefik.http.routers.traefik.rule=Host(`{{ traefik_domain }}`)"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.docker.network=traefik"
+      - "traefik.enable=${traefik_dashboard:-false}"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - "{{ traefik_root }}/config:/etc/traefik"
