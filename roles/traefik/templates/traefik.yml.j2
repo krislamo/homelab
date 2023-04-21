@@ -10,7 +10,7 @@ providers:
 entrypoints:
   web:
     address: ':80'
-{% if traefik_http_redirect is defined and traefik_http_redirect %}
+{% if traefik_http_redirect is defined and traefik_http_redirect and not traefik_http_only %}
     http:
       redirections:
         entrypoint:
@@ -18,10 +18,12 @@ entrypoints:
           scheme: https
           permanent: true
 {% endif %}
+{% if not traefik_http_only is defined or not traefik_http_only %}
   websecure:
     address: ':443'
     http:
       tls: {}
+{% endif %}
 
 {% if traefik_acme_email is defined %}
 certificatesResolvers:

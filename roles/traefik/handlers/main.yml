@@ -4,11 +4,8 @@
     state: touch
   listen: reload_traefik
 
-- name: Restart Traefik container
-  docker_container:
-    name: "{{ traefik_name }}"
-    image: traefik:{{ traefik_version }}
-    state: started
-    container_default_behavior: "no_defaults"
-    restart: yes
+- name: Restart Traefik
+  service:
+    name: "{{ docker_compose_service }}@{{ traefik_name }}"
+    state: restarted
   listen: restart_traefik
