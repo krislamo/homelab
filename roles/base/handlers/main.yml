@@ -1,18 +1,24 @@
 - name: Reboot host
-  reboot:
+  ansible.builtin.reboot:
     msg: "Reboot initiated by Ansible"
     connect_timeout: 5
   listen: reboot_host
   when: allow_reboot
 
 - name: Restart WireGuard
-  service:
+  ansible.builtin.service:
     name: wg-quick@wg0
     state: restarted
   listen: restart_wireguard
 
 - name: Restart Fail2ban
-  service:
+  ansible.builtin.service:
     name: fail2ban
     state: restarted
   listen: restart_fail2ban
+
+- name: Restart ddclient
+  ansible.builtin.service:
+    name: ddclient
+    state: restarted
+  listen: restart_ddclient

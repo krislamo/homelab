@@ -1,0 +1,37 @@
+base_domain: vm.krislamo.org
+
+# base
+allow_reboot: false
+manage_network: false
+
+# proxy
+proxy:
+  #production: true
+  dns_cloudflare:
+    opts: --test-cert
+    #email: realemail@example.com
+    #api_token: CLOUDFLARE_DNS01_API_TOKEN
+    wildcard_domains:
+      - "{{ base_domain }}"
+  servers:
+    - domain: "{{ traefik_domain }}"
+      proxy_pass: "http://127.0.0.1:8000"
+    - domain: "{{ jellyfin_domain }}"
+      proxy_pass: "http://127.0.0.1:8000"
+
+# docker
+docker_users:
+  - vagrant
+
+# traefik
+traefik_version: latest
+traefik_dashboard: true
+traefik_domain: "traefik.{{ base_domain }}"
+traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+#traefik_acme_email: realemail@example.com # Let's Encrypt settings
+#traefik_production: true
+traefik_http_only: true # if behind reverse-proxy
+
+# jellyfin
+jellyfin_domain: "jellyfin.{{ base_domain }}"
+jellyfin_version: latest

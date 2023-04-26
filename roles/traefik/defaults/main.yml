@@ -3,8 +3,8 @@ traefik_name: traefik
 traefik_standalone: true
 traefik_http_only: false
 traefik_debug: false
-traefik_web_entry: "80:80"
-traefik_websecure_entry: "443:443"
+traefik_web_entry: "127.0.0.1:8000"
+traefik_websecure_entry: "127.0.0.1:8443"
 traefik_localonly: "10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 127.0.0.0/8"
 
 # HTTPS settings

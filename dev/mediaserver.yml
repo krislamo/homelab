@@ -1,0 +1,11 @@
+- name: Install Media Server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/mediaserver.yml
+  roles:
+    - base
+    - proxy
+    - docker
+    - traefik
+    - jellyfin

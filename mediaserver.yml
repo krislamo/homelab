@@ -1,0 +1,9 @@
+- name: Install Media Server
+  hosts: mediaservers
+  become: true
+  roles:
+    - base
+    - proxy
+    - docker
+    - traefik
+    - jellyfin

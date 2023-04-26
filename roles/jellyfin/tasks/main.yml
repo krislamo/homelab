@@ -1,0 +1,37 @@
+- name: Create Jellyfin directory
+  ansible.builtin.file:
+    path: "{{ jellyfin_root }}"
+    state: directory
+
+- name: Create jellyfin user
+  user:
+    name: jellyfin
+    state: present
+
+- name: jellyfin user uid
+  getent:
+    database: passwd
+    key: jellyfin
+
+- name: jellyfin user gid
+  getent:
+    database: group
+    key: jellyfin
+
+- name: Install Jellyfin's docker-compose file
+  template:
+    src: docker-compose.yml.j2
+    dest: "{{ jellyfin_root }}/docker-compose.yml"
+  notify: restart_jellyfin
+
+- name: Install Jellyfin's docker-compose variables
+  template:
+    src: compose-env.j2
+    dest: "{{ jellyfin_root }}/.env"
+  notify: restart_jellyfin
+
+- name: Start and enable Jellyfin service
+  service:
+    name: "{{ docker_compose_service }}@{{ jellyfin_name }}"
+    state: started
+    enabled: true

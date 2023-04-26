@@ -14,6 +14,7 @@ HOST[8]="wordpress.${DOMAIN}"
 HOST[9]="site1.wordpress.${DOMAIN}"
 HOST[10]="site2.wordpress.${DOMAIN}"
 HOST[11]="unifi.${DOMAIN}"
+HOST[12]="jellyfin.${DOMAIN}"
 
 # Get Vagrantbox guest IP
 VAGRANT_OUTPUT=$(vagrant ssh -c "hostname -I | cut -d' ' -f2" 2>/dev/null)
