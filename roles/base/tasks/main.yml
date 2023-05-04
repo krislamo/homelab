@@ -1,24 +1,31 @@
-- ansible.builtin.import_tasks: ansible.yml
+- name: Import Ansible tasks
+  ansible.builtin.import_tasks: ansible.yml
   tags: ansible
 
-- ansible.builtin.import_tasks: system.yml
+- name: Import System tasks
+  ansible.builtin.import_tasks: system.yml
   tags: system
 
-- ansible.builtin.import_tasks: firewall.yml
+- name: Import Firewall tasks
+  ansible.builtin.import_tasks: firewall.yml
   tags: firewall
 
-- ansible.builtin.import_tasks: network.yml
+- name: Import Network tasks
+  ansible.builtin.import_tasks: network.yml
   tags: network
   when: manage_network
 
-- ansible.builtin.import_tasks: mail.yml
+- name: Import Mail tasks
+  ansible.builtin.import_tasks: mail.yml
   tags: mail
   when: mail is defined
 
-- ansible.builtin.import_tasks: ddclient.yml
+- name: Import ddclient tasks
+  ansible.builtin.import_tasks: ddclient.yml
   tags: ddclient
   when: ddclient is defined
 
-- ansible.builtin.import_tasks: wireguard.yml
+- name: Import WireGuard tasks
+  ansible.builtin.import_tasks: wireguard.yml
   tags: wireguard
   when: wireguard is defined

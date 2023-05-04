@@ -11,9 +11,10 @@
   ansible.builtin.template:
     src: msmtprc.j2
     dest: /root/.msmtprc
-    mode: 0700
+    mode: 0600
 
 - name: Install /etc/aliases
   ansible.builtin.copy:
     dest: /etc/aliases
     content: "root: {{ mail.rootalias }}"
+    mode: 0644

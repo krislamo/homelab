@@ -2,6 +2,7 @@
   ansible.builtin.file:
     path: "{{ traefik_root }}/config/dynamic"
     state: touch
+    mode: 0500
   listen: reload_traefik
 
 - name: Restart Traefik

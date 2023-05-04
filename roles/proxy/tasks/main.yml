@@ -36,12 +36,13 @@
     src: "/etc/nginx/sites-available/{{ item.item.domain }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ item.item.domain }}.conf"
     state: link
+    mode: 0400
   loop: "{{ nginx_sites.results }}"
   when: item.changed
   notify: reload_nginx
 
 - name: Generate self-signed certificate
-  ansible.builtin.shell: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
+  ansible.builtin.command: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
           -subj   "/C=US/ST=Local/L=Local/O=Org/OU=IT/CN=example.com" \
           -keyout /etc/ssl/private/nginx-selfsigned.key \
           -out    /etc/ssl/certs/nginx-selfsigned.crt'
@@ -60,13 +61,14 @@
   ansible.builtin.template:
     src: cloudflare.ini.j2
     dest: /root/.cloudflare.ini
-    mode: '0600'
+    mode: 0400
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Create nginx post renewal hook directory
   ansible.builtin.file:
     path: /etc/letsencrypt/renewal-hooks/post
     state: directory
+    mode: 0500
   when: proxy.production is defined and proxy.production
 
 - name: Install nginx post renewal hook

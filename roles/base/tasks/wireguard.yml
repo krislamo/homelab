@@ -5,7 +5,9 @@
     update_cache: true
 
 - name: Generate WireGuard keys
-  ansible.builtin.shell: wg genkey | tee privatekey | wg pubkey > publickey
+  ansible.builtin.shell: |
+    set -o pipefail
+    wg genkey | tee privatekey | wg pubkey > publickey
   args:
     chdir: /etc/wireguard/
     creates: /etc/wireguard/privatekey
@@ -19,8 +21,8 @@
   ansible.builtin.template:
     src: wireguard.j2
     dest: /etc/wireguard/wg0.conf
-  notify:
-    - restart_wireguard
+    mode: 0400
+  notify: restart_wireguard
 
 - name: Start WireGuard interface
   ansible.builtin.service:

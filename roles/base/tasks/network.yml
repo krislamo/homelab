@@ -10,5 +10,6 @@
   ansible.builtin.template:
     src: "interface.j2"
     dest: "/etc/network/interfaces.d/{{ item.name }}"
+    mode: 0400
   loop: "{{ interfaces }}"
   notify: reboot_host

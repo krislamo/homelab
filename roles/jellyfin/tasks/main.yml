@@ -2,18 +2,19 @@
   ansible.builtin.file:
     path: "{{ jellyfin_root }}"
     state: directory
+    mode: 0500
 
 - name: Create jellyfin user
   ansible.builtin.user:
     name: jellyfin
     state: present
 
-- name: jellyfin user uid
+- name: Get user jellyfin uid
   ansible.builtin.getent:
     database: passwd
     key: jellyfin
 
-- name: jellyfin user gid
+- name: Get user jellyfin gid
   ansible.builtin.getent:
     database: group
     key: jellyfin
@@ -22,12 +23,14 @@
   ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ jellyfin_root }}/docker-compose.yml"
+    mode: 0400
   notify: restart_jellyfin
 
 - name: Install Jellyfin's docker-compose variables
   ansible.builtin.template:
     src: compose-env.j2
     dest: "{{ jellyfin_root }}/.env"
+    mode: 0400
   notify: restart_jellyfin
 
 - name: Start and enable Jellyfin service

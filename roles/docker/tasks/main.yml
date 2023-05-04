@@ -8,17 +8,14 @@
   ansible.builtin.file:
     path: "{{ docker_compose_root }}"
     state: directory
+    mode: 0500
 
 - name: Install docker-compose systemd service
   ansible.builtin.template:
     src: docker-compose.service.j2
     dest: "/etc/systemd/system/{{ docker_compose_service }}@.service"
-  register: compose_systemd
-
-- name: Reload systemd manager configuration
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: compose_systemd.changed
+    mode: 0400
+  notify: compose_systemd
 
 - name: Add users to docker group
   ansible.builtin.user:
