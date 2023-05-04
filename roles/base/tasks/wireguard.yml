@@ -1,35 +1,35 @@
 - name: Install WireGuard
-  apt:
+  ansible.builtin.apt:
     name: wireguard
     state: present
     update_cache: true
 
 - name: Generate WireGuard keys
-  shell: wg genkey | tee privatekey | wg pubkey > publickey
+  ansible.builtin.shell: wg genkey | tee privatekey | wg pubkey > publickey
   args:
     chdir: /etc/wireguard/
     creates: /etc/wireguard/privatekey
 
 - name: Grab WireGuard private key for configuration
-  slurp:
+  ansible.builtin.slurp:
     src: /etc/wireguard/privatekey
   register: wgkey
 
 - name: Install WireGuard configuration
-  template:
+  ansible.builtin.template:
     src: wireguard.j2
     dest: /etc/wireguard/wg0.conf
   notify:
     - restart_wireguard
 
 - name: Start WireGuard interface
-  service:
+  ansible.builtin.service:
     name: wg-quick@wg0
     state: started
     enabled: true
 
 - name: Add WireGuard firewall rule
-  ufw:
+  community.general.ufw:
     rule: allow
     port: "{{ wireguard.listenport }}"
     proto: tcp

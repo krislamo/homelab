@@ -1,40 +1,40 @@
 - name: Install expect
-  apt:
+  ansible.builtin.apt:
     name: expect
     state: present
 
 - name: Create Bitwarden directory
-  file:
+  ansible.builtin.file:
     path: "{{ bitwarden_root }}"
     state: directory
 
 - name: Download Bitwarden script
-  get_url:
+  ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/\
           bitwarden/self-host/master/bitwarden.sh"
     dest: "{{ bitwarden_root }}"
     mode: u+x
 
 - name: Install Bitwarden script wrapper
-  template:
+  ansible.builtin.template:
     src: bw_wrapper.j2
     dest: "{{ bitwarden_root }}/bw_wrapper"
     mode: u+x
 
 - name: Run Bitwarden installation script
-  shell: "{{ bitwarden_root }}/bw_wrapper"
+  ansible.builtin.shell: "{{ bitwarden_root }}/bw_wrapper"
   args:
     creates: "{{ bitwarden_root }}/bwdata/config.yml"
 
 - name: Install docker-compose override
-  template:
+  ansible.builtin.template:
     src: compose.override.yml.j2
     dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
   when: traefik_version is defined
   notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTP on 80
-  replace:
+  ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^http_port: 80$"
     replace: "http_port: 127.0.0.1:8080"
@@ -42,7 +42,7 @@
   notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTPS on 443
-  replace:
+  ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^https_port: 443$"
     replace: "https_port: 127.0.0.1:8443"
@@ -50,7 +50,7 @@
   notify: rebuild_bitwarden
 
 - name: Disable Bitwarden managed Lets Encrypt
-  replace:
+  ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^ssl_managed_lets_encrypt: true$"
     replace: "ssl_managed_lets_encrypt: false"
@@ -58,7 +58,7 @@
   notify: rebuild_bitwarden
 
 - name: Disable Bitwarden managed SSL
-  replace:
+  ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^ssl: true$"
     replace: "ssl: false"
@@ -66,39 +66,39 @@
   notify: rebuild_bitwarden
 
 - name: Define reverse proxy servers
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     line: "- {{ bitwarden_realips }}"
     insertafter: "^real_ips"
   notify: rebuild_bitwarden
 
 - name: Install Bitwarden systemd service
-  template:
+  ansible.builtin.template:
     src: bitwarden.service.j2
     dest: "/etc/systemd/system/{{ bitwarden_name }}.service"
   register: bitwarden_systemd
   notify: rebuild_bitwarden
 
 - name: Create Bitwarden's initial logging directory
-  file:
+  ansible.builtin.file:
     path: "{{ bitwarden_logs_identity }}"
     state: directory
   register: bitwarden_logs
 
 - name: Create Bitwarden's initial log file
-  file:
+  ansible.builtin.file:
     path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
     state: touch
   when: bitwarden_logs.changed
 
 - name: Install Bitwarden's Fail2ban jail
-  template:
+  ansible.builtin.template:
     src: fail2ban-jail.conf.j2
     dest: /etc/fail2ban/jail.d/bitwarden.conf
   notify: restart_fail2ban
 
 - name: Reload systemd manager configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   when: bitwarden_systemd.changed
   notify: rebuild_bitwarden

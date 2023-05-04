@@ -1,16 +1,16 @@
 - name: Create Gitea directory
-  file:
+  ansible.builtin.file:
     path: "{{ gitea_root }}"
     state: directory
 
 - name: Create Gitea database
-  mysql_db:
+  community.mysql.mysql_db:
     name: "{{ gitea_dbname }}"
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Create Gitea database user
-  mysql_user:
+  community.mysql.mysql_user:
     name: "{{ gitea_dbuser }}"
     password: "{{ gitea_dbpass }}"
     host: '%'
@@ -19,93 +19,93 @@
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Create git user
-  user:
+  ansible.builtin.user:
     name: git
     state: present
 
 - name: Git user uid
-  getent:
+  ansible.builtin.getent:
     database: passwd
     key: git
 
 - name: Git user gid
-  getent:
+  ansible.builtin.getent:
     database: group
     key: git
 
 - name: Create git's .ssh directory
-  file:
+  ansible.builtin.file:
     path: /home/git/.ssh
     state: directory
 
 - name: Generate git's SSH keys
-  openssh_keypair:
+  community.crypto.openssh_keypair:
     path: /home/git/.ssh/id_rsa
 
 - name: Find git's public SSH key
-  slurp:
+  ansible.builtin.slurp:
     src: /home/git/.ssh/id_rsa.pub
   register: git_rsapub
 
 - name: Get stats on git's authorized_keys file
-  stat:
+  ansible.builtin.stat:
     path: /home/git/.ssh/authorized_keys
   register: git_authkeys
 
 - name: Create git's authorized_keys file
-  file:
+  ansible.builtin.file:
     path: /home/git/.ssh/authorized_keys
     state: touch
   when: not git_authkeys.stat.exists
 
 - name: Add git's public SSH key to authorized_keys
-  lineinfile:
+  ansible.builtin.lineinfile:
     path: /home/git/.ssh/authorized_keys
     regex: "^ssh-rsa"
     line: "{{ git_rsapub['content'] | b64decode }}"
 
 - name: Create Gitea host script for SSH
-  template:
+  ansible.builtin.template:
     src: gitea.sh.j2
     dest: /usr/local/bin/gitea
     mode: 0755
 
 - name: Install Gitea's docker-compose file
-  template:
+  ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ gitea_root }}/docker-compose.yml"
   notify: restart_gitea
 
 - name: Install Gitea's docker-compose variables
-  template:
+  ansible.builtin.template:
     src: compose-env.j2
     dest: "{{ gitea_root }}/.env"
   notify: restart_gitea
 
 - name: Create Gitea's logging directory
-  file:
+  ansible.builtin.file:
     name: /var/log/gitea
     state: directory
 
 - name: Create Gitea's initial log file
-  file:
+  ansible.builtin.file:
     name: /var/log/gitea/gitea.log
     state: touch
 
 - name: Install Gitea's Fail2ban filter
-  template:
+  ansible.builtin.template:
     src: fail2ban-filter.conf.j2
     dest: /etc/fail2ban/filter.d/gitea.conf
   notify: restart_fail2ban
 
 - name: Install Gitea's Fail2ban jail
-  template:
+  ansible.builtin.template:
     src: fail2ban-jail.conf.j2
     dest: /etc/fail2ban/jail.d/gitea.conf
   notify: restart_fail2ban
 
 - name: Start and enable Gitea service
-  service:
+  ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ gitea_name }}"
     state: started
     enabled: true

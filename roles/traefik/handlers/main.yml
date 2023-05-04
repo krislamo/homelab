@@ -1,11 +1,11 @@
 - name: Reload Traefik container
-  file:
+  ansible.builtin.file:
     path: "{{ traefik_root }}/config/dynamic"
     state: touch
   listen: reload_traefik
 
 - name: Restart Traefik
-  service:
+  ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ traefik_name }}"
     state: restarted
   listen: restart_traefik

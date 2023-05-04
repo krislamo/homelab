@@ -1,5 +1,5 @@
 - name: Install msmtp
-  apt:
+  ansible.builtin.apt:
     name: "{{ item }}"
     state: present
   loop:
@@ -8,12 +8,12 @@
     - mailutils
 
 - name: Install msmtp configuration
-  template:
+  ansible.builtin.template:
     src: msmtprc.j2
     dest: /root/.msmtprc
     mode: 0700
 
 - name: Install /etc/aliases
-  copy:
+  ansible.builtin.copy:
     dest: /etc/aliases
     content: "root: {{ mail.rootalias }}"

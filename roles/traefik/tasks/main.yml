@@ -1,10 +1,10 @@
 - name: Create Traefik directories
-  file:
+  ansible.builtin.file:
     path: "{{ traefik_root }}/config/dynamic"
     state: directory
 
 - name: Install dynamic security configuration
-  template:
+  ansible.builtin.template:
     src: security.yml.j2
     dest: "{{ traefik_root }}/config/dynamic/security.yml"
     owner: root
@@ -13,32 +13,32 @@
   notify: reload_traefik
 
 - name: Install dynamic non-docker configuration
-  template:
+  ansible.builtin.template:
     src: "external.yml.j2"
     dest: "{{ traefik_root }}/config/dynamic/{{ item.name }}.yml"
   loop: "{{ traefik_external }}"
   when: traefik_external is defined
 
 - name: Install Traefik's docker-compose file
-  template:
+  ansible.builtin.template:
     src: docker-compose.yml.j2
     dest: "{{ traefik_root }}/docker-compose.yml"
   notify: restart_traefik
 
 - name: Install Traefik's docker-compose variables
-  template:
+  ansible.builtin.template:
     src: compose-env.j2
     dest: "{{ traefik_root }}/.env"
   notify: restart_traefik
 
 - name: Install static Traefik configuration
-  template:
+  ansible.builtin.template:
     src: traefik.yml.j2
     dest: "{{ traefik_root }}/config/traefik.yml"
   notify: restart_traefik
 
 - name: Start and enable Traefik service
-  service:
+  ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ traefik_name }}"
     state: started
     enabled: true

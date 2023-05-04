@@ -1,17 +1,17 @@
 - name: Install useful software
-  apt:
+  ansible.builtin.apt:
     name: "{{ packages }}"
     state: present
     update_cache: true
 
 - name: Manage root authorized_keys
-  template:
+  ansible.builtin.template:
     src: authorized_keys.j2
     dest: /root/.ssh/authorized_keys
   when: authorized_keys is defined
 
 - name: Manage filesystem mounts
-  mount:
+  ansible.posix.mount:
     path: "{{ item.path }}"
     src: "UUID={{ item.uuid }}"
     fstype: "{{ item.fstype }}"

@@ -1,46 +1,46 @@
 - name: Install the Uncomplicated Firewall
-  apt:
+  ansible.builtin.apt:
     name: ufw
     state: present
 
 - name: Install Fail2ban
-  apt:
+  ansible.builtin.apt:
     name: fail2ban
     state: present
 
 - name: Deny incoming traffic by default
-  ufw:
+  community.general.ufw:
     default: deny
     direction: incoming
 
 - name: Allow outgoing traffic by default
-  ufw:
+  community.general.ufw:
     default: allow
     direction: outgoing
 
 - name: Allow OpenSSH with rate limiting
-  ufw:
+  community.general.ufw:
     name: ssh
     rule: limit
 
 - name: Remove Fail2ban defaults-debian.conf
-  file:
+  ansible.builtin.file:
     path: /etc/fail2ban/jail.d/defaults-debian.conf
     state: absent
 
 - name: Install OpenSSH's Fail2ban jail
-  template:
+  ansible.builtin.template:
     src: fail2ban-ssh.conf.j2
     dest: /etc/fail2ban/jail.d/sshd.conf
   notify: restart_fail2ban
 
 - name: Install Fail2ban IP allow list
-  template:
+  ansible.builtin.template:
     src: fail2ban-allowlist.conf.j2
     dest: /etc/fail2ban/jail.d/allowlist.conf
   when: fail2ban_ignoreip is defined
   notify: restart_fail2ban
 
 - name: Enable firewall
-  ufw:
+  community.general.ufw:
     state: enabled

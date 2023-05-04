@@ -1,5 +1,5 @@
 - name: Restart Jellyfin
-  service:
+  ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ jellyfin_name }}"
     state: restarted
   listen: restart_jellyfin

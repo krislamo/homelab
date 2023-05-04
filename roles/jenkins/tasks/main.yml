@@ -1,5 +1,5 @@
-- import_tasks: agent.yml
+- ansible.builtin.import_tasks: agent.yml
   when: jenkins_sshkey is defined
 
-- import_tasks: server.yml
+- ansible.builtin.import_tasks: server.yml
   when: jenkins_domain is defined

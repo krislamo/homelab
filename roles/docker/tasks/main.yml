@@ -1,27 +1,27 @@
 - name: Install Docker
-  apt:
+  ansible.builtin.apt:
     name: ['docker.io', 'docker-compose']
     state: present
     update_cache: true
 
 - name: Create docker-compose root
-  file:
+  ansible.builtin.file:
     path: "{{ docker_compose_root }}"
     state: directory
 
 - name: Install docker-compose systemd service
-  template:
+  ansible.builtin.template:
     src: docker-compose.service.j2
     dest: "/etc/systemd/system/{{ docker_compose_service }}@.service"
   register: compose_systemd
 
 - name: Reload systemd manager configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   when: compose_systemd.changed
 
 - name: Add users to docker group
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: docker
     append: true
@@ -29,7 +29,7 @@
   when: docker_users is defined
 
 - name: Start Docker and enable on boot
-  service:
+  ansible.builtin.service:
     name: docker
     state: started
     enabled: true

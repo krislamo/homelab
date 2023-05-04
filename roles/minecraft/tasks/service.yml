@@ -1,11 +1,11 @@
 - name: Deploy Minecraft systemd service
-  template:
+  ansible.builtin.template:
     src: minecraft.service.j2
     dest: "/etc/systemd/system/minecraft@.service"
   register: minecraft_systemd
 
 - name: Deploy service environmental variables
-  template:
+  ansible.builtin.template:
     src: environment.conf.j2
     dest: "{{ minecraft_home }}/{{ item.name }}/environment.conf"
     owner: "{{ minecraft_user }}"
@@ -13,25 +13,25 @@
   loop: "{{ minecraft }}"
 
 - name: Reload systemd manager configuration
-  systemd:
+  ansible.builtin.systemd:
     daemon_reload: true
   when: minecraft_systemd.changed
 
 - name: Disable non-default service instances
-  service:
+  ansible.builtin.service:
     name: "minecraft@{{ item.name }}"
     enabled: false
   loop: "{{ minecraft }}"
   when: item.name != minecraft_onboot
 
 - name: Enable default service instance
-  service:
+  ansible.builtin.service:
     name: "minecraft@{{ minecraft_onboot }}"
     enabled: true
   when: minecraft_eula and minecraft_onboot is defined
 
 - name: Run default service instance
-  service:
+  ansible.builtin.service:
     name: "minecraft@{{ minecraft_onboot }}"
     state: started
   when: minecraft_eula and minecraft_onboot is defined and minecraft_onboot_run

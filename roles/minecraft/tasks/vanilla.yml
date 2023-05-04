@@ -1,5 +1,5 @@
 - name: Download Minecraft
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ minecraft_url }}"
     dest: "{{ minecraft_home }}/{{ item.name }}/minecraft_server.jar"
     checksum: "sha1:{{ item.sha1 }}"

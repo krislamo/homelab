@@ -1,28 +1,28 @@
 - name: Install GPG
-  apt:
+  ansible.builtin.apt:
     name: gpg
     state: present
 
 - name: Add AdoptOpenJDK's signing key
-  apt_key:
+  ansible.builtin.apt_key:
     id: 8ED17AF5D7E675EB3EE3BCE98AC3B29174885C03
     url: https://adoptopenjdk.jfrog.io/adoptopenjdk/api/gpg/key/public
 
 - name: Install AdoptOpenJDK repository
-  apt_repository:
+  ansible.builtin.apt_repository:
     repo: deb https://adoptopenjdk.jfrog.io/adoptopenjdk/deb/ buster main
     mode: 0644
     state: present
 
 - name: Install Java
-  apt:
+  ansible.builtin.apt:
     name: "adoptopenjdk-{{ item.java.version }}-hotspot"
     state: present
   when: item.java.version is defined
   loop: "{{ minecraft }}"
 
 - name: "Install default Java, version {{ minecraft_java }}"
-  apt:
+  ansible.builtin.apt:
     name: "{{ minecraft_java_pkg }}"
     state: present
   when: item.java.version is not defined
@@ -30,7 +30,7 @@
   register: minecraft_java_default
 
 - name: "Activate default Java, version {{ minecraft_java }}"
-  alternatives:
+  community.general.alternatives:
     name: java
     path: "/usr/lib/jvm/{{ minecraft_java_pkg }}-amd64/bin/java"
   when: minecraft_java_default.changed

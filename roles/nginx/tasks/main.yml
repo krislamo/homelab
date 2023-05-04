@@ -1,15 +1,15 @@
 - name: Create nginx root
-  file:
+  ansible.builtin.file:
     path: "{{ nginx_root }}"
     state: directory
 
 - name: Generate deploy keys
-  openssh_keypair:
+  community.crypto.openssh_keypair:
     path: "{{ nginx_repo_key }}"
     state: present
 
 - name: Clone static website files
-  git:
+  ansible.builtin.git:
     repo: "{{ nginx_repo_url }}"
     dest: "{{ nginx_html }}"
     version: "{{ nginx_repo_branch }}"
@@ -17,7 +17,7 @@
     separate_git_dir: "{{ nginx_repo_dest }}"
 
 - name: Start nginx container
-  docker_container:
+  community.general.docker_container:
     name: "{{ nginx_name }}"
     image: nginx:{{ nginx_version }}
     state: started

@@ -1,5 +1,5 @@
 - name: Restart Gitea
-  service:
+  ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ gitea_name }}"
     state: restarted
   listen: restart_gitea

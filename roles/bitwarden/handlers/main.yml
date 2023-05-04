@@ -1,15 +1,15 @@
 - name: Stop Bitwarden for rebuild
-  service:
+  ansible.builtin.service:
     name: "{{ bitwarden_name }}"
     state: stopped
   listen: rebuild_bitwarden
 
 - name: Rebuild Bitwarden
-  shell: "{{ bitwarden_root }}/bitwarden.sh rebuild"
+  ansible.builtin.shell: "{{ bitwarden_root }}/bitwarden.sh rebuild"
   listen: rebuild_bitwarden
 
 - name: Start Bitwarden after rebuild
-  service:
+  ansible.builtin.service:
     name: "{{ bitwarden_name }}"
     state: started
     enabled: true

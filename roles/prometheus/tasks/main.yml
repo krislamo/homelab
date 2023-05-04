@@ -1,35 +1,35 @@
 - name: Install Prometheus node exporter
-  apt:
+  ansible.builtin.apt:
     name: prometheus-node-exporter
     state: present
 
 - name: Run Prometheus node exporter
-  service:
+  ansible.builtin.service:
     name: prometheus-node-exporter
     state: started
 
 - name: Create Prometheus data directory
-  file:
+  ansible.builtin.file:
     path: "{{ prom_root }}/prometheus"
     state: directory
     owner: nobody
 
 - name: Create Prometheus config directory
-  file:
+  ansible.builtin.file:
     path: "{{ prom_root }}/config"
     state: directory
 
 - name: Install Prometheus configuration
-  template:
+  ansible.builtin.template:
     src: prometheus.yml.j2
     dest: "{{ prom_root }}/config/prometheus.yml"
 
 - name: Create Prometheus network
-  docker_network:
+  community.general.docker_network:
     name: "{{ prom_name }}"
 
 - name: Start Prometheus container
-  docker_container:
+  community.general.docker_container:
     name: "{{ prom_name }}"
     image: prom/prometheus:{{ prom_version }}
     state: started
@@ -51,7 +51,7 @@
       traefik.enable: "true"
 
 - name: Start Grafana container
-  docker_container:
+  community.general.docker_container:
     name: "{{ grafana_name }}"
     image: grafana/grafana:{{ grafana_version }}
     state: started

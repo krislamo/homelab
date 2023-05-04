@@ -1,15 +1,15 @@
 - name: Install QEMU/KVM
-  apt:
+  ansible.builtin.apt:
     name: qemu-kvm
     state: present
 
 - name: Install Libvirt
-  apt:
+  ansible.builtin.apt:
     name: ["libvirt-clients", "libvirt-daemon-system"]
     state: present
 
 - name: Add users to libvirt group
-  user:
+  ansible.builtin.user:
     name: "{{ item }}"
     groups: libvirt
     append: yes
@@ -17,12 +17,12 @@
   when: libvirt_users is defined
 
 - name: Check for NODOWNLOAD file
-  stat:
+  ansible.builtin.stat:
     path: /var/lib/libvirt/images/NODOWNLOAD
   register: NODOWNLOAD
 
 - name: Download GNU/Linux ISOs
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ item.url }}"
     dest: /var/lib/libvirt/images
     checksum: "{{ item.hash }}"
@@ -34,7 +34,7 @@
 
 # Prevent downloaded ISOs from being rehashed every run
 - name: Create NODOWNLOAD file
-  file:
+  ansible.builtin.file:
     path: /var/lib/libvirt/images/NODOWNLOAD
     state: touch
   when: download_isos.changed

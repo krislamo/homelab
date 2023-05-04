@@ -1,16 +1,16 @@
 - name: Install Screen
-  apt:
+  ansible.builtin.apt:
     name: screen
     state: present
 
 - name: Create Minecraft user
-  user:
+  ansible.builtin.user:
     name: "{{ minecraft_user }}"
     state: present
-    shell: /bin/bash
+    ansible.builtin.shell: /bin/bash
 
 - name: Create Minecraft directory
-  file:
+  ansible.builtin.file:
     path: "{{ minecraft_home }}/{{ item.name }}"
     state: directory
     owner: "{{ minecraft_user }}"
@@ -18,7 +18,7 @@
   loop: "{{ minecraft }}"
 
 - name: Answer to Mojang's EULA
-  template:
+  ansible.builtin.template:
     src: eula.txt.j2
     dest: "{{ minecraft_home }}/{{ item.name }}/eula.txt"
     owner: "{{ minecraft_user }}"

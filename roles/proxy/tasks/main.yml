@@ -1,29 +1,29 @@
 - name: Install nginx
-  apt:
+  ansible.builtin.apt:
     name: nginx
     state: present
     update_cache: true
 
 - name: Start nginx and enable on boot
-  service:
+  ansible.builtin.service:
     name: nginx
     state: started
     enabled: true
 
 - name: Generate DH Parameters
-  openssl_dhparam:
+  community.crypto.openssl_dhparam:
     path: /etc/ssl/dhparams.pem
     size: 4096
 
 - name: Install nginx base configuration
-  template:
+  ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
     mode: '0644'
   notify: reload_nginx
 
 - name: Install nginx sites configuration
-  template:
+  ansible.builtin.template:
     src: server-nginx.conf.j2
     dest: "/etc/nginx/sites-available/{{ item.domain }}.conf"
     mode: '0644'
@@ -32,7 +32,7 @@
   register: nginx_sites
 
 - name: Enable nginx sites configuration
-  file:
+  ansible.builtin.file:
     src: "/etc/nginx/sites-available/{{ item.item.domain }}.conf"
     dest: "/etc/nginx/sites-enabled/{{ item.item.domain }}.conf"
     state: link
@@ -41,7 +41,7 @@
   notify: reload_nginx
 
 - name: Generate self-signed certificate
-  shell: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
+  ansible.builtin.shell: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
           -subj   "/C=US/ST=Local/L=Local/O=Org/OU=IT/CN=example.com" \
           -keyout /etc/ssl/private/nginx-selfsigned.key \
           -out    /etc/ssl/certs/nginx-selfsigned.crt'
@@ -51,33 +51,33 @@
   notify: reload_nginx
 
 - name: Install LE's certbot
-  apt:
+  ansible.builtin.apt:
     name: ['certbot', 'python3-certbot-dns-cloudflare']
     state: present
   when: proxy.production is defined and proxy.production
 
 - name: Install Cloudflare API token
-  template:
+  ansible.builtin.template:
     src: cloudflare.ini.j2
     dest: /root/.cloudflare.ini
     mode: '0600'
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Create nginx post renewal hook directory
-  file:
+  ansible.builtin.file:
     path: /etc/letsencrypt/renewal-hooks/post
     state: directory
   when: proxy.production is defined and proxy.production
 
 - name: Install nginx post renewal hook
-  copy:
+  ansible.builtin.copy:
     src: reload-nginx.sh
     dest: /etc/letsencrypt/renewal-hooks/post/reload-nginx.sh
     mode: '0755'
   when: proxy.production is defined and proxy.production
 
 - name: Run Cloudflare DNS-01 challenges on wildcard domains
-  shell: '/usr/bin/certbot certonly \
+  ansible.builtin.shell: '/usr/bin/certbot certonly \
             --non-interactive \
             --agree-tos \
             --email "{{ proxy.dns_cloudflare.email }}" \
@@ -93,7 +93,7 @@
   notify: reload_nginx
 
 - name: Add HTTP and HTTPS firewall rule
-  ufw:
+  community.general.ufw:
     rule: allow
     port: "{{ item }}"
     proto: tcp

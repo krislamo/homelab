@@ -1,5 +1,5 @@
 - name: Create Jenkins user
-  user:
+  ansible.builtin.user:
     name: "{{ jenkins_user }}"
     state: present
     shell: /bin/bash
@@ -7,25 +7,25 @@
     generate_ssh_key: true
 
 - name: Set Jenkins authorized key
-  authorized_key:
+  ansible.posix.authorized_key:
     user: jenkins
     state: present
     exclusive: true
     key: "{{ jenkins_sshkey }}"
 
 - name: Give Jenkins user passwordless sudo
-  template:
+  ansible.builtin.template:
     src: jenkins_sudoers.j2
     dest: /etc/sudoers.d/{{ jenkins_user }}
     validate: "visudo -cf %s"
     mode: 0440
 
 - name: Install Ansible
-  apt:
+  ansible.builtin.apt:
     name: ansible
     state: present
 
 - name: Install Java
-  apt:
+  ansible.builtin.apt:
     name: default-jre
     state: present

@@ -1,12 +1,12 @@
 - name: Create Jenkin's directory
-  file:
+  ansible.builtin.file:
     path: "{{ jenkins_root }}"
     state: directory
     owner: "1000"
     group: "1000"
 
 - name: Start Jenkins Container
-  docker_container:
+  community.general.docker_container:
     name: "{{ jenkins_name }}"
     image: jenkins/jenkins:{{ jenkins_version }}
     state: started

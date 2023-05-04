@@ -1,10 +1,10 @@
 - name: Install PostgreSQL
-  apt:
+  ansible.builtin.apt:
     name: postgresql
     state: present
 
 - name: Trust connections to PostgreSQL
-  postgresql_pg_hba:
+  community.general.postgresql_pg_hba:
     dest: "{{ postgresql_config }}"
     contype: host
     databases: all
@@ -15,7 +15,7 @@
   loop: "{{ postgresql_trust }}"
 
 - name: Change PostgreSQL listen addresses
-  postgresql_set:
+  community.general.postgresql_set:
     name: listen_addresses
     value: "{{ postgresql_listen }}"
   become: true
@@ -23,19 +23,19 @@
   register: postgresql_config
 
 - name: Reload PostgreSQL
-  service:
+  ansible.builtin.service:
     name: postgresql
     state: reloaded
   when: postgresql_hba.changed and not postgresql_config.changed
 
 - name: Restart PostgreSQL
-  service:
+  ansible.builtin.service:
     name: postgresql
     state: restarted
   when: postgresql_config.changed
 
 - name: Allow database connections
-  ufw:
+  community.general.ufw:
     rule: allow
     port: "5432"
     proto: tcp

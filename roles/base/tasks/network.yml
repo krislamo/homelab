@@ -1,5 +1,5 @@
 - name: Install network interfaces file
-  copy:
+  ansible.builtin.copy:
     src: network-interfaces.cfg
     dest: /etc/network/interfaces
     owner: root
@@ -7,7 +7,7 @@
     mode: '0644'
 
 - name: Install network interfaces
-  template:
+  ansible.builtin.template:
     src: "interface.j2"
     dest: "/etc/network/interfaces.d/{{ item.name }}"
   loop: "{{ interfaces }}"

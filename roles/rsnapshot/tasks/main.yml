@@ -13,12 +13,12 @@
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 - name: Install rsnapshot
-  apt:
+  ansible.builtin.apt:
     name: rsnapshot
     state: present
 
 - name: Create rsnapshot system directories
-  file:
+  ansible.builtin.file:
     path: "{{ item }}"
     state: directory
   loop:
@@ -26,19 +26,19 @@
     - "{{ rsnapshot_logdir }}"
 
 - name: Create snapshot_root directories
-  file:
+  ansible.builtin.file:
     path: "{{ item.root | default(rsnapshot_root) }}"
     state: directory
   loop: "{{ rsnapshot }}"
 
 - name: Install rsnapshot configuration
-  template:
+  ansible.builtin.template:
     src: rsnapshot.conf.j2
     dest: "{{ rsnapshot_confdir }}/{{ item.name }}.conf"
   loop: "{{ rsnapshot }}"
 
 - name: Install rsnapshot crons
-  cron:
+  ansible.builtin.cron:
     name: "{{ item.1.interval }} rsnapshot of {{ item.0.name }}"
     job: "/usr/bin/rsnapshot -c {{ rsnapshot_confdir }}/{{ item.0.name }}.conf {{ item.1.interval }} >/dev/null"
     user: "root"
@@ -53,13 +53,13 @@
     - cron
 
 - name: Install rsnapshot report script
-  template:
+  ansible.builtin.template:
     src: rsnapshot-report.sh.j2
     dest: /usr/local/bin/rsnapshot-report
     mode: '0750'
 
 - name: Install rsnapshot report crons
-  cron:
+  ansible.builtin.cron:
     name: "{{ item.name }} rsnapshot report email"
     job: "/usr/local/bin/rsnapshot-report {{ rsnapshot_reportlog }}
           | mail -s '{{ item.report.subject | default('Backup Report') }}' {{ item.report.to }}"

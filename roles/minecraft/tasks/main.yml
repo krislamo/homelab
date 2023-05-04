@@ -1,14 +1,14 @@
-- import_tasks: system.yml
+- ansible.builtin.import_tasks: system.yml
   when: minecraft_eula
 
-- import_tasks: java.yml
+- ansible.builtin.import_tasks: java.yml
   when: minecraft_eula
 
-- import_tasks: vanilla.yml
+- ansible.builtin.import_tasks: vanilla.yml
   when: minecraft_eula
 
-- import_tasks: modpacks.yml
+- ansible.builtin.import_tasks: modpacks.yml
   when: minecraft_eula
 
-- import_tasks: service.yml
+- ansible.builtin.import_tasks: service.yml
   when: minecraft_eula

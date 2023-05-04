@@ -1,5 +1,5 @@
 - name: Download Minecraft modpack installer
-  get_url:
+  ansible.builtin.get_url:
     url: "{{ minecraft_modpack_url }}"
     dest: "{{ minecraft_home }}/{{ item.name }}/serverinstall_{{ item.modpack | replace ('/', '_') }}"
     owner: "{{ minecraft_user }}"
@@ -9,7 +9,7 @@
   when: item.modpack is defined and item.sha1 is not defined
 
 - name: Run Minecraft modpack installer
-  command: "sudo -u {{ minecraft_user }} ./serverinstall_{{ item.modpack | replace ('/', '_') }} --auto"
+  ansible.builtin.command: "sudo -u {{ minecraft_user }} ./serverinstall_{{ item.modpack | replace ('/', '_') }} --auto"
   args:
     creates: "{{ minecraft_home }}/{{ item.name }}/mods"
     chdir: "{{ minecraft_home }}/{{ item.name }}"
@@ -17,7 +17,7 @@
   when: item.modpack is defined and item.sha1 is not defined
 
 - name: Find Minecraft Forge
-  find:
+  ansible.builtin.find:
     paths: "{{ minecraft_home }}/{{ item.name }}"
     patterns: "forge*.jar"
   register: minecraft_forge
@@ -25,7 +25,7 @@
   when: item.modpack is defined and item.sha1 is not defined
 
 - name: Link to Minecraft Forge
-  file:
+  ansible.builtin.file:
     src: "{{ item.files[0].path }}"
     dest: "{{ minecraft_home }}/{{ item.item.name }}/minecraft_server.jar"
     owner: "{{ minecraft_user }}"
