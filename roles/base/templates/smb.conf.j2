@@ -1,0 +1,19 @@
+[global]
+   workgroup = WORKGROUP
+   server string = Samba Server %v
+   netbios name = {{ ansible_hostname }}
+   security = user
+   map to guest = bad user
+   dns proxy = no
+{% for user in samba.users %}
+   smb encrypt = {{ 'mandatory' if user.encrypt | default(false) else 'disabled' }}
+{% endfor %}
+
+{% for share in samba.shares %}
+[{{ share.name }}]
+   path = {{ share.path }}
+   browsable = yes
+   guest ok = no
+   read only = {{ 'yes' if share.read_only | default(false) else 'no' }}
+   valid users = {{ share.valid_users }}
+{% endfor %}
