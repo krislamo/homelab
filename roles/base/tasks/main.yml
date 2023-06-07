@@ -29,3 +29,8 @@
   ansible.builtin.import_tasks: wireguard.yml
   tags: wireguard
   when: wireguard is defined
+
+- name: Import Samba tasks
+  ansible.builtin.import_tasks: samba.yml
+  tags: samba
+  when: samba is defined

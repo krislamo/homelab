@@ -4,11 +4,6 @@
     state: directory
     mode: 0500
 
-- name: Create jellyfin user
-  ansible.builtin.user:
-    name: jellyfin
-    state: present
-
 - name: Get user jellyfin uid
   ansible.builtin.getent:
     database: passwd

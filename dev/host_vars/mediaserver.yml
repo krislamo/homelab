@@ -4,6 +4,24 @@ base_domain: vm.krislamo.org
 allow_reboot: false
 manage_network: false
 
+users:
+  - name: jellyfin
+
+samba:
+  users:
+    - name: jellyfin
+      password: jellyfin
+  shares:
+    - name: jellyfin
+      path: /srv/jellyfin
+      owner: jellyfin
+      group: jellyfin
+      valid_users: jellyfin
+  firewall:
+    - 10.0.0.0/8
+    - 172.16.0.0/12
+    - 192.168.0.0/16
+
 # proxy
 proxy:
   #production: true
@@ -35,3 +53,4 @@ traefik_http_only: true # if behind reverse-proxy
 # jellyfin
 jellyfin_domain: "jellyfin.{{ base_domain }}"
 jellyfin_version: latest
+jellyfin_media: /srv/jellyfin

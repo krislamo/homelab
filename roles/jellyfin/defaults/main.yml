@@ -1,5 +1,4 @@
 jellyfin_name: jellyfin
-jellyfin_volume: "{{ jellyfin_name }}"
 jellyfin_router: "{{ jellyfin_name }}"
 jellyfin_rooturl: "https://{{ jellyfin_domain }}"
 jellyfin_root: "{{ docker_compose_root }}/{{ jellyfin_name }}"

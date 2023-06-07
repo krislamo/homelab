@@ -1,7 +1,8 @@
 version: '3.7'
 
 volumes:
-  {{ jellyfin_volume }}:
+  config:
+  cache:
 
 networks:
   traefik:
@@ -24,6 +25,6 @@ services:
       - "traefik.docker.network=traefik"
       - "traefik.enable=true"
     volumes:
-      - ./config:/config
-      - ./cache:/cache
-      - {{ jellyfin_volume }}:/media
+      - config:/config
+      - cache:/cache
+      - {{ jellyfin_media }}:/media

@@ -22,3 +22,9 @@
     name: ddclient
     state: restarted
   listen: restart_ddclient
+
+- name: Restart Samba
+  ansible.builtin.service:
+    name: smbd
+    state: restarted
+  listen: restart_samba

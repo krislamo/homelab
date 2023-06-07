@@ -11,6 +11,23 @@
     mode: 0400
   when: authorized_keys is defined
 
+- name: Create system users
+  ansible.builtin.user:
+    name: "{{ item.name }}"
+    state: present
+    shell: "{{ item.shell | default('/bin/bash') }}"
+    create_home: "{{ item.home | default(false) }}"
+  loop: "{{ users }}"
+  when: users is defined
+
+- name: Set authorized_keys for system users
+  ansible.posix.authorized_key:
+    user: "{{ item.key }}"
+    key: "{{ item.value.key }}"
+    state: present
+  loop: "{{ users }}"
+  when: users is defined and item.value.key is defined
+
 - name: Manage filesystem mounts
   ansible.posix.mount:
     path: "{{ item.path }}"
