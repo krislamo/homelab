@@ -11,6 +11,7 @@
   args:
     chdir: /etc/wireguard/
     creates: /etc/wireguard/privatekey
+    executable: /usr/bin/bash
 
 - name: Grab WireGuard private key for configuration
   ansible.builtin.slurp:

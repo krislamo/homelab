@@ -1,8 +1,9 @@
 - name: Install Media Server
-  hosts: mediaservers
+  hosts: "{{ PLAYBOOK_HOST | default('none') }}"
   become: true
   roles:
     - base
+    - jenkins
     - proxy
     - docker
     - traefik
