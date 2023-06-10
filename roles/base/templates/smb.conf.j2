@@ -13,7 +13,16 @@
 [{{ share.name }}]
    path = {{ share.path }}
    browsable = yes
+{% if share.guest_allow is defined and share.guest_allow %}
+   guest ok = yes
+{% else %}
    guest ok = no
+{% endif %}
    read only = {{ 'yes' if share.read_only | default(false) else 'no' }}
+{% if share.valid_users is defined %}
    valid users = {{ share.valid_users }}
+{% endif %}
+{% if share.force_user is defined %}
+   force user = {{ share.force_user }}
+{% endif %}
 {% endfor %}

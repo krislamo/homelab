@@ -1,6 +1,7 @@
+allow_reboot: true
+manage_firewall: true
 manage_network: false
 network_type: static
-allow_reboot: true
 
 packages:
   - apache2-utils

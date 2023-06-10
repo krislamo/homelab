@@ -1,3 +1,4 @@
-.vagrant
 .playbook
+.vagrant
+.vscode
 /environments/
