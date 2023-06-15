@@ -35,5 +35,5 @@
   community.general.ufw:
     rule: allow
     port: "{{ wireguard.listenport }}"
-    proto: tcp
+    proto: udp
   when: wireguard.listenport is defined
