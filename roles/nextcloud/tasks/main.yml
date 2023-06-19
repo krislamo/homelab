@@ -29,6 +29,8 @@
     networks:
       - name: "{{ nextcloud_container }}"
       - name: traefik
+    env:
+      PHP_MEMORY_LIMIT: 1024M
     labels:
       traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
       traefik.http.routers.nextcloud.entrypoints: websecure
@@ -102,6 +104,13 @@
     - "php occ db:convert-filecache-bigint"
     - "php occ maintenance:mode --off"
   when: nextcloud_install.changed
+
+- name: Install Nextcloud background jobs cron
+  ansible.builtin.cron:
+    name: Nextcloud background job
+    minute: "*/5"
+    job: "/usr/bin/docker exec -u www-data nextcloud /usr/local/bin/php -f /var/www/html/cron.php"
+    user: root
 
 - name: Remove Nextcloud's CAN_INSTALL file
   ansible.builtin.file:
