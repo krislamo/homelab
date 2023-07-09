@@ -1,0 +1,35 @@
+name: homelab-ci
+
+on: [push]
+
+jobs:
+  homelab-ci:
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Cache Vagrant boxes
+        uses: actions/cache@v3
+        with:
+          path: ~/.vagrant.d/boxes
+          key: ${{ runner.os }}-vagrant-${{ hashFiles('Vagrantfile') }}
+          restore-keys: |
+            ${{ runner.os }}-vagrant-
+
+      - name: Install Ansible
+        run: brew install ansible@7
+
+      - name: Software Versions
+        run: |
+          printf "VirtualBox "
+          vboxmanage --version
+          vagrant --version
+          export PATH="/usr/local/opt/ansible@7/bin:$PATH"
+          ansible --version
+
+      - name: Vagrant Up with Dockerbox Playbook
+        run: |
+          export PATH="/usr/local/opt/ansible@7/bin:$PATH"
+          PLAYBOOK=dockerbox vagrant up
+          vagrant ssh -c "docker ps"

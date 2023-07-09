@@ -1,21 +1,3 @@
-- name: 'Install Ansible dependency: python3-apt'
-  ansible.builtin.shell: 'apt-get update && apt-get install python3-apt -y'
-  args:
-    creates: /usr/lib/python3/dist-packages/apt
-    warn: false
-
-- name: Install additional Ansible dependencies
-  ansible.builtin.apt:
-    name: "{{ item }}"
-    state: present
-    force_apt_get: true
-    update_cache: true
-  loop:
-    - aptitude
-    - python3-docker
-    - python3-pymysql
-    - python3-psycopg2
-
 - name: Create Ansible's temporary remote directory
   ansible.builtin.file:
     path: "~/.ansible/tmp"
