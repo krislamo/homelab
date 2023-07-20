@@ -1,3 +1,6 @@
 docker_compose_root: /var/lib/compose
-docker_compose: /usr/bin/docker-compose
 docker_compose_service: compose
+docker_compose: /usr/bin/docker-compose
+docker_repos_keys: "{{ docker_repos_path }}/.keys"
+docker_repos_keytype: rsa
+docker_repos_path: /srv/compose_repos

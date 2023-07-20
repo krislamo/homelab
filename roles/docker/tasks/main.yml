@@ -17,6 +17,57 @@
     mode: 0400
   notify: compose_systemd
 
+- name: Create directories to clone docker-compose repositories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: 0400
+  loop:
+    - "{{ docker_repos_path }}"
+    - "{{ docker_repos_keys }}"
+  when: docker_compose_deploy is defined
+
+- name: Generate OpenSSH deploy keys for docker-compose clones
+  community.crypto.openssh_keypair:
+    path: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
+    type: "{{ docker_repos_keytype }}"
+    mode: 0400
+    state: present
+
+- name: Clone external docker-compose projects
+  ansible.builtin.git:
+    repo: "{{ item.url }}"
+    dest: "{{ docker_repos_path }}/{{ item.name }}"
+    version: "{{ item.version | default('main') }}"
+    force: true
+    key_file: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
+  when: docker_compose_deploy is defined
+  loop: "{{ docker_compose_deploy }}"
+
+- name: Create directories for docker-compose projects using the systemd service
+  ansible.builtin.file:
+    path: "{{ docker_compose_root }}/{{ item.name }}"
+    state: directory
+    mode: 0400
+  loop: "{{ docker_compose_deploy }}"
+  when: docker_compose_deploy is defined
+
+- name: Copy docker-compose.yml files to their service directories
+  ansible.builtin.copy:
+    src: "{{ docker_repos_path }}/{{ item.name }}/{{ item.path | default('docker-compose.yml') }}"
+    dest: "{{ docker_compose_root }}/{{ item.name }}/docker-compose.yml"
+    remote_src: yes
+  loop: "{{ docker_compose_deploy }}"
+  when: docker_compose_deploy is defined
+
+- name: Set environment variables for docker-compose projects
+  ansible.builtin.template:
+    src: docker-compose-env.j2
+    dest: "{{ docker_compose_root }}/{{ item.name }}/.env"
+    mode: 0400
+  loop: "{{ docker_compose_deploy }}"
+  when: docker_compose_deploy is defined and item.env is defined
+
 - name: Add users to docker group
   ansible.builtin.user:
     name: "{{ item }}"
@@ -30,3 +81,11 @@
     name: docker
     state: started
     enabled: true
+
+- name: Start docker-compose services and enable on boot
+  ansible.builtin.service:
+    name: "{{ docker_compose_service }}@{{ item.name }}"
+    state: started
+    enabled: true
+  loop: "{{ docker_compose_deploy }}"
+  when: item.enabled is defined and item.enabled is true
