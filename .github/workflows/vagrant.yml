@@ -1,6 +1,10 @@
 name: homelab-ci
 
-on: [push]
+on:
+  push:
+    branches:
+      - main
+      - testing
 
 jobs:
   homelab-ci:
