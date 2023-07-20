@@ -1,10 +1,10 @@
-- name: Install nginx server (docker)
+- name: Install a static web container
   hosts: all
   become: true
   vars_files:
-    - host_vars/nginx.yml
+    - host_vars/staticweb.yml
   roles:
     - base
     - docker
     - traefik
-    - nginx
+    - staticweb
