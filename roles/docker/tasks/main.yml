@@ -33,6 +33,7 @@
     type: "{{ docker_repos_keytype }}"
     mode: 0400
     state: present
+  when: docker_compose_deploy is defined
 
 - name: Clone external docker-compose projects
   ansible.builtin.git:
