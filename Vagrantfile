@@ -1,43 +1,45 @@
 # -*- mode: ruby -*-
 # vi: set ft=ruby :
 
-SSH_FORWARD=ENV["SSH_FORWARD"]
-if !(SSH_FORWARD == "true")
-  SSH_FORWARD = false
+require 'yaml'
+settings_path = '.vagrant.yml'
+settings = {}
+
+if File.exist?(settings_path)
+  settings = YAML.load_file(settings_path)
 end
 
+VAGRANT_BOX  = settings['VAGRANT_BOX']  || 'debian/bookworm64'
+VAGRANT_CPUS = settings['VAGRANT_CPUS'] || 2
+VAGRANT_MEM  = settings['VAGRANT_MEM']  || 2048
+SSH_FORWARD  = settings['SSH_FORWARD']  || false
+
+# Default to shell environment variable: PLAYBOOK (priority #1)
 PLAYBOOK=ENV["PLAYBOOK"]
 if !PLAYBOOK
-  if File.exist?('.playbook')
-    PLAYBOOK = IO.read('.playbook').split("\n")[0]
-  end
-
+  # PLAYBOOK setting in .vagrant.yml (priority #2)
+  PLAYBOOK = settings['PLAYBOOK'] || false
   if !PLAYBOOK || PLAYBOOK.empty?
-    PLAYBOOK = "\nERROR: Set env PLAYBOOK"
+    puts "[VAGRANTFILE ERROR]: Set PLAYBOOK setting in .vagrant.yml"
+    abort
   end
-else
-  File.write(".playbook", PLAYBOOK)
 end
 
 Vagrant.configure("2") do |config|
-  config.vm.box = "debian/bullseye64"
+  config.vm.box = VAGRANT_BOX
   config.vm.network "private_network", type: "dhcp"
-  config.vm.synced_folder ".", "/vagrant", disabled: true
-  config.vm.synced_folder "./scratch", "/vagrant/scratch"
   config.ssh.forward_agent = SSH_FORWARD
 
-  # Machine Name
-  config.vm.define :moxie do |moxie| #
-  end
-
+  # Libvrit provider
   config.vm.provider :libvirt do |libvirt|
-    libvirt.cpus = 2
-    libvirt.memory = 4096
-    libvirt.default_prefix = ""
+    libvirt.cpus   = VAGRANT_CPUS
+    libvirt.memory = VAGRANT_MEM
   end
 
-  config.vm.provider "virtualbox" do |vbox|
-    vbox.memory = 4096
+  # Virtualbox provider
+  config.vm.provider :virtualbox do |vbox|
+    vbox.cpus   = VAGRANT_CPUS
+    vbox.memory = VAGRANT_MEM
   end
 
   # Provision with Ansible
@@ -46,5 +48,4 @@ Vagrant.configure("2") do |config|
     ansible.compatibility_mode = "2.0"
     ansible.playbook = "dev/" + PLAYBOOK + ".yml"
   end
-
 end
