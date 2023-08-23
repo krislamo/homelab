@@ -16,7 +16,7 @@ SSH_FORWARD  = settings['SSH_FORWARD']  || false
 
 # Default to shell environment variable: PLAYBOOK (priority #1)
 PLAYBOOK=ENV["PLAYBOOK"]
-if !PLAYBOOK
+if !PLAYBOOK || PLAYBOOK.empty?
   # PLAYBOOK setting in .vagrant.yml (priority #2)
   PLAYBOOK = settings['PLAYBOOK'] || false
   if !PLAYBOOK || PLAYBOOK.empty?
