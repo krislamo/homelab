@@ -1,0 +1,4 @@
+- name: Install 'default' aka nothing
+  hosts: all
+  become: true
+  tasks: []
