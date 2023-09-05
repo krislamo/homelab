@@ -1,4 +1,4 @@
-base_domain: vm.krislamo.org
+base_domain: local.krislamo.org
 
 # base
 allow_reboot: false

@@ -9,40 +9,36 @@ docker_users:
 # traefik
 traefik_version: latest
 traefik_dashboard: true
-traefik_domain: traefik.vm.krislamo.org
+traefik_domain: traefik.local.krislamo.org
 traefik_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
+traefik_web_entry: 0.0.0.0:80
+traefik_websecure_entry: 0.0.0.0:443
 #traefik_acme_email: realemail@example.com # Let's Encrypt settings
 #traefik_production: true
-traefik_http_only: true # if behind reverse-proxy
+#traefik_http_only: true # if behind reverse-proxy
 
 # nextcloud
 nextcloud_version: stable
 nextcloud_admin: admin
 nextcloud_pass: password
-nextcloud_domain: cloud.vm.krislamo.org
+nextcloud_domain: cloud.local.krislamo.org
 
 nextcloud_dbversion: latest
 nextcloud_dbpass: password
 
-# gitea
-gitea_domain: git.vm.krislamo.org
-gitea_version: 1
-gitea_dbversion: latest
-gitea_dbpass: password
-
 # jenkins
 jenkins_version: lts
-jenkins_domain: jenkins.vm.krislamo.org
+jenkins_domain: jenkins.local.krislamo.org
 
 # prometheus (includes grafana)
 prom_version: latest
-prom_domain: prom.vm.krislamo.org
+prom_domain: prom.local.krislamo.org
 grafana_version: latest
-grafana_domain: grafana.vm.krislamo.org
+grafana_domain: grafana.local.krislamo.org
 prom_targets: "['10.0.2.15:9100']"
 
 # nginx
-nginx_domain: nginx.vm.krislamo.org
+nginx_domain: nginx.local.krislamo.org
 nginx_name: staticsite
 nginx_repo_url: https://git.krislamo.org/kris/example-website/
 nginx_auth: admin:$apr1$T1l.BCFz$Jyg8msXYEAUi3LLH39I9d1 # admin:admin
