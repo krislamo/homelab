@@ -17,16 +17,26 @@ unset PKILL_ANSWER
 
 # Function to create the SSH tunnel
 function ssh_connect {
-  printf "[INFO]: Starting new vagrant SSH tunnel on PID "
-  sudo -u "$USER" ssh -fNT -i "$PRIVATE_KEY" \
-    -L 8443:localhost:8443 \
-    -L 80:localhost:80 \
-    -L 443:localhost:443 \
-    -o UserKnownHostsFile=/dev/null \
-    -o StrictHostKeyChecking=no \
-      vagrant@"$HOST_IP" 2>/dev/null
-  sleep 2
-  pgrep -f "$MATCH_PATTERN"
+  read -rp "Start a new vagrant SSH tunnel? [y/N]"
+  echo
+  case "$PSTART_ANSWER" in
+    [yY])
+      printf "[INFO]: Starting new vagrant SSH tunnel on PID "
+      sudo -u "$USER" ssh -fNT -i "$PRIVATE_KEY" \
+        -L 8443:localhost:8443 \
+        -L 80:localhost:80 \
+        -L 443:localhost:443 \
+        -o UserKnownHostsFile=/dev/null \
+        -o StrictHostKeyChecking=no \
+        vagrant@"$HOST_IP" 2>/dev/null
+      sleep 2
+      pgrep -f "$MATCH_PATTERN"
+      ;;
+    *)
+      echo "[INFO]: Delined to start a new vagrant SSH tunnel"
+      exit 0
+      ;;
+  esac
 }
 
 # Check for valid PRIVATE_KEY location
