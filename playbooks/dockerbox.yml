@@ -1,8 +1,6 @@
 - name: Install Dockerbox Server
-  hosts: all
+  hosts: "{{ PLAYBOOK_HOST | default('none') }}"
   become: true
-  vars_files:
-    - host_vars/dockerbox.yml
   roles:
     - base
     - docker
