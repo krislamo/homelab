@@ -17,7 +17,7 @@ unset PKILL_ANSWER
 
 # Function to create the SSH tunnel
 function ssh_connect {
-  read -rp "Start a new vagrant SSH tunnel? [y/N]"
+  read -rp "Start a new vagrant SSH tunnel? [y/N] " PSTART_ANSWER
   echo
   case "$PSTART_ANSWER" in
     [yY])
