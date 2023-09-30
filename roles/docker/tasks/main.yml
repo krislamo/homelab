@@ -4,6 +4,13 @@
     state: present
     update_cache: true
 
+- name: Login to private registry
+  community.docker.docker_login:
+    registry_url: "{{ docker_login_url | default('') }}"
+    username: "{{ docker_login_user }}"
+    password: "{{ docker_login_pass }}"
+  when: docker_login_user is defined and docker_login_pass is defined
+
 - name: Create docker-compose root
   ansible.builtin.file:
     path: "{{ docker_compose_root }}"
