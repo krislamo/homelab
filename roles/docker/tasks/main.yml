@@ -38,6 +38,7 @@
   community.crypto.openssh_keypair:
     path: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
     type: "{{ docker_repos_keytype }}"
+    comment: "{{ ansible_hostname }}-deploy-key"
     mode: 0400
     state: present
   when: docker_compose_deploy is defined
@@ -46,11 +47,15 @@
   ansible.builtin.git:
     repo: "{{ item.url }}"
     dest: "{{ docker_repos_path }}/{{ item.name }}"
-    version: "{{ item.version | default('main') }}"
-    force: true
+    version: "{{ item.version }}"
+    accept_newhostkey: "{{ item.accept_newhostkey | default('false') }}"
+    gpg_whitelist: "{{ item.trusted_keys | default([]) }}"
+    verify_commit: "{{ true if (item.trusted_keys is defined and item.trusted_keys) else false }}"
     key_file: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
-  when: docker_compose_deploy is defined
   loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ item.url }}"
+  when: docker_compose_deploy is defined
 
 - name: Create directories for docker-compose projects using the systemd service
   ansible.builtin.file:
@@ -58,14 +63,20 @@
     state: directory
     mode: 0400
   loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: docker_compose_deploy is defined
 
-- name: Copy docker-compose.yml files to their service directories
-  ansible.builtin.copy:
+- name: Synchronize docker-compose.yml
+  ansible.posix.synchronize:
     src: "{{ docker_repos_path }}/{{ item.name }}/{{ item.path | default('docker-compose.yml') }}"
     dest: "{{ docker_compose_root }}/{{ item.name }}/docker-compose.yml"
-    remote_src: yes
+  delegate_to: "{{ inventory_hostname }}"
+  register: compose_update
+  notify: compose_restart
   loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: docker_compose_deploy is defined
 
 - name: Set environment variables for docker-compose projects
@@ -73,7 +84,11 @@
     src: docker-compose-env.j2
     dest: "{{ docker_compose_root }}/{{ item.name }}/.env"
     mode: 0400
+  register: compose_env_update
+  notify: compose_restart
   loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ item.name }}"
   when: docker_compose_deploy is defined and item.env is defined
 
 - name: Add users to docker group
@@ -96,4 +111,6 @@
     state: started
     enabled: true
   loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ docker_compose_service }}@{{ item.name }}"
   when: item.enabled is defined and item.enabled is true

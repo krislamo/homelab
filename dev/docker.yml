@@ -1,0 +1,8 @@
+- name: Install Docker Server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/docker.yml
+  roles:
+    - base
+    - docker

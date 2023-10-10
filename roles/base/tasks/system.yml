@@ -4,6 +4,11 @@
     state: present
     update_cache: true
 
+- name: Install GPG
+  ansible.builtin.apt:
+    name: gpg
+    state: present
+
 - name: Manage root authorized_keys
   ansible.builtin.template:
     src: authorized_keys.j2

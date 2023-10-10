@@ -2,3 +2,29 @@
   ansible.builtin.systemd:
     daemon_reload: true
   listen: compose_systemd
+
+- name: Find which services had a docker-compose.yml updated
+  set_fact:
+    compose_restart_list: "{{ (compose_restart_list | default([])) + [item.item.name] }}"
+  loop: "{{ compose_update.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.changed
+  listen: compose_restart
+
+- name: Find which services had their .env updated
+  set_fact:
+    compose_restart_list: "{{ (compose_restart_list | default([])) + [item.item.name] }}"
+  loop: "{{ compose_env_update.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.changed
+  listen: compose_restart
+
+- name: Restart {{ docker_compose_service }} services
+  ansible.builtin.systemd:
+    state: restarted
+    name: "{{ docker_compose_service }}@{{ item }}"
+  loop: "{{ compose_restart_list | unique }}"
+  when: compose_restart_list is defined
+  listen: compose_restart

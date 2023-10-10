@@ -1,5 +1,4 @@
 # {{ ansible_managed }}
-
 {% if item.env is defined %}
 {% for kvpair in item.env.items() %}
 {{ kvpair.0 }}={{ kvpair.1 }}

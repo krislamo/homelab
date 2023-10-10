@@ -1,0 +1,44 @@
+# base
+allow_reboot: false
+manage_network: false
+
+# docker
+docker_users:
+  - vagrant
+
+#docker_login_url: https://myregistry.example.com
+#docker_login_user: myuser
+#docker_login_pass: YOUR_PASSWD
+
+docker_compose_deploy:
+  # Traefik
+  - name: traefik
+    url: https://github.com/krislamo/traefik
+    version: 31ee724feebc1d5f91cb17ffd6892c352537f194
+    enabled: true
+    accept_newhostkey: true # Consider verifying manually instead
+    # Must manually add my public GPG key to root's keyring
+    #trusted_keys:
+    #  - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    env:
+      ENABLE: true
+
+  # Traefik 2 (no other external compose to test currently)
+  - name: traefik2
+    url: https://github.com/krislamo/traefik
+    version: 31ee724feebc1d5f91cb17ffd6892c352537f194
+    enabled: true
+    accept_newhostkey: true # Consider verifying manually instead
+    # Must manually add my public GPG key to root's keyring
+    #trusted_keys:
+    #  - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    env:
+      ENABLE: true
+      VERSION: "2.10"
+      DOMAIN: traefik2.local.krislamo.org
+      NAME: traefik2
+      ROUTER: traefik2
+      NETWORK: traefik2
+      WEB_PORT: 127.0.0.1:8000:80
+      WEBSECURE_PORT: 127.0.0.1:4443:443
+      LOCAL_PORT: 127.0.0.1:8444:8443
