@@ -74,10 +74,10 @@
   delegate_to: "{{ inventory_hostname }}"
   register: compose_update
   notify: compose_restart
-  loop: "{{ docker_compose_deploy }}"
+  loop: "{{ docker_compose_deploy | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
-  when: docker_compose_deploy is defined
+  when: docker_compose_deploy is defined and docker_compose_deploy | length > 0
 
 - name: Set environment variables for docker-compose projects
   ansible.builtin.template:
