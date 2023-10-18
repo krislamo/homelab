@@ -2,6 +2,7 @@ allow_reboot: true
 manage_firewall: true
 manage_network: false
 network_type: static
+locale_default: en_US.UTF-8
 
 packages:
   - apache2-utils

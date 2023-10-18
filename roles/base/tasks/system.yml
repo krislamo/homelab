@@ -9,6 +9,27 @@
     name: gpg
     state: present
 
+- name: Install locales
+  ansible.builtin.apt:
+    name: locales
+    state: present
+
+- name: Generate locale
+  community.general.locale_gen:
+    name: "{{ locale_default }}"
+    state: present
+  register: locale_gen_output
+
+- name: Set the default locale
+  ansible.builtin.lineinfile:
+    path: /etc/default/locale
+    regexp: "^LANG="
+    line: "LANG={{ locale_default }}"
+
+- name: Reconfigure locales
+  ansible.builtin.command: dpkg-reconfigure -f noninteractive locales
+  when: locale_gen_output.changed
+
 - name: Manage root authorized_keys
   ansible.builtin.template:
     src: authorized_keys.j2
