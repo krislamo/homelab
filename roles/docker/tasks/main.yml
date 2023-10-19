@@ -86,6 +86,7 @@
     mode: 0400
   register: compose_env_update
   notify: compose_restart
+  no_log: "{{ docker_compose_env_nolog | default('true') }}"
   loop: "{{ docker_compose_deploy }}"
   loop_control:
     label: "{{ item.name }}"
