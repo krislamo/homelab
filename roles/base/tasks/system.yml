@@ -9,6 +9,11 @@
     name: gpg
     state: present
 
+- name: Install NTPsec
+  ansible.builtin.apt:
+    name: ntpsec
+    state: present
+
 - name: Install locales
   ansible.builtin.apt:
     name: locales
