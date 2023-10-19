@@ -2,6 +2,10 @@
 allow_reboot: false
 manage_network: false
 
+root_gpgkeys:
+    # kris@lamoureux.io
+  - id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+
 # docker
 docker_users:
   - vagrant
@@ -17,9 +21,8 @@ docker_compose_deploy:
     version: 31ee724feebc1d5f91cb17ffd6892c352537f194
     enabled: true
     accept_newhostkey: true # Consider verifying manually instead
-    # Must manually add my public GPG key to root's keyring
-    #trusted_keys:
-    #  - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    trusted_keys:
+      - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
     env:
       ENABLE: true
 
@@ -29,9 +32,8 @@ docker_compose_deploy:
     version: 31ee724feebc1d5f91cb17ffd6892c352537f194
     enabled: true
     accept_newhostkey: true # Consider verifying manually instead
-    # Must manually add my public GPG key to root's keyring
-    #trusted_keys:
-    #  - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    trusted_keys:
+      - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
     env:
       ENABLE: true
       VERSION: "2.10"

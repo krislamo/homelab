@@ -9,6 +9,19 @@
     name: gpg
     state: present
 
+- name: Check for existing GPG keys
+  command: "gpg --list-keys {{ item.id }} 2>/dev/null"
+  register: gpg_check
+  loop: "{{ root_gpgkeys }}"
+  failed_when: false
+  changed_when: false
+  when: root_gpgkeys is defined
+
+- name: Import GPG keys
+  command: "gpg --keyserver {{ item.server | default('keys.openpgp.org') }} --recv-key {{ item.id }}"
+  loop: "{{ root_gpgkeys }}"
+  when: root_gpgkeys is defined and gpg_check.results | map(attribute='rc') | list != [0]
+
 - name: Install NTPsec
   ansible.builtin.apt:
     name: ntpsec
