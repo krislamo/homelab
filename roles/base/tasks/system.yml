@@ -18,19 +18,19 @@
   when: root_gpgkeys is defined
 
 - name: Import GPG keys
-  command: "gpg --keyserver {{ item.0.server | default('keys.openpgp.org') }} --recv-key {{ item.0.id }}"
+  command: "gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }} --recv-key {{ item.item.id }}"
   register: gpg_check_import
-  loop: "{{ root_gpgkeys | zip(gpg_check.results) | list }}"
+  loop: "{{ gpg_check.results }}"
   loop_control:
-    label: "{{ item.0.id }}"
-  when: root_gpgkeys is defined and item.1.rc != 0
+    label: "{{ item.item.name }}"
+  when: root_gpgkeys is defined and item.rc != 0
 
 - name: Check GPG key imports
   fail:
     msg: "{{ item.stderr }}"
   loop: "{{ gpg_check_import.results }}"
   loop_control:
-    label: "{{ item.item.0.id }}"
+    label: "{{ item.item.item.id }}"
   when: (item.skipped | default(false) == false) and ('imported' not in item.stderr)
 
 - name: Install NTPsec

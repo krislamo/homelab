@@ -3,8 +3,8 @@ allow_reboot: false
 manage_network: false
 
 root_gpgkeys:
-    # kris@lamoureux.io
-  - id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+  - name: kris@lamoureux.io
+    id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
 
 # docker
 docker_users:
