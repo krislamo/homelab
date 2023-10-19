@@ -22,7 +22,7 @@
   register: gpg_check_import
   loop: "{{ gpg_check.results }}"
   loop_control:
-    label: "{{ item.item.name }}"
+    label: "{{ item.item }}"
   when: root_gpgkeys is defined and item.rc != 0
 
 - name: Check GPG key imports
@@ -30,7 +30,7 @@
     msg: "{{ item.stderr }}"
   loop: "{{ gpg_check_import.results }}"
   loop_control:
-    label: "{{ item.item.item.id }}"
+    label: "{{ item.item.item }}"
   when: (item.skipped | default(false) == false) and ('imported' not in item.stderr)
 
 - name: Install NTPsec

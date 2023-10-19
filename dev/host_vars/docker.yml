@@ -2,6 +2,7 @@
 allow_reboot: false
 manage_network: false
 
+# Import my GPG key for git signature verification
 root_gpgkeys:
   - name: kris@lamoureux.io
     id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
@@ -14,6 +15,7 @@ docker_users:
 #docker_login_user: myuser
 #docker_login_pass: YOUR_PASSWD
 
+docker_compose_env_nolog: false # dev only setting
 docker_compose_deploy:
   # Traefik
   - name: traefik
