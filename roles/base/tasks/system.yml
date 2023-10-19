@@ -18,9 +18,20 @@
   when: root_gpgkeys is defined
 
 - name: Import GPG keys
-  command: "gpg --keyserver {{ item.server | default('keys.openpgp.org') }} --recv-key {{ item.id }}"
-  loop: "{{ root_gpgkeys }}"
-  when: root_gpgkeys is defined and gpg_check.results | map(attribute='rc') | list != [0]
+  command: "gpg --keyserver {{ item.0.server | default('keys.openpgp.org') }} --recv-key {{ item.0.id }}"
+  register: gpg_check_import
+  loop: "{{ root_gpgkeys | zip(gpg_check.results) | list }}"
+  loop_control:
+    label: "{{ item.0.id }}"
+  when: root_gpgkeys is defined and item.1.rc != 0
+
+- name: Check GPG key imports
+  fail:
+    msg: "{{ item.stderr }}"
+  loop: "{{ gpg_check_import.results }}"
+  loop_control:
+    label: "{{ item.item.0.id }}"
+  when: (item.skipped | default(false) == false) and ('imported' not in item.stderr)
 
 - name: Install NTPsec
   ansible.builtin.apt:
