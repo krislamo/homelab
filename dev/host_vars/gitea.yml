@@ -2,6 +2,12 @@
 allow_reboot: false
 manage_network: false
 
+users:
+  git:
+    uid: 1001
+    gid: 1001
+    home: true
+
 # Import my GPG key for git signature verification
 root_gpgkeys:
   - name: kris@lamoureux.io
@@ -16,10 +22,24 @@ docker_compose_deploy:
   # Traefik
   - name: traefik
     url: https://github.com/krislamo/traefik
-    version: 31ee724feebc1d5f91cb17ffd6892c352537f194
+    version: 398eb48d311db78b86abf783f903af4a1658d773
     enabled: true
-    accept_newhostkey: true # Consider verifying manually instead
+    accept_newhostkey: true
     trusted_keys:
       - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
     env:
       ENABLE: true
+  # Gitea
+  - name: gitea
+    url: https://github.com/krislamo/gitea
+    version: b0ce66f6a1ab074172eed79eeeb36d7e9011ef8f
+    env:
+      USER_UID: "{{ users.git.uid }}"
+      USER_GID: "{{ users.git.gid }}"
+      DB_PASSWD: "{{ gitea.DB_PASSWD }}"
+
+# gitea
+gitea:
+  DB_NAME: gitea
+  DB_USER: gitea
+  DB_PASSWD: password

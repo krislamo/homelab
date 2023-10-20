@@ -23,9 +23,10 @@ function ssh_connect {
     [yY])
       printf "[INFO]: Starting new vagrant SSH tunnel on PID "
       sudo -u "$USER" ssh -fNT -i "$PRIVATE_KEY" \
-        -L 8443:localhost:8443 \
+        -L 22:localhost:22 \
         -L 80:localhost:80 \
         -L 443:localhost:443 \
+        -L 8443:localhost:8443 \
         -o UserKnownHostsFile=/dev/null \
         -o StrictHostKeyChecking=no \
         vagrant@"$HOST_IP" 2>/dev/null

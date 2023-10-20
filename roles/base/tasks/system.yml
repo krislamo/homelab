@@ -66,13 +66,27 @@
     mode: 0400
   when: authorized_keys is defined
 
+- name: Create system user groups
+  ansible.builtin.group:
+    name: "{{ item.key }}"
+    gid: "{{ item.value.gid }}"
+    state: present
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when: users is defined
+
 - name: Create system users
   ansible.builtin.user:
-    name: "{{ item.name }}"
+    name: "{{ item.key }}"
     state: present
-    shell: "{{ item.shell | default('/bin/bash') }}"
-    create_home: "{{ item.home | default(false) }}"
-  loop: "{{ users }}"
+    uid: "{{ item.value.uid }}"
+    group: "{{ item.value.gid }}"
+    shell: "{{ item.value.shell | default('/bin/bash') }}"
+    create_home: "{{ item.value.home | default(false) }}"
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: users is defined
 
 - name: Set authorized_keys for system users
@@ -80,7 +94,9 @@
     user: "{{ item.key }}"
     key: "{{ item.value.key }}"
     state: present
-  loop: "{{ users }}"
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
   when: users is defined and item.value.key is defined
 
 - name: Manage filesystem mounts
