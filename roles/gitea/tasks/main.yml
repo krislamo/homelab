@@ -1,37 +1,22 @@
-- name: Create Gitea directory
-  ansible.builtin.file:
-    path: "{{ gitea_root }}"
-    state: directory
+- name: Install MySQL module for Ansible
+  ansible.builtin.apt:
+    name: python3-pymysql
+    state: present
 
 - name: Create Gitea database
   community.mysql.mysql_db:
-    name: "{{ gitea_dbname }}"
+    name: "{{ gitea.DB_NAME }}"
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
 
 - name: Create Gitea database user
   community.mysql.mysql_user:
-    name: "{{ gitea_dbuser }}"
-    password: "{{ gitea_dbpass }}"
+    name: "{{ gitea.DB_USER }}"
+    password: "{{ gitea.DB_PASSWD }}"
     host: '%'
     state: present
-    priv: "{{ gitea_dbname }}.*:ALL"
+    priv: "{{ gitea.DB_NAME }}.*:ALL"
     login_unix_socket: /var/run/mysqld/mysqld.sock
-
-- name: Create git user
-  ansible.builtin.user:
-    name: git
-    state: present
-
-- name: Git user uid
-  ansible.builtin.getent:
-    database: passwd
-    key: git
-
-- name: Git user gid
-  ansible.builtin.getent:
-    database: group
-    key: git
 
 - name: Create git's .ssh directory
   ansible.builtin.file:
@@ -70,27 +55,10 @@
     dest: /usr/local/bin/gitea
     mode: 0755
 
-- name: Install Gitea's docker-compose file
-  ansible.builtin.template:
-    src: docker-compose.yml.j2
-    dest: "{{ gitea_root }}/docker-compose.yml"
-  notify: restart_gitea
-
-- name: Install Gitea's docker-compose variables
-  ansible.builtin.template:
-    src: compose-env.j2
-    dest: "{{ gitea_root }}/.env"
-  notify: restart_gitea
-
 - name: Create Gitea's logging directory
   ansible.builtin.file:
     name: /var/log/gitea
     state: directory
-
-- name: Create Gitea's initial log file
-  ansible.builtin.file:
-    name: /var/log/gitea/gitea.log
-    state: touch
 
 - name: Install Gitea's Fail2ban filter
   ansible.builtin.template:
