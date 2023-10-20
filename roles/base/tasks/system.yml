@@ -31,7 +31,7 @@
   loop: "{{ gpg_check_import.results }}"
   loop_control:
     label: "{{ item.item.item }}"
-  when: (item.skipped | default(false) == false) and ('imported' not in item.stderr)
+  when: root_gpgkeys is defined and (item.skipped | default(false) == false) and ('imported' not in item.stderr)
 
 - name: Install NTPsec
   ansible.builtin.apt:
