@@ -5,7 +5,12 @@ allow_reboot: false
 manage_network: false
 
 users:
-  - name: jellyfin
+  jellyfin:
+    uid: 1001
+    gid: 1001
+    shell: /usr/sbin/nologin
+    home: false
+    system: true
 
 samba:
   users:

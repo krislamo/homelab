@@ -10,7 +10,7 @@
     state: present
 
 - name: Check for existing GPG keys
-  command: "gpg --list-keys {{ item.id }} 2>/dev/null"
+  ansible.builtin.command: "gpg --list-keys {{ item.id }} 2>/dev/null"
   register: gpg_check
   loop: "{{ root_gpgkeys }}"
   failed_when: false
@@ -18,20 +18,22 @@
   when: root_gpgkeys is defined
 
 - name: Import GPG keys
-  command: "gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }} --recv-key {{ item.item.id }}"
+  ansible.builtin.command:
+    "gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }} --recv-key {{ item.item.id }}"
   register: gpg_check_import
   loop: "{{ gpg_check.results }}"
   loop_control:
     label: "{{ item.item }}"
+  changed_when: false
   when: root_gpgkeys is defined and item.rc != 0
 
 - name: Check GPG key imports
-  fail:
+  ansible.builtin.fail:
     msg: "{{ item.stderr }}"
   loop: "{{ gpg_check_import.results }}"
   loop_control:
     label: "{{ item.item.item }}"
-  when: (item.skipped | default(false) == false) and ('imported' not in item.stderr)
+  when: root_gpgkeys is defined and (not item.skipped | default(false)) and ('imported' not in item.stderr)
 
 - name: Install NTPsec
   ansible.builtin.apt:
@@ -47,7 +49,7 @@
   community.general.locale_gen:
     name: "{{ locale_default }}"
     state: present
-  register: locale_gen_output
+  notify: reconfigure_locales
 
 - name: Set the default locale
   ansible.builtin.lineinfile:
@@ -55,15 +57,11 @@
     regexp: "^LANG="
     line: "LANG={{ locale_default }}"
 
-- name: Reconfigure locales
-  ansible.builtin.command: dpkg-reconfigure -f noninteractive locales
-  when: locale_gen_output.changed
-
 - name: Manage root authorized_keys
   ansible.builtin.template:
     src: authorized_keys.j2
     dest: /root/.ssh/authorized_keys
-    mode: 0400
+    mode: "400"
   when: authorized_keys is defined
 
 - name: Create system user groups
@@ -84,6 +82,7 @@
     group: "{{ item.value.gid }}"
     shell: "{{ item.value.shell | default('/bin/bash') }}"
     create_home: "{{ item.value.home | default(false) }}"
+    system: "{{ item.value.system | default(false) }}"
   loop: "{{ users | dict2items }}"
   loop_control:
     label: "{{ item.key }}"

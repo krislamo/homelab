@@ -48,7 +48,7 @@
     repo: "{{ item.url }}"
     dest: "{{ docker_repos_path }}/{{ item.name }}"
     version: "{{ item.version }}"
-    accept_newhostkey: "{{ item.accept_newhostkey | default('false') }}"
+    accept_newhostkey: "{{ item.accept_newhostkey | default(false) }}"
     gpg_whitelist: "{{ item.trusted_keys | default([]) }}"
     verify_commit: "{{ true if (item.trusted_keys is defined and item.trusted_keys) else false }}"
     key_file: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
@@ -86,7 +86,7 @@
     mode: 0400
   register: compose_env_update
   notify: compose_restart
-  no_log: "{{ docker_compose_env_nolog | default('true') }}"
+  no_log: "{{ docker_compose_env_nolog | default(true) }}"
   loop: "{{ docker_compose_deploy }}"
   loop_control:
     label: "{{ item.name }}"

@@ -2,4 +2,4 @@
   ansible.builtin.file:
     path: "~/.ansible/tmp"
     state: directory
-    mode: 0700
+    mode: "700"

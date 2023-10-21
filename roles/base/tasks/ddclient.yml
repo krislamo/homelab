@@ -7,7 +7,7 @@
   ansible.builtin.template:
     src: ddclient.conf.j2
     dest: /etc/ddclient.conf
-    mode: 0600
+    mode: "600"
   register: ddclient_settings
 
 - name: Start ddclient and enable on boot

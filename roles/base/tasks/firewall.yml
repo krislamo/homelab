@@ -32,14 +32,14 @@
   ansible.builtin.template:
     src: fail2ban-ssh.conf.j2
     dest: /etc/fail2ban/jail.d/sshd.conf
-    mode: 0640
+    mode: "640"
   notify: restart_fail2ban
 
 - name: Install Fail2ban IP allow list
   ansible.builtin.template:
     src: fail2ban-allowlist.conf.j2
     dest: /etc/fail2ban/jail.d/allowlist.conf
-    mode: 0640
+    mode: "640"
   when: fail2ban_ignoreip is defined
   notify: restart_fail2ban
 

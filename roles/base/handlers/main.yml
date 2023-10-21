@@ -5,6 +5,10 @@
   listen: reboot_host
   when: allow_reboot
 
+- name: Reconfigure locales
+  ansible.builtin.command: dpkg-reconfigure -f noninteractive locales
+  listen: reconfigure_locales
+
 - name: Restart WireGuard
   ansible.builtin.service:
     name: wg-quick@wg0

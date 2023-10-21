@@ -22,7 +22,7 @@
   ansible.builtin.template:
     src: wireguard.j2
     dest: /etc/wireguard/wg0.conf
-    mode: 0400
+    mode: "400"
   notify: restart_wireguard
 
 - name: Start WireGuard interface
