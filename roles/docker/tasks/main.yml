@@ -1,7 +1,37 @@
-- name: Install Docker
+- name: Add official Docker APT key
+  ansible.builtin.get_url:
+    url: "{{ docker_apt_keyring_url }}"
+    dest: "{{ docker_apt_keyring }}"
+    checksum: "sha256:{{ docker_apt_keyring_hash }}"
+  when: docker_official
+
+- name: Remove official Docker APT key
+  ansible.builtin.file:
+    path: "{{ docker_apt_keyring }}"
+    state: absent
+  when: not docker_official
+
+- name: Add/remove official Docker APT repository
+  ansible.builtin.apt_repository:
+    repo: >
+      deb [arch=amd64 signed-by={{ docker_apt_keyring }}]
+      {{ docker_apt_repo }} {{ ansible_distribution_release }} stable
+    state: "{{ 'present' if docker_official else 'absent' }}"
+    filename: "{{ docker_apt_keyring | regex_replace('^.*/', '') }}"
+
+- name: Install/uninstall Docker from Debian repositories
   ansible.builtin.apt:
-    name: ['docker.io', 'docker-compose']
-    state: present
+    name: ['docker.io', 'docker-compose', 'containerd', 'runc']
+    state: "{{ 'absent' if docker_official else 'present' }}"
+    autoremove: true
+    update_cache: true
+
+- name: Install/uninstall Docker from Docker repositories
+  ansible.builtin.apt:
+    name: ['docker-ce', 'docker-ce-cli', 'containerd.io',
+           'docker-buildx-plugin', 'docker-compose-plugin']
+    state: "{{ 'present' if docker_official else 'absent' }}"
+    autoremove: true
     update_cache: true
 
 - name: Login to private registry
@@ -15,20 +45,20 @@
   ansible.builtin.file:
     path: "{{ docker_compose_root }}"
     state: directory
-    mode: 0500
+    mode: "500"
 
 - name: Install docker-compose systemd service
   ansible.builtin.template:
     src: docker-compose.service.j2
     dest: "/etc/systemd/system/{{ docker_compose_service }}@.service"
-    mode: 0400
+    mode: "400"
   notify: compose_systemd
 
 - name: Create directories to clone docker-compose repositories
   ansible.builtin.file:
     path: "{{ item }}"
     state: directory
-    mode: 0400
+    mode: "400"
   loop:
     - "{{ docker_repos_path }}"
     - "{{ docker_repos_keys }}"
@@ -39,7 +69,13 @@
     path: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
     type: "{{ docker_repos_keytype }}"
     comment: "{{ ansible_hostname }}-deploy-key"
-    mode: 0400
+    mode: "400"
+    state: present
+  when: docker_compose_deploy is defined
+
+- name: Check for git installation
+  ansible.builtin.apt:
+    name: git
     state: present
   when: docker_compose_deploy is defined
 
@@ -61,7 +97,7 @@
   ansible.builtin.file:
     path: "{{ docker_compose_root }}/{{ item.name }}"
     state: directory
-    mode: 0400
+    mode: "400"
   loop: "{{ docker_compose_deploy }}"
   loop_control:
     label: "{{ item.name }}"
@@ -73,7 +109,9 @@
     dest: "{{ docker_compose_root }}/{{ item.name }}/docker-compose.yml"
   delegate_to: "{{ inventory_hostname }}"
   register: compose_update
-  notify: compose_restart
+  notify:
+    - compose_restart
+    - compose_enable
   loop: "{{ docker_compose_deploy | default([]) }}"
   loop_control:
     label: "{{ item.name }}"
@@ -83,9 +121,11 @@
   ansible.builtin.template:
     src: docker-compose-env.j2
     dest: "{{ docker_compose_root }}/{{ item.name }}/.env"
-    mode: 0400
+    mode: "400"
   register: compose_env_update
-  notify: compose_restart
+  notify:
+    - compose_restart
+    - compose_enable
   no_log: "{{ docker_compose_env_nolog | default(true) }}"
   loop: "{{ docker_compose_deploy }}"
   loop_control:
@@ -105,13 +145,4 @@
     name: docker
     state: started
     enabled: true
-
-- name: Start docker-compose services and enable on boot
-  ansible.builtin.service:
-    name: "{{ docker_compose_service }}@{{ item.name }}"
-    state: started
-    enabled: true
-  loop: "{{ docker_compose_deploy }}"
-  loop_control:
-    label: "{{ docker_compose_service }}@{{ item.name }}"
-  when: item.enabled is defined and item.enabled is true
+  when: docker_managed | default(true)

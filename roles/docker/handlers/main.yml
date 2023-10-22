@@ -21,6 +21,19 @@
   when: item.changed
   listen: compose_restart
 
+- name: Restart MariaDB
+  ansible.builtin.service:
+    name: mariadb
+    state: restarted
+  when: not mariadb_restarted
+  listen: restart_mariadb # hijack handler for early restart
+
+- name: Set MariaDB as restarted
+  set_fact:
+    mariadb_restarted: true
+  when: not mariadb_restarted
+  listen: restart_mariadb
+
 - name: Restart {{ docker_compose_service }} services
   ansible.builtin.systemd:
     state: restarted
@@ -28,3 +41,14 @@
   loop: "{{ compose_restart_list | unique }}"
   when: compose_restart_list is defined
   listen: compose_restart
+
+- name: Start {{ docker_compose_service }} services and enable on boot
+  ansible.builtin.service:
+    name: "{{ docker_compose_service }}@{{ item.name }}"
+    state: started
+    enabled: true
+  loop: "{{ docker_compose_deploy }}"
+  loop_control:
+    label: "{{ docker_compose_service }}@{{ item.name }}"
+  when: item.enabled is defined and item.enabled is true
+  listen: compose_enable

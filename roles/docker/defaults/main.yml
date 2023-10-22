@@ -1,6 +1,11 @@
+docker_apt_keyring: /etc/apt/keyrings/docker.asc
+docker_apt_keyring_hash: 1500c1f56fa9e26b9b8f42452a553675796ade0807cdce11975eb98170b3a570
+docker_apt_keyring_url: https://download.docker.com/linux/debian/gpg
+docker_apt_repo: https://download.docker.com/linux/debian
 docker_compose_root: /var/lib/compose
 docker_compose_service: compose
-docker_compose: /usr/bin/docker-compose
+docker_compose: "{{ (docker_official | bool) | ternary('/usr/bin/docker compose', '/usr/bin/docker-compose') }}"
+docker_official: false
 docker_repos_keys: "{{ docker_repos_path }}/.keys"
 docker_repos_keytype: rsa
 docker_repos_path: /srv/.compose_repos

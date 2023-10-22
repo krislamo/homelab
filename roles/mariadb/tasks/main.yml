@@ -3,6 +3,10 @@
     name: mariadb-server
     state: present
 
+- name: Set MariaDB restarted fact
+  set_fact:
+    mariadb_restarted: false
+
 - name: Regather facts for the potentially new docker0 interface
   ansible.builtin.setup:
 

@@ -71,9 +71,3 @@
     src: fail2ban-jail.conf.j2
     dest: /etc/fail2ban/jail.d/gitea.conf
   notify: restart_fail2ban
-
-- name: Start and enable Gitea service
-  ansible.builtin.service:
-    name: "{{ docker_compose_service }}@{{ gitea_name }}"
-    state: started
-    enabled: true

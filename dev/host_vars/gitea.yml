@@ -14,6 +14,7 @@ root_gpgkeys:
     id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
 
 # docker
+docker_official: true # docker's apt repos
 docker_users:
   - vagrant
 
@@ -33,6 +34,7 @@ docker_compose_deploy:
   - name: gitea
     url: https://github.com/krislamo/gitea
     version: b0ce66f6a1ab074172eed79eeeb36d7e9011ef8f
+    enabled: true
     env:
       USER_UID: "{{ users.git.uid }}"
       USER_GID: "{{ users.git.gid }}"
