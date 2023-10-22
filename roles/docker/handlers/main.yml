@@ -4,7 +4,7 @@
   listen: compose_systemd
 
 - name: Find which services had a docker-compose.yml updated
-  set_fact:
+  ansible.builtin.set_fact:
     compose_restart_list: "{{ (compose_restart_list | default([])) + [item.item.name] }}"
   loop: "{{ compose_update.results }}"
   loop_control:
@@ -13,7 +13,7 @@
   listen: compose_restart
 
 - name: Find which services had their .env updated
-  set_fact:
+  ansible.builtin.set_fact:
     compose_restart_list: "{{ (compose_restart_list | default([])) + [item.item.name] }}"
   loop: "{{ compose_env_update.results }}"
   loop_control:
@@ -29,20 +29,20 @@
   listen: restart_mariadb # hijack handler for early restart
 
 - name: Set MariaDB as restarted
-  set_fact:
+  ansible.builtin.set_fact:
     mariadb_restarted: true
   when: not mariadb_restarted
   listen: restart_mariadb
 
-- name: Restart {{ docker_compose_service }} services
+- name: Restart compose services
   ansible.builtin.systemd:
     state: restarted
     name: "{{ docker_compose_service }}@{{ item }}"
-  loop: "{{ compose_restart_list | unique }}"
+  loop: "{{ compose_restart_list | default([]) | unique }}"
   when: compose_restart_list is defined
   listen: compose_restart
 
-- name: Start {{ docker_compose_service }} services and enable on boot
+- name: Start compose services and enable on boot
   ansible.builtin.service:
     name: "{{ docker_compose_service }}@{{ item.name }}"
     state: started

@@ -3,6 +3,9 @@
     url: "{{ docker_apt_keyring_url }}"
     dest: "{{ docker_apt_keyring }}"
     checksum: "sha256:{{ docker_apt_keyring_hash }}"
+    mode: "644"
+    owner: root
+    group: root
   when: docker_official
 
 - name: Remove official Docker APT key
