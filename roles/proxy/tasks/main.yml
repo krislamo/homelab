@@ -19,27 +19,17 @@
   ansible.builtin.template:
     src: nginx.conf.j2
     dest: /etc/nginx/nginx.conf
-    mode: 0644
+    mode: "644"
   notify: reload_nginx
 
 - name: Install nginx sites configuration
   ansible.builtin.template:
     src: server-nginx.conf.j2
     dest: "/etc/nginx/sites-available/{{ item.domain }}.conf"
-    mode: 0400
+    mode: "400"
   loop: "{{ proxy.servers }}"
   notify: reload_nginx
   register: nginx_sites
-
-- name: Enable nginx sites configuration
-  ansible.builtin.file:
-    src: "/etc/nginx/sites-available/{{ item.item.domain }}.conf"
-    dest: "/etc/nginx/sites-enabled/{{ item.item.domain }}.conf"
-    state: link
-    mode: 0400
-  loop: "{{ nginx_sites.results }}"
-  when: item.changed
-  notify: reload_nginx
 
 - name: Generate self-signed certificate
   ansible.builtin.command: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
@@ -61,14 +51,14 @@
   ansible.builtin.template:
     src: cloudflare.ini.j2
     dest: /root/.cloudflare.ini
-    mode: 0400
+    mode: "400"
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Create nginx post renewal hook directory
   ansible.builtin.file:
     path: /etc/letsencrypt/renewal-hooks/post
     state: directory
-    mode: 0500
+    mode: "500"
   when: proxy.production is defined and proxy.production
 
 - name: Install nginx post renewal hook

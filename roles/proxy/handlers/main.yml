@@ -1,3 +1,13 @@
+- name: Enable nginx sites configuration
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item.item.domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.item.domain }}.conf"
+    state: link
+    mode: "400"
+  loop: "{{ nginx_sites.results }}"
+  when: item.changed
+  listen: reload_nginx
+
 - name: Reload nginx
   ansible.builtin.service:
     name: nginx
