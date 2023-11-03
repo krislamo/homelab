@@ -4,6 +4,18 @@ base_domain: local.krislamo.org
 allow_reboot: false
 manage_network: false
 
+users:
+  git:
+    uid: 1001
+    gid: 1001
+    home: true
+    system: true
+
+# Import my GPG key for git signature verification
+root_gpgkeys:
+  - name: kris@lamoureux.io
+    id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+
 # proxy
 proxy:
   #production: true
@@ -15,13 +27,48 @@ proxy:
       - "{{ base_domain }}"
   servers:
     - domain: "{{ bitwarden_domain }}"
-      proxy_pass: "http://127.0.0.1:8080"
+      proxy_pass: "http://127.0.0.1"
     - domain: "{{ gitea_domain }}"
-      proxy_pass: "http://127.0.0.1:3000"
+      proxy_pass: "http://127.0.0.1"
 
 # docker
+docker_official: true # docker's apt repos
 docker_users:
   - vagrant
+
+docker_compose_env_nolog: false # dev only setting
+docker_compose_deploy:
+  # Traefik
+  - name: traefik
+    url: https://github.com/krislamo/traefik
+    version: e97db75e2e214582fac5f5e495687ab5cdf855ad
+    path: docker-compose.web.yml
+    enabled: true
+    accept_newhostkey: true
+    trusted_keys:
+      - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    env:
+      ENABLE: true
+  # Gitea
+  - name: gitea
+    url: https://github.com/krislamo/gitea
+    version: b0ce66f6a1ab074172eed79eeeb36d7e9011ef8f
+    enabled: true
+    trusted_keys:
+      - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    env:
+      ENTRYPOINT: web
+      ENABLE_TLS: false
+      USER_UID: "{{ users.git.uid }}"
+      USER_GID: "{{ users.git.gid }}"
+      DB_PASSWD: "{{ gitea.DB_PASSWD }}"
+
+# gitea
+gitea_domain: "git.{{ base_domain }}"
+gitea:
+  DB_NAME: gitea
+  DB_USER: gitea
+  DB_PASSWD: password
 
 # bitwarden
 # Get Installation ID & Key at https://bitwarden.com/host/
@@ -30,8 +77,3 @@ bitwarden_dbpass: password
 bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
 bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
 #bitwarden_prodution: true
-
-# gitea
-gitea_domain: "git.{{ base_domain }}"
-gitea_version: 1
-gitea_dbpass: password

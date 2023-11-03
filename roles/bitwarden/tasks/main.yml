@@ -26,18 +26,18 @@
   args:
     creates: "{{ bitwarden_root }}/bwdata/config.yml"
 
-- name: Install docker-compose override
+- name: Install compose override
   ansible.builtin.template:
     src: compose.override.yml.j2
     dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
-  when: traefik_version is defined
+  when: bitwarden_override | default(true)
   notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTP on 80
   ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^http_port: 80$"
-    replace: "http_port: 127.0.0.1:8080"
+    replace: "http_port: {{ bitwarden_http_port | default('127.0.0.1:9080') }}"
   when: not bitwarden_standalone
   notify: rebuild_bitwarden
 
@@ -45,7 +45,7 @@
   ansible.builtin.replace:
     path: "{{ bitwarden_root }}/bwdata/config.yml"
     regexp: "^https_port: 443$"
-    replace: "https_port: 127.0.0.1:8443"
+    replace: "https_port: {{ bitwarden_https_port | default('127.0.0.1:9443') }}"
   when: not bitwarden_standalone
   notify: rebuild_bitwarden
 

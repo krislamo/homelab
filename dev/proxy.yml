@@ -5,8 +5,8 @@
     - host_vars/proxy.yml
   roles:
     - base
-    - mariadb
     - proxy
     - docker
+    - mariadb
     - gitea
     - bitwarden

@@ -23,10 +23,13 @@ send "{{ bitwarden_install_id }}\r"
 expect "Enter your installation key:"
 send "{{ bitwarden_install_key }}\r"
 
-expect "Do you have a SSL certificate to use? (y/n):"
+expect "Enter your region (US/EU) \\\[US\\\]:"
+send "US\r"
+
+expect "Do you have a SSL certificate to use? (y/N):"
 send "n\r"
 
-expect "Do you want to generate a self-signed SSL certificate? (y/n):"
+expect "Do you want to generate a self-signed SSL certificate? (y/N):"
 {% if bitwarden_standalone and not bitwarden_production %}
 send "y\r"
 {% else %}

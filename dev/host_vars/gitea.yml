@@ -7,6 +7,7 @@ users:
     uid: 1001
     gid: 1001
     home: true
+    system: true
 
 # Import my GPG key for git signature verification
 root_gpgkeys:
@@ -35,6 +36,8 @@ docker_compose_deploy:
     url: https://github.com/krislamo/gitea
     version: b0ce66f6a1ab074172eed79eeeb36d7e9011ef8f
     enabled: true
+    trusted_keys:
+      - FBF673CEEC030F8AECA814E73EDA9C3441EDA925
     env:
       USER_UID: "{{ users.git.uid }}"
       USER_GID: "{{ users.git.gid }}"
