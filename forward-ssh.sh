@@ -58,21 +58,38 @@ function ssh_connect {
 }
 
 # Check for valid PRIVATE_KEY location
-PRIVATE_KEY="$(find .vagrant -name "private_key" 2>/dev/null)"
-if ! ssh-keygen -l -f "$PRIVATE_KEY" &>/dev/null; then
+PRIVATE_KEY="$(find .vagrant -name "private_key" 2>/dev/null | sort)"
+
+# Single vagrant machine or multiple
+if [ "$(echo "$PRIVATE_KEY" | wc -l)" -gt 1 ]; then
+  while IFS= read -r KEYFILE; do
+    if ! ssh-keygen -l -f "$KEYFILE" &>/dev/null; then
+      echo "[ERROR]: The SSH key '$KEYFILE' is not valid. Is your virtual machines running?"
+      exit 1
+    fi
+    echo "[CHECK]: Valid key at $KEYFILE"
+  done < <(echo "$PRIVATE_KEY")
+  PRIVATE_KEY="$(echo "$PRIVATE_KEY" | grep -m1 "${1:-default}")"
+elif ! ssh-keygen -l -f "$PRIVATE_KEY" &>/dev/null; then
   echo "[ERROR]: The SSH key '$PRIVATE_KEY' is not valid. Is your virtual machine running?"
   exit 1
+else
+  echo "[CHECK]: Valid key at $PRIVATE_KEY"
 fi
-echo "[CHECK]: Valid key at $PRIVATE_KEY"
 
 # Grab first IP or use whatever HOST_IP_FIELD is set to and check that the guest is up
-HOST_IP="$(vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" 2>/dev/null)"
+HOST_IP="$(vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" "${1:-default}" 2>/dev/null)"
+if [ -z "$HOST_IP" ]; then
+  echo "[ERROR]: Failed to find ${1:-default}'s IP"
+  exit 1
+fi
 HOST_IP="${HOST_IP::-1}" # trim
+
 if ! ping -c 1 "$HOST_IP" &>/dev/null; then
   echo "[ERROR]: Cannot ping the host IP '$HOST_IP'"
   exit 1
 fi
-echo "[CHECK]: Host at $HOST_IP is up"
+echo "[CHECK]: Host at $HOST_IP (${1:-default}) is up"
 
 # Pattern for matching processes running
 MATCH_PATTERN="ssh -fNT -i ${PRIVATE_KEY}.*vagrant@"
