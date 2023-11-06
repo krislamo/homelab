@@ -5,7 +5,12 @@
   listen: rebuild_bitwarden
 
 - name: Rebuild Bitwarden
-  ansible.builtin.shell: "{{ bitwarden_root }}/bitwarden.sh rebuild"
+  ansible.builtin.command: "{{ bitwarden_root }}/bitwarden.sh rebuild"
+  listen: rebuild_bitwarden
+
+- name: Reload systemd manager configuration
+  ansible.builtin.systemd:
+    daemon_reload: true
   listen: rebuild_bitwarden
 
 - name: Start Bitwarden after rebuild
@@ -14,3 +19,10 @@
     state: started
     enabled: true
   listen: rebuild_bitwarden
+
+- name: Create Bitwarden's initial log file
+  ansible.builtin.file:
+    path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
+    state: touch
+    mode: "644"
+  listen: touch_bitwarden

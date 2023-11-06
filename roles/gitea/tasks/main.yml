@@ -21,6 +21,7 @@
 - name: Create git's .ssh directory
   ansible.builtin.file:
     path: /home/git/.ssh
+    mode: "700"
     state: directory
 
 - name: Generate git's SSH keys
@@ -40,6 +41,7 @@
 - name: Create git's authorized_keys file
   ansible.builtin.file:
     path: /home/git/.ssh/authorized_keys
+    mode: "600"
     state: touch
   when: not git_authkeys.stat.exists
 
@@ -53,21 +55,24 @@
   ansible.builtin.template:
     src: gitea.sh.j2
     dest: /usr/local/bin/gitea
-    mode: 0755
+    mode: "755"
 
 - name: Create Gitea's logging directory
   ansible.builtin.file:
     name: /var/log/gitea
     state: directory
+    mode: "755"
 
 - name: Install Gitea's Fail2ban filter
   ansible.builtin.template:
     src: fail2ban-filter.conf.j2
     dest: /etc/fail2ban/filter.d/gitea.conf
+    mode: "644"
   notify: restart_fail2ban
 
 - name: Install Gitea's Fail2ban jail
   ansible.builtin.template:
     src: fail2ban-jail.conf.j2
     dest: /etc/fail2ban/jail.d/gitea.conf
+    mode: "640"
   notify: restart_fail2ban

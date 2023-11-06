@@ -7,6 +7,7 @@
   ansible.builtin.file:
     path: "{{ bitwarden_root }}"
     state: directory
+    mode: "755"
 
 - name: Download Bitwarden script
   ansible.builtin.get_url:
@@ -22,7 +23,7 @@
     mode: u+x
 
 - name: Run Bitwarden installation script
-  ansible.builtin.shell: "{{ bitwarden_root }}/bw_wrapper"
+  ansible.builtin.command: "{{ bitwarden_root }}/bw_wrapper"
   args:
     creates: "{{ bitwarden_root }}/bwdata/config.yml"
 
@@ -30,6 +31,7 @@
   ansible.builtin.template:
     src: compose.override.yml.j2
     dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
+    mode: "644"
   when: bitwarden_override | default(true)
   notify: rebuild_bitwarden
 
@@ -76,6 +78,7 @@
   ansible.builtin.template:
     src: bitwarden.service.j2
     dest: "/etc/systemd/system/{{ bitwarden_name }}.service"
+    mode: "644"
   register: bitwarden_systemd
   notify: rebuild_bitwarden
 
@@ -83,22 +86,12 @@
   ansible.builtin.file:
     path: "{{ bitwarden_logs_identity }}"
     state: directory
-  register: bitwarden_logs
-
-- name: Create Bitwarden's initial log file
-  ansible.builtin.file:
-    path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
-    state: touch
-  when: bitwarden_logs.changed
+    mode: "755"
+  notify: touch_bitwarden
 
 - name: Install Bitwarden's Fail2ban jail
   ansible.builtin.template:
     src: fail2ban-jail.conf.j2
     dest: /etc/fail2ban/jail.d/bitwarden.conf
+    mode: "640"
   notify: restart_fail2ban
-
-- name: Reload systemd manager configuration
-  ansible.builtin.systemd:
-    daemon_reload: true
-  when: bitwarden_systemd.changed
-  notify: rebuild_bitwarden

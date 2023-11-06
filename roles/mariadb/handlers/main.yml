@@ -6,7 +6,7 @@
   listen: restart_mariadb
 
 - name: Set MariaDB as restarted
-  set_fact:
+  ansible.builtin.set_fact:
     mariadb_restarted: true
   when: not mariadb_restarted
   listen: restart_mariadb
