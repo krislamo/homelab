@@ -22,7 +22,7 @@
 
 # Root check
 if [ "$EUID" -ne 0 ]; then
-  echo "[ERROR]: Please run script as root"
+  echo "[ERROR]: Please run this script as root"
   exit 1
 fi
 
@@ -51,7 +51,7 @@ function ssh_connect {
       pgrep -f "$MATCH_PATTERN"
       ;;
     *)
-      echo "[INFO]: Delined to start a new vagrant SSH tunnel"
+      echo "[INFO]: Declined to start a new vagrant SSH tunnel"
       exit 0
       ;;
   esac
@@ -64,7 +64,7 @@ PRIVATE_KEY="$(find .vagrant -name "private_key" 2>/dev/null | sort)"
 if [ "$(echo "$PRIVATE_KEY" | wc -l)" -gt 1 ]; then
   while IFS= read -r KEYFILE; do
     if ! ssh-keygen -l -f "$KEYFILE" &>/dev/null; then
-      echo "[ERROR]: The SSH key '$KEYFILE' is not valid. Is your virtual machines running?"
+      echo "[ERROR]: The SSH key '$KEYFILE' is not valid. Are your virtual machines running?"
       exit 1
     fi
     echo "[CHECK]: Valid key at $KEYFILE"
