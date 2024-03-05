@@ -78,7 +78,7 @@ else
 fi
 
 # Grab first IP or use whatever HOST_IP_FIELD is set to and check that the guest is up
-HOST_IP="$(vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" "${1:-default}" 2>/dev/null)"
+HOST_IP="$(sudo -u "$SUDO_USER" vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" "${1:-default}" 2>/dev/null)"
 if [ -z "$HOST_IP" ]; then
   echo "[ERROR]: Failed to find ${1:-default}'s IP"
   exit 1
