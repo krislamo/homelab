@@ -28,7 +28,6 @@ fi
 
 # Clean environment
 unset PRIVATE_KEY
-unset HOST_IP
 unset MATCH_PATTERN
 unset PKILL_ANSWER
 
@@ -78,12 +77,17 @@ else
 fi
 
 # Grab first IP or use whatever HOST_IP_FIELD is set to and check that the guest is up
-HOST_IP="$(sudo -u "$SUDO_USER" vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" "${1:-default}" 2>/dev/null)"
 if [ -z "$HOST_IP" ]; then
-  echo "[ERROR]: Failed to find ${1:-default}'s IP"
-  exit 1
+  HOST_IP="$(sudo -u "$SUDO_USER" vagrant ssh -c "hostname -I | cut -d' ' -f${HOST_IP_FIELD:-1}" "${1:-default}" 2>/dev/null)"
+
+  if [ -z "$HOST_IP" ]; then
+    echo "[ERROR]: Failed to find ${1:-default}'s IP"
+    exit 1
+  fi
+  HOST_IP="${HOST_IP::-1}" # trim
+else
+  echo "[INFO]: HOST_IP configured by the shell environment"
 fi
-HOST_IP="${HOST_IP::-1}" # trim
 
 if ! ping -c 1 "$HOST_IP" &>/dev/null; then
   echo "[ERROR]: Cannot ping the host IP '$HOST_IP'"
