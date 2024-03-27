@@ -5,9 +5,11 @@
     - host_vars/dockerbox.yml
   roles:
     - base
+    - proxy
     - docker
+    - mariadb
     - traefik
     - nextcloud
-    - jenkins
-    - prometheus
-    - nginx
+    # - jenkins
+    # - prometheus
+    # - nginx
