@@ -1,0 +1,25 @@
+- name: Set Nextcloud's Trusted Proxy
+  ansible.builtin.command: >
+    docker exec --user www-data "{{ nextcloud_name }}"
+      php occ config:system:set trusted_proxies 0 --value="{{ traefik_name }}"
+  register: nextcloud_trusted_proxy
+  changed_when: "nextcloud_trusted_proxy.stdout == 'System config value trusted_proxies => 0 set to string ' ~ traefik_name"
+  listen: install_nextcloud
+
+- name: Set Nextcloud's Trusted Domain
+  ansible.builtin.command: >
+    docker exec --user www-data "{{ nextcloud_name }}"
+      php occ config:system:set trusted_domains 0 --value="{{ nextcloud.DOMAIN }}"
+  register: nextcloud_trusted_domains
+  changed_when: "nextcloud_trusted_domains.stdout == 'System config value trusted_domains => 0 set to string ' ~ nextcloud.DOMAIN"
+  listen: install_nextcloud
+
+- name: Preform Nextcloud database maintenance
+  ansible.builtin.command: >
+    docker exec --user www-data "{{ nextcloud_name }}" {{ item }}
+  loop:
+    - "php occ maintenance:mode --on"
+    - "php occ db:add-missing-indices"
+    - "php occ db:convert-filecache-bigint"
+    - "php occ maintenance:mode --off"
+  listen: install_nextcloud

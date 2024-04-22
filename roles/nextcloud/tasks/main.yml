@@ -1,109 +1,62 @@
-- name: Create Nextcloud network
-  community.general.docker_network:
-    name: "{{ nextcloud_container }}"
+- name: Install MySQL module for Ansible
+  ansible.builtin.apt:
+    name: python3-pymysql
+    state: present
 
-- name: Start Nextcloud's database container
-  community.general.docker_container:
-    name: "{{ nextcloud_dbcontainer }}"
-    image: mariadb:{{ nextcloud_dbversion }}
+- name: Create Nextcloud database
+  community.mysql.mysql_db:
+    name: "{{ nextcloud.DB_NAME | default('nextcloud') }}"
+    state: present
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Create Nextcloud database user
+  community.mysql.mysql_user:
+    name: "{{ nextcloud.DB_USER | default('nextcloud') }}"
+    password: "{{ nextcloud.DB_PASSWD }}"
+    host: '%'
+    state: present
+    priv: "{{ nextcloud.DB_NAME | default('nextcloud') }}.*:ALL"
+    login_unix_socket: /var/run/mysqld/mysqld.sock
+
+- name: Start Nextcloud service and enable on boot
+  ansible.builtin.service:
+    name: "{{ docker_compose_service }}@{{ nextcloud_name }}"
     state: started
-    restart_policy: always
-    volumes: "{{ nextcloud_dbroot }}:/var/lib/mysql"
-    networks_cli_compatible: true
-    networks:
-      - name: "{{ nextcloud_container }}"
-    env:
-      MYSQL_RANDOM_ROOT_PASSWORD: "true"
-      MYSQL_DATABASE: "{{ nextcloud_dbname }}"
-      MYSQL_USER: "{{ nextcloud_dbuser }}"
-      MYSQL_PASSWORD: "{{ nextcloud_dbpass }}"
-
-- name: Start Nextcloud container
-  community.general.docker_container:
-    name: "{{ nextcloud_container }}"
-    image: nextcloud:{{ nextcloud_version }}
-    state: started
-    restart_policy: always
-    volumes: "{{ nextcloud_root }}:/var/www/html"
-    networks_cli_compatible: true
-    networks:
-      - name: "{{ nextcloud_container }}"
-      - name: traefik
-    env:
-      PHP_MEMORY_LIMIT: 1024M
-    labels:
-      traefik.http.routers.nextcloud.rule: "Host(`{{ nextcloud_domain }}`)"
-      traefik.http.routers.nextcloud.entrypoints: websecure
-      traefik.http.routers.nextcloud.tls.certresolver: letsencrypt
-      traefik.http.routers.nextcloud.middlewares: "securehttps@file,nextcloud-webdav"
-      traefik.http.middlewares.nextcloud-webdav.redirectregex.regex: "https://(.*)/.well-known/(card|cal)dav"
-      traefik.http.middlewares.nextcloud-webdav.redirectregex.replacement: "https://${1}/remote.php/dav/"
-      traefik.http.middlewares.nextcloud-webdav.redirectregex.permanent: "true"
-      traefik.docker.network: traefik
-      traefik.enable: "true"
-
-- name: Grab Nextcloud database container information
-  community.general.docker_container_info:
-    name: "{{ nextcloud_dbcontainer }}"
-  register: nextcloud_dbinfo
+    enabled: true
+  when: nextcloud.ENABLE | default('false')
 
 - name: Grab Nextcloud container information
   community.general.docker_container_info:
-    name: "{{ nextcloud_container }}"
+    name: "{{ nextcloud_name }}"
   register: nextcloud_info
 
 - name: Wait for Nextcloud to become available
   ansible.builtin.wait_for:
     host: "{{ nextcloud_info.container.NetworkSettings.Networks.traefik.IPAddress }}"
+    delay: 10
     port: 80
 
 - name: Check Nextcloud status
-  ansible.builtin.command: "docker exec --user www-data {{ nextcloud_container }}
-            php occ status"
+  ansible.builtin.command: >
+    docker exec --user www-data "{{ nextcloud_name }}" php occ status
   register: nextcloud_status
-  args:
-    removes: "{{ nextcloud_root }}/config/CAN_INSTALL"
-
-- name: Wait for Nextcloud database to become available
-  ansible.builtin.wait_for:
-    host: "{{ nextcloud_dbinfo.container.NetworkSettings.Networks.nextcloud.IPAddress }}"
-    port: 3306
+  changed_when: false
 
 - name: Install Nextcloud
-  ansible.builtin.command: 'docker exec --user www-data {{ nextcloud_container }}
-            php occ maintenance:install
-              --database "mysql"
-              --database-host "{{ nextcloud_dbcontainer }}"
-              --database-name "{{ nextcloud_dbname }}"
-              --database-user "{{ nextcloud_dbuser }}"
-              --database-pass "{{ nextcloud_dbpass }}"
-              --admin-user "{{ nextcloud_admin }}"
-              --admin-pass "{{ nextcloud_pass }}"'
+  ansible.builtin.command: >
+    docker exec --user www-data {{ nextcloud_name }}
+      php occ maintenance:install
+        --database "mysql"
+        --database-host "{{ nextcloud.DB_HOST | default('host.docker.internal') }}"
+        --database-name "{{ nextcloud.DB_NAME | default('nextcloud') }}"
+        --database-user "{{ nextcloud.DB_USER | default('nextcloud') }}"
+        --database-pass "{{ nextcloud.DB_PASSWD }}"
+        --admin-user "{{ nextcloud.ADMIN_USER | default('admin') }}"
+        --admin-pass "{{ nextcloud.ADMIN_PASSWD }}"
   register: nextcloud_install
-  when:
-    - nextcloud_status.stdout[:26] == "Nextcloud is not installed"
-    - nextcloud_domain is defined
-
-- name: Set Nextcloud's Trusted Proxy
-  ansible.builtin.command: 'docker exec --user www-data {{ nextcloud_container }}
-            php occ config:system:set trusted_proxies 0
-              --value="{{ traefik_name }}"'
-  when: nextcloud_install.changed
-
-- name: Set Nextcloud's Trusted Domain
-  ansible.builtin.command: 'docker exec --user www-data {{ nextcloud_container }}
-            php occ config:system:set trusted_domains 0
-              --value="{{ nextcloud_domain }}"'
-  when: nextcloud_install.changed
-
-- name: Preform Nextcloud database maintenance
-  ansible.builtin.command: "docker exec --user www-data {{ nextcloud_container }} {{ item }}"
-  loop:
-    - "php occ maintenance:mode --on"
-    - "php occ db:add-missing-indices"
-    - "php occ db:convert-filecache-bigint"
-    - "php occ maintenance:mode --off"
-  when: nextcloud_install.changed
+  when: nextcloud_status.stderr[:26] == "Nextcloud is not installed"
+  changed_when: nextcloud_install.stdout == "Nextcloud was successfully installed"
+  notify: install_nextcloud
 
 - name: Install Nextcloud background jobs cron
   ansible.builtin.cron:
@@ -111,8 +64,3 @@
     minute: "*/5"
     job: "/usr/bin/docker exec -u www-data nextcloud /usr/local/bin/php -f /var/www/html/cron.php"
     user: root
-
-- name: Remove Nextcloud's CAN_INSTALL file
-  ansible.builtin.file:
-    path: "{{ nextcloud_root }}/config/CAN_INSTALL"
-    state: absent
