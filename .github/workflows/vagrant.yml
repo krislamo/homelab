@@ -21,6 +21,9 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-vagrant-
 
+      - name: Install Tools
+        run: brew install nmap tree
+
       - name: Install VirtualBox
         run: brew install --cask virtualbox
 
@@ -36,51 +39,5 @@ jobs:
           vagrant --version
           ansible --version
 
-      - name: Install debugging tools
-        run: brew install nmap tree
-
       - name: Vagrant Up with Dockerbox Playbook
-        env:
-          SSH_AUTH_SOCK: ''
-        run: |
-          PLAYBOOK=dockerbox vagrant up --debug &
-          VAGRANT_UP_PID=$!
-          DEBUG_ID="[homelab-ci]"
-          echo "$DEBUG_ID Waiting for VM to start..."
-          sleep 60
-          TIMEOUT=600
-          ELAPSED=0
-          SLEEP_DURATION=30
-          SSH_AVAILABLE=0
-          while [[ $ELAPSED -lt $TIMEOUT ]]; do
-            vagrant ssh-config
-            PRIVATE_KEY="$(vagrant ssh-config | grep -E 'IdentityFile.*\.rsa$' | awk '{print $2}')"
-            HOST_IP="$(vagrant ssh-config | grep HostName | awk '{print $2}')"
-            echo "$DEBUG_ID Checking SSH connection availability..."
-            echo "$DEBUG_ID Private Key: $PRIVATE_KEY"
-            echo "$DEBUG_ID Host IP: $HOST_IP"
-            echo "$DEBUG_ID Running nmap to check open ports..."
-            nmap -p 22 "$HOST_IP" | grep "22/tcp open" && SSH_AVAILABLE=1 || SSH_AVAILABLE=0
-            if [[ $SSH_AVAILABLE -eq 1 ]]; then
-              echo "$DEBUG_ID SSH port is open, attempting connection..."
-              set -x
-              ssh -vvv -i "$PRIVATE_KEY" \
-                  -o UserKnownHostsFile=/dev/null \
-                  -o StrictHostKeyChecking=no \
-                  -o IdentitiesOnly=yes \
-                  -o PreferredAuthentications=publickey \
-                  -o PubkeyAuthentication=yes \
-                  -o PasswordAuthentication=no \
-                  -o KbdInteractiveAuthentication=no \
-                  -v vagrant@"$HOST_IP" cat /etc/os-release && break || echo "$DEBUG_ID SSH connection failed, retrying..."
-              set +x
-            else
-              echo "$DEBUG_ID SSH port not open, retrying in $SLEEP_DURATION seconds..."
-            fi
-            sleep $SLEEP_DURATION
-            ((ELAPSED+=SLEEP_DURATION))
-          done
-          if [[ $SSH_AVAILABLE -ne 1 ]]; then
-            echo "$DEBUG_ID Timeout reached without successful SSH connection."
-          fi
-          wait $VAGRANT_UP_PID  # Ensure the Vagrant up process completes
+        run: ./scripts/github-vagrant.sh
