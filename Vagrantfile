@@ -36,6 +36,7 @@ Vagrant.configure("2") do |config|
   config.vm.provider :virtualbox do |vbox|
     vbox.cpus   = VAGRANT_CPUS
     vbox.memory = VAGRANT_MEM
+    vbox.gui    = true
   end
 
   # Provision with Ansible
@@ -43,6 +44,6 @@ Vagrant.configure("2") do |config|
     ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/roles"
     ansible.compatibility_mode = "2.0"
     ansible.playbook = "dev/" + PLAYBOOK + ".yml"
-    ansible.raw_arguments = ["--diff"]
+    ansible.raw_arguments = ["--diff", "-vvv"] 
   end
 end
