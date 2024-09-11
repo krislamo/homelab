@@ -8,6 +8,9 @@ ListenPort = {{ wireguard.listenport }}
 {% for peer in wireguard.peers %}
 [Peer]
 PublicKey = {{ peer.publickey }}
+{% if peer.presharedkey is defined %}
+PresharedKey = {{ peer.presharedkey }}
+{% endif %}
 {% if peer.endpoint is defined %}
 Endpoint = {{ peer.endpoint }}
 {% endif %}
