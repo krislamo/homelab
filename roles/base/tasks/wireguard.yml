@@ -18,6 +18,28 @@
     src: /etc/wireguard/privatekey
   register: wgkey
 
+- name: Check if WireGuard preshared key file exists
+  ansible.builtin.stat:
+    path: /etc/wireguard/presharedkey-{{ item.name }}
+  loop: "{{ wireguard.peers }}"
+  loop_control:
+    label: "{{ item.name }}"
+  register: presharedkey_files
+
+- name: Grab WireGuard preshared key for configuration
+  ansible.builtin.slurp:
+    src: /etc/wireguard/presharedkey-{{ item.item.name }}
+  register: wgshared
+  loop: "{{ presharedkey_files.results }}"
+  loop_control:
+    label: "{{ item.item.name }}"
+  when: item.stat.exists
+
+- name: Grab WireGuard private key for configuration
+  ansible.builtin.slurp:
+    src: /etc/wireguard/privatekey
+  register: wgkey
+
 - name: Install WireGuard configuration
   ansible.builtin.template:
     src: wireguard.j2

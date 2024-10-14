@@ -1,4 +1,6 @@
-[Interface]
+# {{ ansible_managed }}
+
+[Interface] # {{ ansible_hostname }}
 PrivateKey = {{ wgkey['content'] | b64decode | trim }}
 Address = {{ wireguard.address }}
 {% if wireguard.listenport is defined %}
@@ -6,10 +8,25 @@ ListenPort = {{ wireguard.listenport }}
 {% endif %}
 
 {% for peer in wireguard.peers %}
+{% if peer.name is defined %}
+[Peer] # {{ peer.name }}
+{% else %}
 [Peer]
+{% endif %}
 PublicKey = {{ peer.publickey }}
 {% if peer.presharedkey is defined %}
 PresharedKey = {{ peer.presharedkey }}
+{% else %}
+{% set preshared_key = (
+    wgshared.results
+    | selectattr('item.item.name', 'equalto', peer.name)
+    | first
+  ).content
+  | default(none)
+%}
+{% if preshared_key is not none %}
+PresharedKey = {{ preshared_key | b64decode | trim }}
+{% endif %}
 {% endif %}
 {% if peer.endpoint is defined %}
 Endpoint = {{ peer.endpoint }}
