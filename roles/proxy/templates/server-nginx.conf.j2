@@ -35,7 +35,13 @@ server {
   client_max_body_size {{ item.client_max_body_size }};
 {% endif %}
   location / {
-{% if item.restrict is defined and item.restrict  %}
+{% if item.allowedips is defined %}
+{% for ip in item.allowedips %}
+    allow {{ ip }};
+{% endfor %}
+    deny all;
+{% endif %}
+{% if item.restrict is defined and item.restrict %}
     auth_basic "{{ item.restrict_name | default('Restricted Access') }}";
     auth_basic_user_file {{ item.restrict_file | default('/etc/nginx/.htpasswd') }};
     proxy_set_header Authorization "";
