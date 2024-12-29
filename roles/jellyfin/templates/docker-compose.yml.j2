@@ -15,7 +15,7 @@ services:
     networks:
       - traefik
     labels:
-      - "traefik.http.routers.{{ jellyfin_router }}.rule=Host(`{{ jellyfin_domain }}`)"
+      - "traefik.http.routers.{{ jellyfin_router }}.rule=Host({{ jellyfin_domains }})"
 {% if traefik_http_only %}
       - "traefik.http.routers.{{ jellyfin_router }}.entrypoints=web"
 {% else %}

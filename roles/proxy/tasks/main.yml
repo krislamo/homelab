@@ -45,10 +45,11 @@
   register: nginx_sites
 
 - name: Generate self-signed certificate
-  ansible.builtin.command: 'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
-          -subj   "/C=US/ST=Local/L=Local/O=Org/OU=IT/CN=example.com" \
-          -keyout /etc/ssl/private/nginx-selfsigned.key \
-          -out    /etc/ssl/certs/nginx-selfsigned.crt'
+  ansible.builtin.command:
+    'openssl req -newkey rsa:4096 -x509 -sha256 -days 3650 -nodes \
+    -subj   "/C=US/ST=Local/L=Local/O=Org/OU=IT/CN=example.com" \
+    -keyout /etc/ssl/private/nginx-selfsigned.key \
+    -out    /etc/ssl/certs/nginx-selfsigned.crt'
   args:
     creates: /etc/ssl/certs/nginx-selfsigned.crt
   when: proxy.production is not defined or not proxy.production
@@ -56,15 +57,22 @@
 
 - name: Install LE's certbot
   ansible.builtin.apt:
-    name: ['certbot', 'python3-certbot-dns-cloudflare']
+    name: ["certbot", "python3-certbot-dns-cloudflare"]
     state: present
   when: proxy.production is defined and proxy.production
+
+- name: Grab Cloudflare API token for configuration
+  ansible.builtin.slurp:
+    src: /root/.cloudflare-api
+  register: cfapi
+  when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Install Cloudflare API token
   ansible.builtin.template:
     src: cloudflare.ini.j2
     dest: /root/.cloudflare.ini
     mode: "400"
+  diff: false
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Create nginx post renewal hook directory
@@ -78,19 +86,19 @@
   ansible.builtin.copy:
     src: reload-nginx.sh
     dest: /etc/letsencrypt/renewal-hooks/post/reload-nginx.sh
-    mode: '0755'
+    mode: "0755"
   when: proxy.production is defined and proxy.production
 
 - name: Run Cloudflare DNS-01 challenges on wildcard domains
   ansible.builtin.shell: '/usr/bin/certbot certonly \
-            --non-interactive \
-            --agree-tos \
-            --email "{{ proxy.dns_cloudflare.email }}" \
-            --dns-cloudflare \
-            --dns-cloudflare-credentials /root/.cloudflare.ini \
-            -d "*.{{ item }}" \
-            -d "{{ item }}" \
-            {{ proxy.dns_cloudflare.opts | default("") }}'
+    --non-interactive \
+    --agree-tos \
+    --email "{{ proxy.dns_cloudflare.email }}" \
+    --dns-cloudflare \
+    --dns-cloudflare-credentials /root/.cloudflare.ini \
+    -d "*.{{ item }}" \
+    -d "{{ item }}" \
+    {{ proxy.dns_cloudflare.opts | default("") }}'
   args:
     creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
