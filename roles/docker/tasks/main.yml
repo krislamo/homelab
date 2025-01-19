@@ -24,15 +24,21 @@
 
 - name: Install/uninstall Docker from Debian repositories
   ansible.builtin.apt:
-    name: ['docker.io', 'docker-compose', 'containerd', 'runc']
+    name: ["docker.io", "docker-compose", "containerd", "runc"]
     state: "{{ 'absent' if docker_official else 'present' }}"
     autoremove: true
     update_cache: true
 
 - name: Install/uninstall Docker from Docker repositories
   ansible.builtin.apt:
-    name: ['docker-ce', 'docker-ce-cli', 'containerd.io',
-           'docker-buildx-plugin', 'docker-compose-plugin']
+    name:
+      [
+        "docker-ce",
+        "docker-ce-cli",
+        "containerd.io",
+        "docker-buildx-plugin",
+        "docker-compose-plugin",
+      ]
     state: "{{ 'present' if docker_official else 'absent' }}"
     autoremove: true
     update_cache: true
@@ -134,14 +140,6 @@
   loop_control:
     label: "{{ item.name }}"
   when: docker_compose_deploy is defined and item.env is defined
-
-- name: Add users to docker group
-  ansible.builtin.user:
-    name: "{{ item }}"
-    groups: docker
-    append: true
-  loop: "{{ docker_users }}"
-  when: docker_users is defined
 
 - name: Start Docker and enable on boot
   ansible.builtin.service:
