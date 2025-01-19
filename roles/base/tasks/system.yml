@@ -80,8 +80,10 @@
     state: present
     uid: "{{ item.value.uid }}"
     group: "{{ item.value.gid }}"
+    groups: "{{ item.value.groups | default([]) }}"
     shell: "{{ item.value.shell | default('/bin/bash') }}"
     create_home: "{{ item.value.home | default(false) }}"
+    home: "{{ item.value.homedir | default('/home/' + item.key) }}"
     system: "{{ item.value.system | default(false) }}"
   loop: "{{ users | dict2items }}"
   loop_control:
