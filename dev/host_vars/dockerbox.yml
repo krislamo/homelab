@@ -5,7 +5,11 @@ manage_network: false
 # Import my GPG key for git signature verification
 root_gpgkeys:
   - name: kris@lamoureux.io
+    id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+  # Older key, but still in use
+  - name: kris@lamoureux.io
     id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+    server: keyserver.ubuntu.com
 
 # proxy
 proxy:

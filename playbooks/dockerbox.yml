@@ -3,9 +3,9 @@
   become: true
   roles:
     - base
+    - jenkins
     - docker
+    - mariadb
     - traefik
     - nextcloud
-    - jenkins
-    - prometheus
-    - nginx
+    - proxy

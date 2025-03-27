@@ -1,4 +1,5 @@
+.ansible*
+/environments/
 .playbook
 .vagrant*
 .vscode
-/environments/
