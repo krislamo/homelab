@@ -16,10 +16,12 @@
     regex: "^bind-address"
     line: "bind-address            = {{ ansible_facts.docker0.ipv4.address }}"
   notify: restart_mariadb
+  when: ansible_facts.docker0 is defined
 
 - name: Flush handlers to ensure MariaDB restarts immediately
   ansible.builtin.meta: flush_handlers
   tags: restart_mariadb
+  when: ansible_facts.docker0 is defined
 
 - name: Allow database connections from Docker
   community.general.ufw:

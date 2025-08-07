@@ -1,0 +1,14 @@
+# base
+allow_reboot: false
+manage_network: false
+
+users:
+  kris:
+    uid: 1001
+    gid: 1001
+    home: true
+
+# podman
+user_namespaces:
+  - kris
+

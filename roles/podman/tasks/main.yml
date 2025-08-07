@@ -1,0 +1,62 @@
+- name: Install Podman
+  ansible.builtin.apt:
+    name: ["podman", "podman-compose", "podman-docker"]
+    state: present
+
+- name: Get user info for namespace users
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+  loop: "{{ user_namespaces }}"
+  register: user_info
+
+- name: Configure /etc/subuid for rootless users
+  ansible.builtin.lineinfile:
+    path: "/etc/subuid"
+    line:
+      "{{ item.item }}:{{ 100000 +
+      ((item.ansible_facts.getent_passwd[item.item][1] | int - 1000) * 65536)
+      }}:65536"
+    regexp: "^{{ item.item }}:"
+    create: true
+    backup: true
+    mode: "0644"
+  loop: "{{ user_info.results }}"
+
+- name: Configure /etc/subgid for rootless users
+  ansible.builtin.lineinfile:
+    path: "/etc/subgid"
+    line:
+      "{{ item.item }}:{{ 100000 +
+      ((item.ansible_facts.getent_passwd[item.item][1] | int - 1000) * 65536)
+      }}:65536"
+    regexp: "^{{ item.item }}:"
+    create: true
+    backup: true
+    mode: "0644"
+  loop: "{{ user_info.results }}"
+
+- name: Create nodocker file to disable Docker CLI emulation message
+  ansible.builtin.file:
+    path: /etc/containers/nodocker
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Create global containers config directory
+  ansible.builtin.file:
+    path: /etc/containers
+    state: directory
+    mode: "0755"
+
+- name: Configure global containers.conf for rootless
+  ansible.builtin.copy:
+    content: |
+      [engine]
+      cgroup_manager = "cgroupfs"
+      events_logger = "journald"
+      runtime = "crun"
+    dest: /etc/containers/containers.conf
+    mode: "0644"
+    backup: true
