@@ -1,0 +1,54 @@
+- name: Reload systemd manager configuration
+  ansible.builtin.systemd:
+    daemon_reload: true
+    scope: user
+  become: true
+  become_user: "{{ podman_user }}"
+  listen: podman_compose_systemd
+
+- name: Find which services had a podman-compose.yml updated
+  ansible.builtin.set_fact:
+    podman_compose_restart_list:
+      "{{ (podman_compose_restart_list | default([])) + [{'user': podman_user,
+      'service': item.item.name}] }}"
+  loop: "{{ podman_compose_update.results }}"
+  loop_control:
+    label: "{{ podman_user }}/{{ item.item.name }}"
+  when: item.changed
+  listen: podman_compose_restart
+
+- name: Find which services had their .env updated
+  ansible.builtin.set_fact:
+    podman_compose_restart_list:
+      "{{ (podman_compose_restart_list | default([])) + [{'user': podman_user,
+      'service': item.item.name}] }}"
+  loop: "{{ podman_compose_env_update.results }}"
+  loop_control:
+    label: "{{ podman_user }}/{{ item.item.name }}"
+  when: item.changed
+  listen: podman_compose_restart
+
+- name: Restart podman-compose services
+  ansible.builtin.systemd:
+    state: restarted
+    name: "podman-compose@{{ item.service }}"
+    scope: user
+  become: true
+  become_user: "{{ item.user }}"
+  loop: "{{ podman_compose_restart_list | default([]) | unique }}"
+  when: podman_compose_restart_list is defined
+  listen: podman_compose_restart
+
+- name: Start podman-compose services and enable on boot
+  ansible.builtin.systemd:
+    name: "podman-compose@{{ item.name }}"
+    state: started
+    enabled: true
+    scope: user
+  become: true
+  become_user: "{{ podman_user }}"
+  loop: "{{ podman_compose }}"
+  loop_control:
+    label: "{{ podman_user }}/{{ item.name }}"
+  when: item.enabled is defined and item.enabled is true
+  listen: podman_compose_enable

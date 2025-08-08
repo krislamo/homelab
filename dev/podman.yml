@@ -6,3 +6,4 @@
   roles:
     - base
     - podman
+    - bitwarden

@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+{% if item.env is defined %}
+{% for key, value in item.env.items() %}
+{% if value is boolean %}
+{{ key }}={{ value | lower }}
+{% else %}
+{{ key }}={{ value }}
+{% endif %}
+{% endfor %}
+{% endif %}

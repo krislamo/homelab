@@ -1,0 +1,17 @@
+[Unit]
+Description=%i podman-compose service for {{ podman_user }}
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory={{ podman_rootdir }}/%i
+ExecStart=/usr/bin/podman-compose up -d --remove-orphans
+ExecStop=/usr/bin/podman-compose down
+Environment="PODMAN_USERNS=keep-id"
+Environment="PODMAN_SOCKET_PATH=/run/user/{{ podman_userid }}/podman/podman.sock"
+TimeoutStartSec=0
+
+[Install]
+WantedBy=default.target

@@ -1,4 +1,7 @@
-# base
+##############
+#### base ####
+##############
+
 allow_reboot: false
 manage_network: false
 
@@ -7,8 +10,37 @@ users:
     uid: 1001
     gid: 1001
     home: true
+    ansible_temp: true
 
-# podman
+################
+#### podman ####
+################
+
 user_namespaces:
   - kris
 
+podman_compose_deploy:
+  kris:
+    root: /home/kris/podman_root
+    trusted_keys:
+      - id: FBF673CEEC030F8AECA814E73EDA9C3441EDA925
+        keyserver: keyserver.ubuntu.com
+    compose:
+      - name: traefik
+        url: https://github.com/krislamo/traefik
+        version: d62bd06b37ecf0993962b0449a9d708373f9e381
+        enabled: true
+        accept_newhostkey: true # Consider verifying manually instead
+        env:
+          DASHBOARD: true
+
+###################
+#### Bitwarden ####
+###################
+
+# Get Installation ID & Key at https://bitwarden.com/host/
+bitwarden_domain: vault.local.krislamo.org
+bitwarden_dbpass: password
+bitwarden_install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
+bitwarden_install_key: 1yB3Z2gRI0KnnH90C6p
+#bitwarden_prodution: true

@@ -43,6 +43,7 @@
     owner: root
     group: root
     mode: "0644"
+  when: podman_nodocker | bool
 
 - name: Create global containers config directory
   ansible.builtin.file:
@@ -60,3 +61,17 @@
     dest: /etc/containers/containers.conf
     mode: "0644"
     backup: true
+
+- name: Install git for repository cloning
+  ansible.builtin.apt:
+    name: git
+    state: present
+  when: podman_compose_deploy is defined
+
+- name: Deploy Podman compose projects for each user
+  ansible.builtin.include_tasks: deploy.yml
+  vars:
+    podman_user: "{{ item.key }}"
+    podman_compose_config: "{{ item.value }}"
+  loop: "{{ podman_compose_deploy | dict2items }}"
+  when: podman_compose_deploy is defined
