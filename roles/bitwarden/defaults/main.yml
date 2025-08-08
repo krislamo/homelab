@@ -1,7 +1,10 @@
 bitwarden_name: bitwarden
-bitwarden_root: "/var/lib/{{ bitwarden_name }}"
+bitwarden_user: bitwarden
+bitwarden_root: /home/bitwarden
 bitwarden_logs_identity: "{{ bitwarden_root }}/bwdata/logs/identity/Identity"
-bitwarden_logs_identity_date: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+bitwarden_logs_identity_date:
+  "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{
+  ansible_date_time.day }}"
 bitwarden_database: "{{ bitwarden_name }}"
 bitwarden_realips: "172.16.0.0/12"
 bitwarden_standalone: false
