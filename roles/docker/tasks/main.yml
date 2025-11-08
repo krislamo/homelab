@@ -101,6 +101,7 @@
   loop_control:
     label: "{{ item.url }}"
   when: docker_compose_deploy is defined
+  tags: docker
 
 - name: Create directories for docker-compose projects using the systemd service
   ansible.builtin.file:
@@ -111,6 +112,7 @@
   loop_control:
     label: "{{ item.name }}"
   when: docker_compose_deploy is defined
+  tags: docker
 
 - name: Synchronize docker-compose.yml
   ansible.posix.synchronize:
@@ -125,6 +127,7 @@
   loop_control:
     label: "{{ item.name }}"
   when: docker_compose_deploy is defined and docker_compose_deploy | length > 0
+  tags: docker
 
 - name: Set environment variables for docker-compose projects
   ansible.builtin.template:
@@ -140,6 +143,7 @@
   loop_control:
     label: "{{ item.name }}"
   when: docker_compose_deploy is defined and item.env is defined
+  tags: docker
 
 - name: Start Docker and enable on boot
   ansible.builtin.service:
