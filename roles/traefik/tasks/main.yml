@@ -33,4 +33,4 @@
     name: "{{ docker_compose_service }}@{{ traefik_name }}"
     state: started
     enabled: true
-  when: traefik.ENABLED | default('false')
+  when: traefik.ENABLED | default(false)

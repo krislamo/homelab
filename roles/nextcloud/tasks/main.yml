@@ -23,7 +23,7 @@
     name: "{{ docker_compose_service }}@{{ nextcloud_name }}"
     state: started
     enabled: true
-  when: nextcloud.ENABLE | default('false')
+  when: nextcloud.ENABLE | default(false)
 
 - name: Grab Nextcloud container information
   community.general.docker_container_info:
