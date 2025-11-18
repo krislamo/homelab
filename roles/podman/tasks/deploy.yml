@@ -1,0 +1,219 @@
+- name: Get user info for podman compose user
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ podman_user }}"
+  register: podman_user_info
+
+- name: Set user-specific variables
+  ansible.builtin.set_fact:
+    podman_rootdir: "{{ podman_compose_config.root }}"
+    podman_userid: "{{ podman_user_info.ansible_facts.getent_passwd[podman_user][1] }}"
+    podman_homedir: "{{ podman_user_info.ansible_facts.getent_passwd[podman_user][4] }}"
+    podman_project: "{{ podman_compose_config.compose }}"
+    podman_repos: "{{ podman_compose_config.root }}/.compose_repos"
+
+- name: Create docker compose (podman) root directory for user
+  ansible.builtin.file:
+    path: "{{ podman_rootdir }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+
+- name: Create user systemd directory
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/systemd/user"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+
+- name: Install docker compose (podman) systemd service for user
+  ansible.builtin.template:
+    src: compose.service.j2
+    dest: "/home/{{ podman_user }}/.config/systemd/user/compose@.service"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  notify: podman_compose_systemd
+
+- name: Create directories for cloning docker compose (podman) repositories
+  ansible.builtin.file:
+    path: "{{ repo_dir }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  loop:
+    - "{{ podman_repos }}"
+  loop_control:
+    loop_var: repo_dir
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Create .ssh directory for podman compose user
+  ansible.builtin.file:
+    path: "{{ podman_homedir }}/.ssh"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Generate OpenSSH deploy keys for docker compose (podman) clones
+  community.crypto.openssh_keypair:
+    path: "{{ podman_ssh_key_path }}/podman-id_{{ podman_repos_keytype }}"
+    type: "{{ podman_repos_keytype }}"
+    comment: "{{ ansible_hostname }}-{{ podman_user }}-deploy-key"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0600"
+    state: present
+  when: podman_project is defined
+
+- name: Import trusted GPG keys for docker compose (podman) projects
+  ansible.builtin.command:
+    cmd: "gpg --keyserver {{ key.keyserver | default('keys.openpgp.org') }} --recv-key {{ key.id }}"
+  become: true
+  become_user: "{{ podman_user }}"
+  loop: "{{ podman_compose_config.trusted_keys }}"
+  loop_control:
+    loop_var: key
+    label: "{{ key.id }}"
+  changed_when: false
+  when: podman_compose_config.trusted_keys is defined
+
+- name: Clone external docker compose (podman) projects
+  ansible.builtin.git:
+    repo: "{{ project.url }}"
+    dest: "{{ podman_repos }}/{{ project.name }}"
+    version: "{{ project.version }}"
+    accept_newhostkey: "{{ project.accept_newhostkey | default(false) }}"
+    gpg_allowlist: "{{ (project.trusted_keys |
+      default(podman_compose_config.trusted_keys | default([]))) |
+      map(attribute='id') | list }}"
+    verify_commit: >-
+      {{
+        true if
+        (project.trusted_keys is defined and project.trusted_keys) or
+        (
+          podman_compose_config.trusted_keys is defined and
+          podman_compose_config.trusted_keys
+        )
+        else false
+      }}
+    key_file: "{{ podman_ssh_key_path }}/podman-id_{{ podman_repos_keytype }}"
+  become: true
+  become_user: "{{ podman_user }}"
+  loop: "{{ podman_project }}"
+  loop_control:
+    loop_var: project
+    label: "{{ project.url }}"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Create directories for docker compose (podman) projects
+  ansible.builtin.file:
+    path: "{{ podman_rootdir }}/{{ project.name }}"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0700"
+  loop: "{{ podman_project }}"
+  loop_control:
+    loop_var: project
+    label: "{{ project.name }}"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Synchronize docker-compose.yml
+  ansible.posix.synchronize:
+    # noqa jinja[spacing]
+    src: >-
+      {{ podman_repos }}/{{ project.name }}/
+      {{- project.path | default('docker-compose.yml') }}
+    dest: "{{ podman_rootdir }}/{{ project.name }}/docker-compose.yml"
+    owner: false
+    group: false
+  delegate_to: "{{ inventory_hostname }}"
+  register: podman_compose_update
+  notify:
+    - podman_compose_restart
+    - podman_compose_enable
+  loop: "{{ podman_project | default([]) }}"
+  loop_control:
+    loop_var: project
+    label: "{{ project.name }}"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Update list of compose projects updated
+  ansible.builtin.set_fact:
+    podman_compose_restart_list:
+      "{{ (podman_compose_restart_list | default([])) +
+      [{'user': podman_user, 'service': item.project.name}] }}"
+  loop: "{{ podman_compose_update.results }}"
+  loop_control:
+    label: "{{ podman_user }}/{{ item.project.name }}"
+  when: (podman_compose_update.results | default([]) | length) > 0
+
+- name: Fix ownership of synchronized compose files
+  ansible.builtin.file:
+    path: "{{ podman_rootdir }}/{{ project.name }}/docker-compose.yml"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0664"
+  loop: "{{ podman_project | default([]) }}"
+  loop_control:
+    loop_var: project
+    label: "{{ project.name }}"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
+
+- name: Set environment variables for docker compose (podman) projects
+  ansible.builtin.template:
+    src: compose-env.j2
+    dest: "{{ podman_rootdir }}/{{ project.name }}/.env"
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0600"
+  register: podman_compose_env_update
+  notify:
+    - podman_compose_restart
+    - podman_compose_enable
+  no_log: true
+  loop: "{{ podman_project }}"
+  loop_control:
+    loop_var: project
+    label: "{{ project.name }}"
+  when: podman_project is defined and project.env is defined
+
+- name: Update list of compose projects who updated their .env
+  ansible.builtin.set_fact:
+    # noqa jinja[spacing]
+    podman_compose_restart_list: "{{
+      (podman_compose_restart_list | default([]))
+      + ([{'user': podman_user,'service': item.project.name}]
+      if {'user': podman_user, 'service': item.project.name}
+      not in (podman_compose_restart_list | default([]))
+      else [])
+      }}"
+  loop: "{{ podman_compose_env_update.results }}"
+  loop_control:
+    label: "{{ podman_user }}/{{ item.project.name }}"
+  when: (podman_compose_env_update.results | default([]) | length) > 0
+
+- name: Update list of enabled compose projects
+  ansible.builtin.set_fact:
+    podman_compose_enable_list: >-
+      {{ (podman_compose_enable_list | default([]))
+         + [{'user': podman_user, 'service': project.name}] }}
+  when: project.enabled | default(false)
+  notify: podman_compose_enable

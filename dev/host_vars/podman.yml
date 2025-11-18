@@ -1,14 +1,45 @@
-# base
+##############
+#### base ####
+##############
+
 allow_reboot: false
 manage_network: false
 
-users:
-  kris:
-    uid: 1001
-    gid: 1001
-    home: true
+################
+#### proxy #####
+################
 
-# podman
-user_namespaces:
-  - kris
+proxy:
+  servers:
+    - domain: cloud.local.krislamo.org
+      proxy_pass: http://127.0.0.1:8000
 
+################
+#### podman ####
+################
+
+podman_compose:
+  vagrant:
+    root: /opt/oci
+    trusted_keys:
+      - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+    compose:
+      - name: traefik
+        url: https://github.com/krislamo/traefik
+        version: d7197ddd5b7019c60faf5d164e555b6374972d40
+        enabled: true
+        accept_newhostkey: true # Consider verifying manually instead
+        env:
+          VERSION: latest
+          SOCKET: /run/user/1000/podman/podman.sock
+          DASHBOARD: true
+      - name: nextcloud
+        url: https://github.com/krislamo/nextcloud
+        version: 245c91a22fa75e5dde1d423e88540529a4fa4f27
+        enabled: true
+        env:
+          VERSION: latest
+          DOMAIN: cloud.local.krislamo.org
+          DATA: /opt/oci/nextcloud/data/
+          REDIS_VERSION: latest
+          REDIS_PASSWORD: changeme

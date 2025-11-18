@@ -5,4 +5,5 @@
     - host_vars/podman.yml
   roles:
     - base
+    - proxy
     - podman

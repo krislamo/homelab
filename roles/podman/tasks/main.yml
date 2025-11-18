@@ -1,14 +1,23 @@
-- name: Install Podman
+- name: Install Podman with Docker CLI tools
   ansible.builtin.apt:
-    name: ["podman", "podman-compose", "podman-docker"]
+    name: ["podman", "docker-cli", "docker-compose"]
     state: present
 
-- name: Get user info for namespace users
+- name: Install GnuPG tools and trusted CA bundle
+  ansible.builtin.apt:
+    name: ["gnupg", "ca-certificates"]
+    state: present
+  when: podman_compose is defined
+
+- name: Get podman user info for user namespace configuration
   ansible.builtin.getent:
     database: passwd
     key: "{{ item }}"
-  loop: "{{ user_namespaces }}"
+  loop: "{{ podman_compose.keys() | list }}"
   register: user_info
+  loop_control:
+    label: "{{ item }}"
+  when: podman_compose is defined
 
 - name: Configure /etc/subuid for rootless users
   ansible.builtin.lineinfile:
@@ -22,6 +31,8 @@
     backup: true
     mode: "0644"
   loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
 - name: Configure /etc/subgid for rootless users
   ansible.builtin.lineinfile:
@@ -35,14 +46,33 @@
     backup: true
     mode: "0644"
   loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
-- name: Create nodocker file to disable Docker CLI emulation message
-  ansible.builtin.file:
-    path: /etc/containers/nodocker
-    state: touch
-    owner: root
-    group: root
-    mode: "0644"
+- name: Enable lingering for podman compose user
+  ansible.builtin.command:
+    cmd: "loginctl enable-linger {{ item.item }}"
+  changed_when: false
+  loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Start and enable the Podman socket
+  ansible.builtin.systemd:
+    name: podman.socket
+    state: started
+    enabled: true
+    scope: user
+  vars:
+    uid: "{{ item.ansible_facts.getent_passwd[item.item][1] }}"
+  environment:
+    XDG_RUNTIME_DIR: "/run/user/{{ uid }}"
+    DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ uid }}/bus"
+  become: true
+  become_user: "{{ item.item }}"
+  loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
 
 - name: Create global containers config directory
   ansible.builtin.file:
@@ -58,5 +88,29 @@
       events_logger = "journald"
       runtime = "crun"
     dest: /etc/containers/containers.conf
-    mode: "0644"
     backup: true
+    mode: "0644"
+
+- name: Configure Docker CLI to use rootless Podman socket
+  ansible.builtin.copy:
+    src: files/docker-host.sh
+    dest: /etc/profile.d/docker-host.sh
+    owner: root
+    group: root
+    mode: '0755'
+
+- name: Install git for repository cloning
+  ansible.builtin.apt:
+    name: git
+    state: present
+  when: podman_compose is defined
+
+- name: Deploy Podman compose projects for each user
+  ansible.builtin.include_tasks: deploy.yml
+  vars:
+    podman_user: "{{ compose_user.key }}"
+    podman_compose_config: "{{ compose_user.value }}"
+  loop: "{{ podman_compose | dict2items }}"
+  loop_control:
+    loop_var: compose_user
+  when: podman_compose is defined

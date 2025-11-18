@@ -90,6 +90,20 @@
     label: "{{ item.key }}"
   when: users is defined
 
+- name: Create Ansible's temporary remote directory for users
+  ansible.builtin.file:
+    path: "{{ item.value.homedir | default('/home/' + item.key) }}/.ansible/tmp"
+    state: directory
+    mode: "700"
+    owner: "{{ item.key }}"
+    group: "{{ item.value.gid }}"
+  loop: "{{ users | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  when:
+    - users is defined
+    - item.value.tmp | default(true)
+
 - name: Set authorized_keys for system users
   ansible.posix.authorized_key:
     user: "{{ item.key }}"

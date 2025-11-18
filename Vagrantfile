@@ -9,7 +9,7 @@ if File.exist?(settings_path)
   settings = YAML.load_file(settings_path)
 end
 
-VAGRANT_BOX  = settings['VAGRANT_BOX']  || 'debian/bookworm64'
+VAGRANT_BOX  = settings['VAGRANT_BOX']  || 'krislamo.org/debian13'
 VAGRANT_CPUS = settings['VAGRANT_CPUS'] || 2
 VAGRANT_MEM  = settings['VAGRANT_MEM']  || 2048
 SSH_FORWARD  = settings['SSH_FORWARD']  || false

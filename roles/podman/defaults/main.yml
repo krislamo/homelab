@@ -1,0 +1,4 @@
+# Default configuration for podman role
+podman_repos_keytype: ed25519
+podman_ssh_key_path: "{{ ansible_user_dir }}/.ssh"
+podman_nodocker: false

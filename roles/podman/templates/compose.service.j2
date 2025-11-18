@@ -1,0 +1,15 @@
+[Unit]
+Description=%i docker compose (podman) service
+Requires=podman.socket
+After=podman.socket
+
+[Service]
+Type=oneshot
+RemainAfterExit=true
+WorkingDirectory={{ podman_rootdir }}/%i
+Environment=DOCKER_HOST=unix://%t/podman/podman.sock
+ExecStart=/usr/bin/docker compose up -d --remove-orphans
+ExecStop=/usr/bin/docker compose down
+
+[Install]
+WantedBy=default.target
