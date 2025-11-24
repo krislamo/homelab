@@ -18,8 +18,10 @@
   when: root_gpgkeys is defined
 
 - name: Import GPG keys
-  ansible.builtin.command:
-    "gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }} --recv-key {{ item.item.id }}"
+  ansible.builtin.command: >-
+    gpg
+    --keyserver {{ item.item.server | default('keys.openpgp.org') }}
+    --recv-key {{ item.item.id }}
   register: gpg_check_import
   loop: "{{ gpg_check.results }}"
   loop_control:
@@ -33,7 +35,61 @@
   loop: "{{ gpg_check_import.results }}"
   loop_control:
     label: "{{ item.item.item }}"
-  when: root_gpgkeys is defined and (not item.skipped | default(false)) and ('imported' not in item.stderr)
+  when:
+    - root_gpgkeys is defined
+    - not item.skipped | default(false)
+    - "'imported' not in item.stderr"
+
+- name: Create /opt/scripts directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "755"
+  loop:
+    - /opt/scripts
+    - /opt/scripts/.keys
+  when: scripts is defined
+
+- name: Generate OpenSSH deploy keys for script clones
+  community.crypto.openssh_keypair:
+    path: /opt/scripts/.keys/id_ed25519
+    type: ed25519
+    comment: "{{ ansible_hostname }}-deploy-key"
+    mode: "400"
+    state: present
+  when: scripts is defined
+
+- name: Check for git installation
+  ansible.builtin.apt:
+    name: git
+    state: present
+  when: scripts is defined
+
+- name: Clone external scripts projects
+  ansible.builtin.git:
+    repo: "{{ item.url }}"
+    dest: "/opt/scripts/{{ item.name }}"
+    version: "{{ item.version }}"
+    accept_newhostkey: "{{ item.accept_newhostkey | default(false) }}"
+    gpg_allowlist: "{{ item.trusted_keys | default([]) }}"
+    verify_commit: "{{ true if (item.trusted_keys is defined and item.trusted_keys) else false }}"
+    key_file: /opt/scripts/.keys/id_ed25519
+  loop: "{{ scripts }}"
+  loop_control:
+    label: "{{ item.url }}"
+  when: scripts is defined
+  tags: scripts
+
+- name: Synchronize scripts
+  ansible.posix.synchronize:
+    src: "/opt/scripts/{{ item.name }}/{{ item.path }}"
+    dest: "{{ item.dest }}"
+  delegate_to: "{{ inventory_hostname }}"
+  loop: "{{ scripts | default([]) }}"
+  loop_control:
+    label: "{{ item.name }}"
+  when: scripts is defined and scripts | length > 0
+  tags: scripts
 
 - name: Install NTPsec
   ansible.builtin.apt:
