@@ -100,6 +100,21 @@
   when: scripts is defined and scripts | length > 0
   tags: scripts
 
+- name: Deploy cron jobs
+  ansible.builtin.cron:
+    name: "{{ item.name }}"
+    job: "{{ item.job }}"
+    user: "{{ item.user | default('root') }}"
+    minute: "{{ item.minute | default('*') }}"
+    hour: "{{ item.hour | default('*') }}"
+    day: "{{ item.day | default('*') }}"
+    month: "{{ item.month | default('*') }}"
+    weekday: "{{ item.weekday | default('*') }}"
+    state: "{{ item.state | default('present') }}"
+    disabled: "{{ item.disabled | default(false) }}"
+  loop: "{{ cron }}"
+  when: cron is defined and cron | length > 0
+
 - name: Install NTPsec
   ansible.builtin.apt:
     name: ntpsec
