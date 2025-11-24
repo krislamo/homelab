@@ -5,6 +5,20 @@
 allow_reboot: false
 manage_network: false
 
+root_gpgkeys:
+  - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+
+scripts:
+  trusted_keys:
+    - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+  repos:
+    - name: dotfiles
+      url: https://github.com/krislamo/dotfiles
+      version: 999d745710b9db500e82d1a0d0107ac5d623a669
+      scripts:
+        - src: gotify/.local/bin/gotify
+          dest: /usr/local/bin/gotify
+
 ################
 #### proxy #####
 ################

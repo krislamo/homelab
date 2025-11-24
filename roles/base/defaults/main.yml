@@ -20,3 +20,6 @@ packages:
   - tree
   - vim
   - wget
+
+
+base_scripts: /srv/.scripts

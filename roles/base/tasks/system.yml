@@ -10,7 +10,8 @@
     state: present
 
 - name: Check for existing GPG keys
-  ansible.builtin.command: "gpg --list-keys {{ item.id }} 2>/dev/null"
+  ansible.builtin.command: >-
+    gpg --list-keys {{ item.id }} 2>/dev/null
   register: gpg_check
   loop: "{{ root_gpgkeys }}"
   failed_when: false
@@ -18,8 +19,9 @@
   when: root_gpgkeys is defined
 
 - name: Import GPG keys
-  ansible.builtin.command:
-    "gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }} --recv-key {{ item.item.id }}"
+  ansible.builtin.command: >-
+    gpg --keyserver {{ item.item.server | default('keys.openpgp.org') }}
+      --recv-key {{ item.item.id }}
   register: gpg_check_import
   loop: "{{ gpg_check.results }}"
   loop_control:
@@ -33,7 +35,70 @@
   loop: "{{ gpg_check_import.results }}"
   loop_control:
     label: "{{ item.item.item }}"
-  when: root_gpgkeys is defined and (not item.skipped | default(false)) and ('imported' not in item.stderr)
+  when:
+    - root_gpgkeys is defined
+    - not item.skipped | default(false)
+    - "'imported' not in item.stderr"
+
+- name: Create scripts directories
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: "700"
+    owner: root
+    group: root
+  loop:
+    - "{{ base_scripts }}"
+    - "{{ base_scripts }}/.keys"
+  when: scripts is defined
+
+- name: Generate OpenSSH deploy keys for script clones
+  community.crypto.openssh_keypair:
+    path: "{{ base_scripts }}/.keys/id_ed25519"
+    type: ed25519
+    comment: "{{ ansible_hostname }}-deploy-key"
+    mode: "400"
+    state: present
+  when: scripts is defined
+
+- name: Check for git installation
+  ansible.builtin.apt:
+    name: git
+    state: present
+  when: scripts is defined
+
+- name: Clone external scripts projects
+  ansible.builtin.git:
+    repo: "{{ item.url }}"
+    dest: "{{ base_scripts }}/{{ item.name }}"
+    version: "{{ item.version }}"
+    accept_newhostkey: "{{ item.accept_newhostkey | default(false) }}"
+    gpg_allowlist: >-
+      {{ (item.trusted_keys | default(scripts.trusted_keys) | default([]))
+        | map(attribute='id')
+        | list }}
+    verify_commit: >-
+      {{ true if
+        ((item.trusted_keys | default(scripts.trusted_keys)) is defined
+        and (item.trusted_keys | default(scripts.trusted_keys)))
+        else false }}
+    key_file: "{{ base_scripts }}/.keys/id_ed25519"
+  loop: "{{ scripts.repos }}"
+  loop_control:
+    label: "{{ item.url }}"
+  when: scripts is defined
+  tags: scripts
+
+- name: Synchronize scripts
+  ansible.posix.synchronize:
+    src: "{{ base_scripts }}/{{ item.0.name }}/{{ item.1.src }}"
+    dest: "{{ item.1.dest }}"
+  delegate_to: "{{ inventory_hostname }}"
+  loop: "{{ scripts.repos | default([]) | subelements('scripts') }}"
+  loop_control:
+    label: "{{ item.0.name }}: {{ item.1.src }}"
+  when: scripts is defined and scripts | length > 0
+  tags: scripts
 
 - name: Install NTPsec
   ansible.builtin.apt:
@@ -92,7 +157,8 @@
 
 - name: Create Ansible's temporary remote directory for users
   ansible.builtin.file:
-    path: "{{ item.value.homedir | default('/home/' + item.key) }}/.ansible/tmp"
+    path: >-
+      {{ item.value.homedir | default('/home/' + item.key) }}/.ansible/tmp
     state: directory
     mode: "700"
     owner: "{{ item.key }}"
