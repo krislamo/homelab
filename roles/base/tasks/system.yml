@@ -143,6 +143,7 @@
     dest: /root/.ssh/authorized_keys
     mode: "400"
   when: authorized_keys is defined
+  tags: users
 
 - name: Create system user groups
   ansible.builtin.group:
@@ -153,6 +154,7 @@
   loop_control:
     label: "{{ item.key }}"
   when: users is defined
+  tags: users
 
 - name: Create system users
   ansible.builtin.user:
@@ -169,6 +171,7 @@
   loop_control:
     label: "{{ item.key }}"
   when: users is defined
+  tags: users
 
 - name: Create Ansible's temporary remote directory for users
   ansible.builtin.file:
@@ -184,6 +187,7 @@
   when:
     - users is defined
     - item.value.tmp | default(true)
+  tags: users
 
 - name: Set authorized_keys for system users
   ansible.posix.authorized_key:
@@ -194,6 +198,7 @@
   loop_control:
     label: "{{ item.key }}"
   when: users is defined and item.value.key is defined
+  tags: users
 
 - name: Manage filesystem mounts
   ansible.posix.mount:
