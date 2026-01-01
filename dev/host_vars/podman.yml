@@ -2,8 +2,8 @@
 #### base ####
 ##############
 
-allow_reboot: false
-manage_network: false
+base_allow_reboot: false
+base_manage_network: false
 
 root_gpgkeys:
   - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96

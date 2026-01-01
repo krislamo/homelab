@@ -43,4 +43,4 @@
     from: "{{ item }}"
     state: enabled
   loop: "{{ samba.firewall }}"
-  when: manage_firewall
+  when: base_manage_firewall

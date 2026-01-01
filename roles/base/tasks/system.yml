@@ -1,6 +1,6 @@
 - name: Install useful software
   ansible.builtin.apt:
-    name: "{{ packages }}"
+    name: "{{ base_packages }}"
     state: present
     update_cache: true
 
@@ -127,7 +127,7 @@
 
 - name: Generate locale
   community.general.locale_gen:
-    name: "{{ locale_default }}"
+    name: "{{ base_locale_default }}"
     state: present
   notify: reconfigure_locales
 
@@ -135,7 +135,7 @@
   ansible.builtin.lineinfile:
     path: /etc/default/locale
     regexp: "^LANG="
-    line: "LANG={{ locale_default }}"
+    line: "LANG={{ base_locale_default }}"
 
 - name: Manage root authorized_keys
   ansible.builtin.template:

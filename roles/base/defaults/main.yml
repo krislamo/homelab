@@ -1,10 +1,10 @@
-allow_reboot: true
-manage_firewall: true
-manage_network: false
-network_type: static
-locale_default: en_US.UTF-8
+base_allow_reboot: true
+base_manage_firewall: true
+base_manage_network: false
+base_network_type: static
+base_locale_default: en_US.UTF-8
 
-packages:
+base_packages:
   - apache2-utils
   - cryptsetup
   - curl

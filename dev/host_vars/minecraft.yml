@@ -1,6 +1,6 @@
 # base
-allow_reboot: false
-manage_network: false
+base_allow_reboot: false
+base_manage_network: false
 
 # minecraft
 # Agree to EULA to start service in Vagrant

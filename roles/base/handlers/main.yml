@@ -3,7 +3,7 @@
     msg: "Reboot initiated by Ansible"
     connect_timeout: 5
   listen: reboot_host
-  when: allow_reboot
+  when: base_allow_reboot
 
 - name: Reconfigure locales
   ansible.builtin.command: dpkg-reconfigure -f noninteractive locales

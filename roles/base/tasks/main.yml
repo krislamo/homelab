@@ -9,12 +9,12 @@
 - name: Import Firewall tasks
   ansible.builtin.import_tasks: firewall.yml
   tags: firewall
-  when: manage_firewall
+  when: base_manage_firewall
 
 - name: Import Network tasks
   ansible.builtin.import_tasks: network.yml
   tags: network
-  when: manage_network
+  when: base_manage_network
 
 - name: Import Mail tasks
   ansible.builtin.import_tasks: mail.yml

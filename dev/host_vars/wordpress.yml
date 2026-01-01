@@ -1,6 +1,6 @@
 # base
-allow_reboot: false
-manage_network: false
+base_allow_reboot: false
+base_manage_network: false
 
 # docker
 docker_users:
@@ -22,7 +22,6 @@ wordpress_multisite: true
 # database settings
 wordpress_dbversion: latest
 wordpress_dbpass: password
-
 # multisite (enable in admin panel then uncomment)
 #wordpress_rule: "Host(`{{ wordpress_domain }}`) ||
 #                 Host(`site1.{{ wordpress_domain }}`) ||

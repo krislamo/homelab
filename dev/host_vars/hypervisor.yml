@@ -1,8 +1,8 @@
 debian_version: 10.5.0
 
 # base
-allow_reboot: false
-manage_network: false
+base_allow_reboot: false
+base_manage_network: false
 
 # libvirt
 libvirt_users: vagrant

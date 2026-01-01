@@ -1,6 +1,6 @@
 # base
-allow_reboot: false
-manage_network: false
+base_allow_reboot: false
+base_manage_network: false
 
 # docker
 docker_users:
