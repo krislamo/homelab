@@ -1,1 +1,1 @@
-cached_dhparams_pem: /vagrant/scratch/dhparams.pem
+proxy_cached_dhparams_pem: /vagrant/scratch/dhparams.pem

@@ -12,12 +12,12 @@
 
 - name: Check for cached dhparams.pem file
   ansible.builtin.stat:
-    path: "{{ cached_dhparams_pem }}"
+    path: "{{ proxy_cached_dhparams_pem }}"
   register: dhparams_file
 
 - name: Copy cached dhparams.pem to /etc/ssl/
   ansible.builtin.copy:
-    src: "{{ cached_dhparams_pem }}"
+    src: "{{ proxy_cached_dhparams_pem }}"
     dest: /etc/ssl/dhparams.pem
     mode: "600"
     remote_src: true

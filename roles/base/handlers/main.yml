@@ -7,7 +7,9 @@
 
 - name: Reconfigure locales
   ansible.builtin.command: dpkg-reconfigure -f noninteractive locales
+  changed_when: false
   listen: reconfigure_locales
+  when: not ansible_check_mode
 
 - name: Restart WireGuard
   ansible.builtin.service:
