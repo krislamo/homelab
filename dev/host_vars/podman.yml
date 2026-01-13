@@ -1,6 +1,8 @@
 ##############
 #### base ####
 ##############
+selinux:
+  state: enforcing
 
 base_allow_reboot: false
 base_manage_network: false

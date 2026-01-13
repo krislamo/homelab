@@ -4,6 +4,18 @@
     state: present
     update_cache: true
 
+- name: Get the default policy and basic SELinux utilities
+  ansible.builtin.apt:
+    name: ["selinux-basics", "selinux-policy-default", "auditd"]
+    state: present
+  when: selinux is defined and selinux is not false
+
+- name: Configure SELinux
+  ansible.posix.selinux:
+    state: "{{ selinux.state | default('permissive') }}"
+    policy: "{{ selinux.policy | default('default') }}"
+  when: selinux is defined and selinux is not false
+
 - name: Install GPG
   ansible.builtin.apt:
     name: gpg
