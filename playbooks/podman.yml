@@ -1,0 +1,7 @@
+- name: Install Podman server
+  hosts: "{{ PLAYBOOK_HOST | default('none') }}"
+  become: true
+  roles:
+    - base
+    - proxy
+    - podman

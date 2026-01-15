@@ -6,6 +6,17 @@ Address = {{ wireguard.address }}
 {% if wireguard.listenport is defined %}
 ListenPort = {{ wireguard.listenport }}
 {% endif %}
+{%- if wireguard.table is defined %}
+Table = {{ wireguard.table }}
+{% endif -%}
+
+{%- if wireguard.postup is defined %}
+PostUp = {{ wireguard.postup }}
+{% endif -%}
+
+{%- if wireguard.predown is defined %}
+PreDown = {{ wireguard.predown }}
+{% endif %}
 
 {% for peer in wireguard.peers %}
 {% if peer.name is defined %}
