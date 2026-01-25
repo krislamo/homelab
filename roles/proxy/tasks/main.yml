@@ -91,6 +91,19 @@
     mode: "0755"
   when: proxy.production is defined and proxy.production
 
+- name: Enable SELinux bool certbot_acmesh to allow sh access for DNS-01
+  ansible.posix.seboolean:
+    name: certbot_acmesh
+    state: true
+    persistent: true
+  when:
+    - selinux is defined
+    - selinux is not false
+    - proxy is defined
+    - proxy.production is defined
+    - proxy.production
+    - proxy.dns_cloudflare is defined
+
 - name: Run Cloudflare DNS-01 challenges on wildcard domains
   ansible.builtin.shell: '/usr/bin/certbot certonly \
     --non-interactive \
@@ -108,7 +121,7 @@
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
   notify: reload_nginx
 
-- name: Enable httpd_can_network_connect to allow nginx network access
+- name: Enable SELinux bool httpd_can_network_connect to give nginx networking
   ansible.posix.seboolean:
     name: httpd_can_network_connect
     state: true
