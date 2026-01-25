@@ -65,14 +65,14 @@
 
 - name: Grab Cloudflare API token for configuration
   ansible.builtin.slurp:
-    src: /root/.cloudflare-api
+    src: /etc/letsencrypt/cloudflare-api.key
   register: cfapi
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
 
 - name: Install Cloudflare API token
   ansible.builtin.template:
     src: cloudflare.ini.j2
-    dest: /root/.cloudflare.ini
+    dest: /etc/letsencrypt/cloudflare.ini
     mode: "400"
   diff: false
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
@@ -97,10 +97,11 @@
     --agree-tos \
     --email "{{ proxy.dns_cloudflare.email }}" \
     --dns-cloudflare \
-    --dns-cloudflare-credentials /root/.cloudflare.ini \
+    --dns-cloudflare-credentials /etc/letsencrypt/cloudflare.ini \
     -d "*.{{ item }}" \
     -d "{{ item }}" \
-    {{ proxy.dns_cloudflare.opts | default("") }}'
+    {{ proxy.dns_cloudflare.opts | default("") }}
+    < /dev/null'
   args:
     creates: "/etc/letsencrypt/live/{{ item }}/fullchain.pem"
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
