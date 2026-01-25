@@ -105,6 +105,13 @@
     state: present
   when: podman_compose is defined
 
+- name: Login to private Podman registries with Docker CLI for each user
+  ansible.builtin.include_tasks: login.yml
+  loop: "{{ podman_login | dict2items }}"
+  loop_control:
+    loop_var: podman_user
+  when: podman_login is defined
+
 - name: Deploy Podman compose projects for each user
   ansible.builtin.include_tasks: deploy.yml
   vars:

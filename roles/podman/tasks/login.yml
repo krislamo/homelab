@@ -1,0 +1,20 @@
+- name: "Get UID for {{ podman_user.key }}"
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ podman_user.key }}"
+
+- name: Login to private Podman registry via Docker CLI
+  community.docker.docker_login:
+    registry_url: "{{ registry.key }}"
+    username: "{{ registry.value.username }}"
+    password: "{{ registry.value.password }}"
+    docker_host: "unix:///run/user/{{ podman_uid }}/podman/podman.sock"
+  vars:
+    podman_uid: "{{ ansible_facts.getent_passwd[podman_user.key][1] }}"
+  loop: "{{ podman_user.value | dict2items }}"
+  loop_control:
+    loop_var: registry
+    label: "{{ podman_user.key }} => {{ registry.key }}"
+  become: true
+  become_user: "{{ podman_user.key }}"
+  no_log: true

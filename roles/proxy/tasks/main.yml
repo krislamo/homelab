@@ -41,6 +41,8 @@
     dest: "/etc/nginx/sites-available/{{ item.domain }}.conf"
     mode: "400"
   loop: "{{ proxy.servers }}"
+  loop_control:
+    label: "{{ item.domain }}"
   notify: reload_nginx
   register: nginx_sites
 
@@ -104,6 +106,16 @@
   loop: "{{ proxy.dns_cloudflare.wildcard_domains }}"
   when: proxy.production is defined and proxy.production and proxy.dns_cloudflare is defined
   notify: reload_nginx
+
+- name: Enable httpd_can_network_connect to allow nginx network access
+  ansible.posix.seboolean:
+    name: httpd_can_network_connect
+    state: true
+    persistent: true
+  when:
+    - selinux is defined
+    - selinux is not false
+    - proxy is defined
 
 - name: Add HTTP and HTTPS firewall rule
   community.general.ufw:
