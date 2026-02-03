@@ -121,3 +121,4 @@
   loop_control:
     loop_var: compose_user
   when: podman_compose is defined
+  tags: podman_compose

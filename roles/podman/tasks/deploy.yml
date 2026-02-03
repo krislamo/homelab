@@ -3,6 +3,7 @@
     database: passwd
     key: "{{ podman_user }}"
   register: podman_user_info
+  tags: podman_compose
 
 - name: Set user-specific variables
   ansible.builtin.set_fact:
@@ -11,6 +12,7 @@
     podman_homedir: "{{ podman_user_info.ansible_facts.getent_passwd[podman_user][4] }}"
     podman_project: "{{ podman_compose_config.compose }}"
     podman_repos: "{{ podman_compose_config.root }}/.compose_repos"
+  tags: podman_compose
 
 - name: Create docker compose (podman) root directory for user
   ansible.builtin.file:
@@ -51,6 +53,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Create .ssh directory for podman compose user
   ansible.builtin.file:
@@ -62,6 +65,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Generate OpenSSH deploy keys for docker compose (podman) clones
   community.crypto.openssh_keypair:
@@ -73,6 +77,7 @@
     mode: "0600"
     state: present
   when: podman_project is defined
+  tags: podman_compose
 
 - name: Import trusted GPG keys for docker compose (podman) projects
   ansible.builtin.command:
@@ -85,6 +90,7 @@
     label: "{{ key.id }}"
   changed_when: false
   when: podman_compose_config.trusted_keys is defined
+  tags: podman_compose
 
 - name: Clone external docker compose (podman) projects
   ansible.builtin.git:
@@ -115,6 +121,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Create directories for docker compose (podman) projects
   ansible.builtin.file:
@@ -130,6 +137,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Synchronize docker-compose.yml
   ansible.posix.synchronize:
@@ -152,6 +160,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Update list of compose projects updated
   ansible.builtin.set_fact:
@@ -162,6 +171,7 @@
   loop_control:
     label: "{{ podman_user }}/{{ item.project.name }}"
   when: (podman_compose_update.results | default([]) | length) > 0
+  tags: podman_compose
 
 - name: Fix ownership of synchronized compose files
   ansible.builtin.file:
@@ -176,6 +186,7 @@
   when:
     - podman_project is defined
     - podman_project | length > 0
+  tags: podman_compose
 
 - name: Set environment variables for docker compose (podman) projects
   ansible.builtin.template:
@@ -194,6 +205,7 @@
     loop_var: project
     label: "{{ project.name }}"
   when: podman_project is defined and project.env is defined
+  tags: podman_compose
 
 - name: Update list of compose projects who updated their .env
   ansible.builtin.set_fact:
@@ -209,6 +221,7 @@
   loop_control:
     label: "{{ podman_user }}/{{ item.project.name }}"
   when: (podman_compose_env_update.results | default([]) | length) > 0
+  tags: podman_compose
 
 - name: Update list of enabled compose projects
   ansible.builtin.set_fact:
@@ -217,3 +230,4 @@
          + [{'user': podman_user, 'service': project.name}] }}
   when: project.enabled | default(false)
   notify: podman_compose_enable
+  tags: podman_compose
