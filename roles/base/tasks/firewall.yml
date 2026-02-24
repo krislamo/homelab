@@ -18,10 +18,10 @@
     default: allow
     direction: outgoing
 
-- name: Allow OpenSSH with rate limiting
+- name: "{{ base_ssh_ufw_rule | capitalize }} OpenSSH"
   community.general.ufw:
     name: ssh
-    rule: limit
+    rule: "{{ base_ssh_ufw_rule | default('limit') }}"
 
 - name: Remove Fail2ban defaults-debian.conf
   ansible.builtin.file:

@@ -23,3 +23,4 @@ base_packages:
 
 
 base_scripts: /srv/.scripts
+base_ssh_ufw_rule: limit
