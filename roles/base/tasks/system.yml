@@ -16,6 +16,38 @@
     policy: "{{ selinux.policy | default('default') }}"
   when: selinux is defined and selinux is not false
 
+- name: Check for GRUB
+  ansible.builtin.stat:
+    path: /etc/default/grub
+  register: grub_config
+  when: selinux is defined and selinux is not false
+
+- name: Check if SELinux is already activated in GRUB
+  ansible.builtin.command: grep -q 'security=selinux' /etc/default/grub
+  register: selinux_grub
+  changed_when: false
+  failed_when: false
+  when:
+    - selinux is defined
+    - selinux is not false
+    - grub_config.stat.exists
+
+- name: Activate SELinux
+  ansible.builtin.command: selinux-activate
+  changed_when: true
+  when:
+    - selinux is defined
+    - selinux is not false
+    - grub_config.stat.exists
+    - selinux_grub.rc != 0
+  register: selinux_activated
+
+- name: Reboot after SELinux activation
+  ansible.builtin.reboot:
+  when:
+    - selinux_activated is changed
+    - base_allow_reboot
+
 - name: Install GPG
   ansible.builtin.apt:
     name: gpg

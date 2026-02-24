@@ -112,6 +112,88 @@
     loop_var: podman_user
   when: podman_login is defined
 
+- name: Stat rootless Podman directory
+  ansible.builtin.stat:
+    path: "/home/{{ compose_user.key }}/.local/share/containers"
+  loop: "{{ podman_compose | dict2items }}"
+  loop_control:
+    loop_var: compose_user
+    label: "{{ compose_user.key }}"
+  register: podman_user_containers_stat
+  when:
+    - podman_compose is defined
+    - selinux is defined
+    - selinux is not false
+
+- name: Create rootless Podman directory
+  ansible.builtin.file:
+    path: "/home/{{ item.compose_user.key }}/.local/share/containers"
+    state: directory
+    owner: "{{ item.compose_user.key }}"
+    group: "{{ item.compose_user.key }}"
+    mode: "700"
+  loop: "{{ podman_user_containers_stat.results }}"
+  loop_control:
+    label: "{{ item.compose_user.key }}"
+  when:
+    - podman_compose is defined
+    - selinux is defined
+    - selinux is not false
+    - not item.stat.exists
+
+- name: Label rootless Podman directory
+  ansible.builtin.command: >-
+    restorecon -Rv /home/{{ item.compose_user.key }}/.local/share/containers
+  loop: "{{ podman_user_containers_stat.results }}"
+  loop_control:
+    label: "/home/{{ item.compose_user.key }}/.local/share/containers"
+  changed_when: true
+  when:
+    - podman_compose is defined
+    - selinux is defined
+    - selinux is not false
+    - not item.stat.exists
+
+- name: Stat Podman label directories
+  ansible.builtin.stat:
+    path: "{{ item.path }}"
+  loop: "{{ podman_label }}"
+  register: podman_label_stat
+  loop_control:
+    label: "{{ item.path }}"
+  when:
+    - podman_label is defined
+    - selinux is defined
+    - selinux is not false
+
+- name: Create Podman label directories
+  ansible.builtin.file:
+    path: "{{ item.item.path }}"
+    owner: "{{ item.item.owner | default(omit) }}"
+    group: "{{ item.item.group | default(omit) }}"
+    mode: "{{ item.item.mode | default('700') }}"
+    state: directory
+  loop: "{{ podman_label_stat.results }}"
+  loop_control:
+    label: "{{ item.item.path }}"
+  when:
+    - podman_label is defined
+    - selinux is defined
+    - selinux is not false
+    - not item.stat.exists
+
+- name: Set labels on Podman label directories
+  ansible.builtin.command: "chcon {{ item.item.label }} {{ item.item.path }}"
+  loop: "{{ podman_label_stat.results }}"
+  changed_when: true
+  loop_control:
+    label: "{{ item.item.path }} => {{ item.item.label }}"
+  when:
+    - podman_label is defined
+    - selinux is defined
+    - selinux is not false
+    - not item.stat.exists
+
 - name: Deploy Podman compose projects for each user
   ansible.builtin.include_tasks: deploy.yml
   vars:

@@ -10,18 +10,17 @@
     state: started
     enabled: true
 
-- name: Check for cached dhparams.pem file
+- name: Check if environment is vagrant
   ansible.builtin.stat:
-    path: "{{ proxy_cached_dhparams_pem }}"
-  register: dhparams_file
+    path: /home/vagrant
+  register: vagrant_home
 
-- name: Copy cached dhparams.pem to /etc/ssl/
-  ansible.builtin.copy:
-    src: "{{ proxy_cached_dhparams_pem }}"
+- name: Download Mozilla's standard DH params (dev only)
+  ansible.builtin.get_url:
+    url: https://ssl-config.mozilla.org/ffdhe4096.txt
     dest: /etc/ssl/dhparams.pem
     mode: "600"
-    remote_src: true
-  when: dhparams_file.stat.exists
+  when: vagrant_home.stat.exists
 
 - name: Generate DH Parameters
   community.crypto.openssl_dhparam:

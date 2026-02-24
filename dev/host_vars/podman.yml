@@ -4,7 +4,7 @@
 selinux:
   state: enforcing
 
-base_allow_reboot: false
+base_allow_reboot: true
 base_manage_network: false
 
 root_gpgkeys:
@@ -27,12 +27,18 @@ scripts:
 
 proxy:
   servers:
-    - domain: cloud.local.krislamo.org
-      proxy_pass: http://127.0.0.1:8000
+    - domain: music.local.krislamo.org
+      proxy_pass: http://127.0.0.1:4533
 
 ################
 #### podman ####
 ################
+
+podman_label:
+  - path: /home/vagrant/navidrome
+    label: system_u:object_r:container_file_t:s0
+    owner: vagrant
+    group: vagrant
 
 podman_compose:
   vagrant:
@@ -40,22 +46,15 @@ podman_compose:
     trusted_keys:
       - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
     compose:
-      - name: traefik
-        url: https://github.com/krislamo/traefik
-        version: d7197ddd5b7019c60faf5d164e555b6374972d40
+      - name: navidrome
+        url: https://github.com/krislamo/navidrome
+        version: 305f92cff143c0d497d21277145f605d9da830de
         enabled: true
         accept_newhostkey: true # Consider verifying manually instead
         env:
           VERSION: latest
-          SOCKET: /run/user/1000/podman/podman.sock
-          DASHBOARD: true
-      - name: nextcloud
-        url: https://github.com/krislamo/nextcloud
-        version: 245c91a22fa75e5dde1d423e88540529a4fa4f27
-        enabled: true
-        env:
-          VERSION: latest
-          DOMAIN: cloud.local.krislamo.org
-          DATA: /opt/oci/nextcloud/data/
-          REDIS_VERSION: latest
-          REDIS_PASSWORD: changeme
+          BASEURL: https://music.local.krislamo.org
+          MUSIC: /home/vagrant/navidrome
+          LASTFM_ENABLED: "false"
+          LASTFM_APIKEY: "n/a"
+          LASTFM_SECRET: "n/a"
