@@ -1,0 +1,24 @@
+- name: Install GnuPG
+  ansible.builtin.apt:
+    name: gnupg
+    state: present
+    update_cache: true
+
+- name: Check if zrepl repo exists
+  ansible.builtin.stat:
+    path: /etc/apt/sources.list.d/zrepl.list
+  register: zrepl_repo_file
+
+- name: Install zrepl repo
+  ansible.builtin.include_tasks: install.yml
+  when: not zrepl_repo_file.stat.exists
+
+- name: Install zrepl
+  ansible.builtin.apt:
+    name: zrepl
+    state: present
+
+- name: Set zrepl package hold state
+  ansible.builtin.dpkg_selections:
+    name: zrepl
+    selection: "{{ 'hold' if zrepl_pkg_hold else 'install' }}"

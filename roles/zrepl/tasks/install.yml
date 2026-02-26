@@ -1,0 +1,40 @@
+- name: Download zrepl APT signing key
+  ansible.builtin.get_url:
+    url: https://zrepl.cschwarz.com/apt/apt-key.asc
+    dest: /tmp/zrepl-apt-key.asc
+    mode: "600"
+    force: true
+
+- name: Get fingerprint of downloaded key
+  ansible.builtin.shell: |
+    set -euo pipefail
+    gpg --with-colons --import-options show-only \
+      --import /tmp/zrepl-apt-key.asc | awk -F: '$1=="fpr"{print $10; exit}'
+  args:
+    executable: /bin/bash
+  changed_when: false
+  register: gpg_key_info
+
+- name: Verify key fingerprint matches expected value
+  ansible.builtin.assert:
+    that: gpg_key_info.stdout == expected_fingerprint
+  vars:
+    expected_fingerprint: "E101418FD3D6FBCB9D65A62D708699FC5F2EBF16"
+
+- name: Dearmor zrepl key into APT keyring
+  ansible.builtin.command:
+    cmd: >-
+      gpg --dearmor --yes --output /usr/share/keyrings/zrepl-archive-keyring.gpg
+      /tmp/zrepl-apt-key.asc
+  args:
+    creates: /usr/share/keyrings/zrepl-archive-keyring.gpg
+
+- name: Add zrepl apt repository
+  ansible.builtin.apt_repository:
+    repo: "deb [signed-by={{ zrepl_keyring_path }}] {{ zrepl_url }} {{ zrepl_suite }} main"
+    filename: zrepl
+    state: present
+  vars:
+    zrepl_keyring_path: /usr/share/keyrings/zrepl-archive-keyring.gpg
+    zrepl_url: "https://zrepl.cschwarz.com/apt/debian"
+    zrepl_suite: "{{ ansible_distribution_release }}"
