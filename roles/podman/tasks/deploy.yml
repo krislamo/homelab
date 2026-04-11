@@ -170,7 +170,7 @@
   loop: "{{ podman_compose_update.results }}"
   loop_control:
     label: "{{ podman_user }}/{{ item.project.name }}"
-  when: (podman_compose_update.results | default([]) | length) > 0
+  when: item.changed | default(false)
   tags: podman_compose
 
 - name: Fix ownership of synchronized compose files
@@ -220,7 +220,7 @@
   loop: "{{ podman_compose_env_update.results }}"
   loop_control:
     label: "{{ podman_user }}/{{ item.project.name }}"
-  when: (podman_compose_env_update.results | default([]) | length) > 0
+  when: item.changed | default(false)
   tags: podman_compose
 
 - name: Update list of enabled compose projects
