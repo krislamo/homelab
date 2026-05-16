@@ -15,10 +15,10 @@ VAGRANT_MEM  = settings['VAGRANT_MEM']  || 2048
 SSH_FORWARD  = settings['SSH_FORWARD']  || false
 
 # Default to shell environment variable: PLAYBOOK (priority #1)
-PLAYBOOK=ENV["PLAYBOOK"]
-if !PLAYBOOK || PLAYBOOK.empty?
+playbook=ENV["PLAYBOOK"]
+if !playbook || playbook.empty?
   # PLAYBOOK setting in .vagrant.yml (priority #2)
-  PLAYBOOK = settings['PLAYBOOK'] || 'default'
+  playbook = settings['PLAYBOOK'] || 'default'
 end
 
 Vagrant.configure("2") do |config|
@@ -42,7 +42,7 @@ Vagrant.configure("2") do |config|
   config.vm.provision "ansible" do |ansible|
     ENV['ANSIBLE_ROLES_PATH'] = File.dirname(__FILE__) + "/roles"
     ansible.compatibility_mode = "2.0"
-    ansible.playbook = "dev/" + PLAYBOOK + ".yml"
+    ansible.playbook = "dev/" + playbook + ".yml"
     ansible.raw_arguments = ["--diff"]
   end
 end
