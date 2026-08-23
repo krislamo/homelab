@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Finds the SSH private key under ./.vagrant and connects to
 # the Vagrant box, port forwarding localhost ports: 8443, 443, 80, 22
