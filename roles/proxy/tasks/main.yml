@@ -43,7 +43,16 @@
   loop_control:
     label: "{{ item.domain }}"
   notify: reload_nginx
-  register: nginx_sites
+
+- name: Enable nginx sites configuration
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ item.domain }}.conf"
+    dest: "/etc/nginx/sites-enabled/{{ item.domain }}.conf"
+    state: "{{ item.enabled | default(true) | ternary('link', 'absent') }}"
+  loop: "{{ proxy.servers }}"
+  loop_control:
+    label: "{{ item.domain }}"
+  notify: reload_nginx
 
 - name: Generate self-signed certificate
   ansible.builtin.command:

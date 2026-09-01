@@ -8,6 +8,17 @@
     name: fail2ban
     state: present
 
+- name: Ensure Fail2ban's log file is correctly labelled
+  ansible.builtin.file:
+    path: /var/log/fail2ban.log
+    state: touch
+    mode: "0640"
+    access_time: preserve
+    modification_time: preserve
+    setype: fail2ban_log_t
+  when: selinux is defined and selinux is not false
+  notify: restart_fail2ban
+
 - name: Deny incoming traffic by default
   community.general.ufw:
     default: deny

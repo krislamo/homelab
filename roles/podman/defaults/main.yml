@@ -1,4 +1,6 @@
 # Default configuration for podman role
-podman_repos_keytype: ed25519
-podman_ssh_key_path: "{{ ansible_user_dir }}/.ssh"
+podman_log_root: /var/log/oci
 podman_nodocker: false
+podman_repos_keytype: ed25519
+podman_selinux_dir: /usr/share/selinux
+podman_ssh_key_path: "{{ ansible_user_dir }}/.ssh"

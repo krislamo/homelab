@@ -71,7 +71,7 @@
   community.crypto.openssh_keypair:
     path: "{{ podman_homedir }}/.ssh/podman-id_{{ podman_repos_keytype }}"
     type: "{{ podman_repos_keytype }}"
-    comment: "{{ ansible_hostname }}-{{ podman_user }}-deploy-key"
+    comment: "{{ ansible_facts['hostname'] }}-{{ podman_user }}-deploy-key"
     owner: "{{ podman_user }}"
     group: "{{ podman_user }}"
     mode: "0600"

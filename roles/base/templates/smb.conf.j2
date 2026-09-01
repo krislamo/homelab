@@ -1,7 +1,7 @@
 [global]
    workgroup = WORKGROUP
    server string = Samba Server %v
-   netbios name = {{ ansible_hostname }}
+   netbios name = {{ ansible_facts['hostname'] }}
    security = user
    map to guest = bad user
    dns proxy = no

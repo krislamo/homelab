@@ -1,0 +1,11 @@
+- name: Install VPS Server
+  hosts: all
+  become: true
+  vars_files:
+    - host_vars/vps.yml
+  roles:
+    - base
+    - proxy
+    - mariadb
+    - podman
+    - gitea

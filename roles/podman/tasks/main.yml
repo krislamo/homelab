@@ -3,6 +3,91 @@
     name: ["podman", "docker-cli", "docker-compose"]
     state: present
 
+- name: Allow rootless containers to use capabilities in their user namespace
+  ansible.posix.seboolean:
+    name: container_use_userns_all_caps
+    state: true
+    persistent: true
+  when: selinux is defined and selinux is not false
+
+- name: Create SELinux policy build directory
+  ansible.builtin.file:
+    path: "{{ podman_selinux_dir }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: selinux is defined and selinux is not false
+
+- name: Install container log SELinux policy source
+  ansible.builtin.copy:
+    src: oci_log.te
+    dest: "{{ podman_selinux_dir }}/oci_log.te"
+    owner: root
+    group: root
+    mode: "0644"
+  register: podman_selinux_src
+  when: selinux is defined and selinux is not false
+
+- name: Clear stale container log SELinux artifacts
+  ansible.builtin.file:
+    path: "{{ podman_selinux_dir }}/oci_log.{{ item }}"
+    state: absent
+  loop: [mod, pp]
+  when:
+    - selinux is defined and selinux is not false
+    - podman_selinux_src is changed
+
+- name: Compile container log SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      checkmodule -M -m -o {{ podman_selinux_dir }}/oci_log.mod
+      {{ podman_selinux_dir }}/oci_log.te
+    creates: "{{ podman_selinux_dir }}/oci_log.mod"
+  when: selinux is defined and selinux is not false
+
+- name: Package container log SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      semodule_package -o {{ podman_selinux_dir }}/oci_log.pp
+      -m {{ podman_selinux_dir }}/oci_log.mod
+    creates: "{{ podman_selinux_dir }}/oci_log.pp"
+  when: selinux is defined and selinux is not false
+
+- name: List loaded SELinux policy modules
+  ansible.builtin.command:
+    cmd: semodule -l
+  register: podman_semodule_list
+  changed_when: false
+  when: selinux is defined and selinux is not false
+
+- name: Load container log SELinux policy module
+  ansible.builtin.command:
+    cmd: semodule -i {{ podman_selinux_dir }}/oci_log.pp
+  register: podman_semodule
+  changed_when: podman_semodule.rc == 0
+  when:
+    - selinux is defined and selinux is not false
+    - podman_selinux_src is changed or "oci_log" not in podman_semodule_list.stdout_lines
+
+- name: Set SELinux context on container log directory
+  community.general.sefcontext:
+    target: "{{ podman_log_root }}(/.*)?"
+    setype: oci_log_t
+    state: present
+  when: selinux is defined and selinux is not false
+
+- name: Create container log directory
+  ansible.builtin.file:
+    path: "{{ podman_log_root }}"
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('oci_log_t', omit) }}
+
 - name: Install GnuPG tools and trusted CA bundle
   ansible.builtin.apt:
     name: ["gnupg", "ca-certificates"]
@@ -19,13 +104,19 @@
     label: "{{ item }}"
   when: podman_compose is defined
 
+- name: Set subuid base facts for podman users
+  ansible.builtin.set_fact:
+    podman_subuid_base: "{{ podman_subuid_base | default({}) | combine({
+      item.item: 100000 + ((item.ansible_facts.getent_passwd[item.item][1]
+      | int - 1000) * 65536) }) }}"
+  loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
 - name: Configure /etc/subuid for rootless users
   ansible.builtin.lineinfile:
     path: "/etc/subuid"
-    line:
-      "{{ item.item }}:{{ 100000 +
-      ((item.ansible_facts.getent_passwd[item.item][1] | int - 1000) * 65536)
-      }}:65536"
+    line: "{{ item.item }}:{{ podman_subuid_base[item.item] }}:65536"
     regexp: "^{{ item.item }}:"
     create: true
     backup: true
@@ -37,10 +128,7 @@
 - name: Configure /etc/subgid for rootless users
   ansible.builtin.lineinfile:
     path: "/etc/subgid"
-    line:
-      "{{ item.item }}:{{ 100000 +
-      ((item.ansible_facts.getent_passwd[item.item][1] | int - 1000) * 65536)
-      }}:65536"
+    line: "{{ item.item }}:{{ podman_subuid_base[item.item] }}:65536"
     regexp: "^{{ item.item }}:"
     create: true
     backup: true
@@ -49,10 +137,39 @@
   loop_control:
     label: "{{ item.item }}"
 
-- name: Enable lingering for podman compose user
-  ansible.builtin.command:
-    cmd: "loginctl enable-linger {{ item.item }}"
-  changed_when: false
+- name: Ensure systemd linger directory exists
+  ansible.builtin.file:
+    path: /var/lib/systemd/linger
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Enable lingering for podman compose users
+  ansible.builtin.file:
+    path: "/var/lib/systemd/linger/{{ item.item }}"
+    state: touch
+    owner: root
+    group: root
+    mode: "0644"
+    access_time: preserve
+    modification_time: preserve
+  loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Start user manager for podman compose users
+  ansible.builtin.systemd_service:
+    name: "user@{{ item.ansible_facts.getent_passwd[item.item][1] }}.service"
+    state: started
+  loop: "{{ user_info.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Wait for user runtime directory
+  ansible.builtin.wait_for:
+    path: "/run/user/{{ item.ansible_facts.getent_passwd[item.item][1] }}/bus"
+    timeout: 30
   loop: "{{ user_info.results }}"
   loop_control:
     label: "{{ item.item }}"
@@ -97,7 +214,7 @@
     dest: /etc/profile.d/docker-host.sh
     owner: root
     group: root
-    mode: '0755'
+    mode: "0755"
 
 - name: Install git for repository cloning
   ansible.builtin.apt:

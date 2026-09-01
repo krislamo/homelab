@@ -1,6 +1,6 @@
 # {{ ansible_managed }}
 
-[Interface] # {{ ansible_hostname }}
+[Interface] # {{ ansible_facts['hostname'] }}
 PrivateKey = {{ wgkey['content'] | b64decode | trim }}
 Address = {{ wireguard.address }}
 {% if wireguard.listenport is defined %}

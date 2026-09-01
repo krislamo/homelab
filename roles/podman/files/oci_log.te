@@ -1,0 +1,19 @@
+module oci_log 1.0;
+
+require {
+	type container_t;
+	type fail2ban_t;
+	attribute logfile;
+	attribute file_type;
+	attribute non_security_file_type;
+	class dir { add_name search watch write };
+	class file { append create getattr open watch };
+}
+
+type oci_log_t;
+typeattribute oci_log_t file_type, non_security_file_type, logfile;
+
+allow container_t oci_log_t:dir { add_name search write };
+allow container_t oci_log_t:file { append create getattr open };
+allow fail2ban_t oci_log_t:dir watch;
+allow fail2ban_t oci_log_t:file watch;

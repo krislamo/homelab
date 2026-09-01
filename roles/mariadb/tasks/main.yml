@@ -16,12 +16,22 @@
     regex: "^bind-address"
     line: "bind-address            = {{ ansible_facts.docker0.ipv4.address }}"
   notify: restart_mariadb
-  when: ansible_facts.docker0 is defined
+  when: ansible_facts['docker0'] is defined
+
+- name: Change the bind-address for rootless containers
+  ansible.builtin.lineinfile:
+    path: /etc/mysql/mariadb.conf.d/50-server.cnf
+    regexp: "^bind-address"
+    line: "bind-address            = 0.0.0.0"
+  notify: restart_mariadb
+  when:
+    - ansible_facts['docker0'] is not defined
+    - podman_compose is defined
 
 - name: Flush handlers to ensure MariaDB restarts immediately
   ansible.builtin.meta: flush_handlers
   tags: restart_mariadb
-  when: ansible_facts.docker0 is defined
+  when: ansible_facts['docker0'] is defined or podman_compose is defined
 
 - name: Allow database connections from Docker
   community.general.ufw:
@@ -29,4 +39,4 @@
     port: "3306"
     proto: tcp
     src: "{{ item }}"
-  loop: "{{ mariadb_trust | default(['172.16.0.0/12']) }}"
+  loop: "{{ mariadb_trust | default(['169.254.0.0/16']) }}"

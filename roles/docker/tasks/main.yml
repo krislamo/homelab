@@ -77,7 +77,7 @@
   community.crypto.openssh_keypair:
     path: "{{ docker_repos_keys }}/id_{{ docker_repos_keytype }}"
     type: "{{ docker_repos_keytype }}"
-    comment: "{{ ansible_hostname }}-deploy-key"
+    comment: "{{ ansible_facts['hostname'] }}-deploy-key"
     mode: "400"
     state: present
   when: docker_compose_deploy is defined

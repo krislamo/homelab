@@ -13,7 +13,7 @@
   community.mysql.mysql_user:
     name: "{{ gitea.DB_USER }}"
     password: "{{ gitea.DB_PASSWD }}"
-    host: '%'
+    host: "%"
     state: present
     priv: "{{ gitea.DB_NAME }}.*:ALL"
     login_unix_socket: /var/run/mysqld/mysqld.sock
@@ -21,35 +21,36 @@
 - name: Create git's .ssh directory
   ansible.builtin.file:
     path: /home/git/.ssh
+    owner: git
+    group: git
     mode: "700"
     state: directory
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('ssh_home_t', omit) }}
 
 - name: Generate git's SSH keys
   community.crypto.openssh_keypair:
     path: /home/git/.ssh/id_rsa
+    owner: git
+    group: git
+    mode: "600"
+  register: gitea_keypair
+
+- name: Label git's SSH keys for sshd access
+  ansible.builtin.file:
+    path: "/home/git/.ssh/{{ item }}"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('ssh_home_t', omit) }}
+  loop:
+    - id_rsa
+    - id_rsa.pub
 
 - name: Find git's public SSH key
   ansible.builtin.slurp:
     src: /home/git/.ssh/id_rsa.pub
-  register: git_rsapub
-
-- name: Get stats on git's authorized_keys file
-  ansible.builtin.stat:
-    path: /home/git/.ssh/authorized_keys
-  register: git_authkeys
-
-- name: Create git's authorized_keys file
-  ansible.builtin.file:
-    path: /home/git/.ssh/authorized_keys
-    mode: "600"
-    state: touch
-  when: not git_authkeys.stat.exists
-
-- name: Add git's public SSH key to authorized_keys
-  ansible.builtin.lineinfile:
-    path: /home/git/.ssh/authorized_keys
-    regex: "^ssh-rsa"
-    line: "{{ git_rsapub['content'] | b64decode }}"
+  register: gitea_rsapub
 
 - name: Create Gitea host script for SSH
   ansible.builtin.template:
@@ -57,11 +58,147 @@
     dest: /usr/local/bin/gitea
     mode: "755"
 
+- name: Install Gitea SSH SELinux policy source
+  ansible.builtin.copy:
+    src: gitea_ssh.te
+    dest: "{{ podman_selinux_dir }}/gitea_ssh.te"
+    owner: root
+    group: root
+    mode: "0644"
+  register: gitea_selinux_src
+  when: selinux is defined and selinux is not false
+
+- name: Clear stale Gitea SSH SELinux artifacts
+  ansible.builtin.file:
+    path: "{{ podman_selinux_dir }}/gitea_ssh.{{ item }}"
+    state: absent
+  loop: [mod, pp]
+  when:
+    - selinux is defined and selinux is not false
+    - gitea_selinux_src is changed
+
+- name: Compile Gitea SSH SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      checkmodule -M -m -o {{ podman_selinux_dir }}/gitea_ssh.mod
+      {{ podman_selinux_dir }}/gitea_ssh.te
+    creates: "{{ podman_selinux_dir }}/gitea_ssh.mod"
+  when: selinux is defined and selinux is not false
+
+- name: Package Gitea SSH SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      semodule_package -o {{ podman_selinux_dir }}/gitea_ssh.pp
+      -m {{ podman_selinux_dir }}/gitea_ssh.mod
+    creates: "{{ podman_selinux_dir }}/gitea_ssh.pp"
+  when: selinux is defined and selinux is not false
+
+- name: List loaded SELinux policy modules for Gitea
+  ansible.builtin.command:
+    cmd: semodule -l
+  register: gitea_semodule_list
+  changed_when: false
+  when: selinux is defined and selinux is not false
+
+- name: Load Gitea SSH SELinux policy module
+  ansible.builtin.command:
+    cmd: semodule -i {{ podman_selinux_dir }}/gitea_ssh.pp
+  register: gitea_semodule
+  changed_when: gitea_semodule.rc == 0
+  when:
+    - selinux is defined and selinux is not false
+    - gitea_selinux_src is changed or "gitea_ssh" not in gitea_semodule_list.stdout_lines
+
+- name: Configure sshd for Gitea AuthorizedKeysCommand
+  ansible.builtin.template:
+    src: gitea_sshd.conf.j2
+    dest: /etc/ssh/sshd_config.d/gitea.conf
+    owner: root
+    group: root
+    mode: "0644"
+    validate: /usr/sbin/sshd -t -f %s
+  notify: restart_ssh
+
+- name: Set SELinux context on Gitea's data directory
+  community.general.sefcontext:
+    target: "{{ gitea_data }}(/.*)?"
+    setype: container_file_t
+    selevel: "{{ gitea_se_level }}"
+    state: present
+  when: selinux is defined and selinux is not false
+
+- name: Create Gitea's data directory
+  ansible.builtin.file:
+    path: "{{ gitea_data }}"
+    state: directory
+    owner: "{{ gitea_oci_uid }}"
+    group: "{{ gitea_oci_uid }}"
+    mode: "0750"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ gitea_se_level }}"
+
+- name: Create Gitea's container-side SSH directories
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ gitea_oci_uid }}"
+    group: "{{ gitea_oci_uid }}"
+    mode: "{{ item.mode }}"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ gitea_se_level }}"
+  loop:
+    - { path: "{{ gitea_data }}/git", mode: "0755" }
+    - { path: "{{ gitea_data }}/git/.ssh", mode: "0700" }
+
+- name: Authorise git's public SSH key inside the container
+  ansible.builtin.copy:
+    content: "{{ gitea_rsapub['content'] | b64decode }}"
+    dest: "{{ gitea_data }}/git/.ssh/authorized_keys"
+    owner: "{{ gitea_oci_uid }}"
+    group: "{{ gitea_oci_uid }}"
+    mode: "0600"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ gitea_se_level }}"
+
+- name: Set SELinux context on Gitea's logging directory
+  community.general.sefcontext:
+    target: "{{ gitea_logs }}(/.*)?"
+    setype: oci_log_t
+    selevel: "{{ gitea_se_level }}"
+    state: present
+  when: selinux is defined and selinux is not false
+
 - name: Create Gitea's logging directory
   ansible.builtin.file:
-    name: /var/log/gitea
+    name: "{{ gitea_logs }}"
     state: directory
-    mode: "755"
+    owner: "{{ gitea_oci_uid }}"
+    group: "{{ gitea_oci_uid }}"
+    mode: "0755"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('oci_log_t', omit) }}
+    selevel: "{{ gitea_se_level }}"
+
+- name: Create Gitea's log file for Fail2ban
+  ansible.builtin.file:
+    path: /var/log/oci/gitea/gitea.log
+    state: touch
+    owner: "{{ gitea_oci_uid }}"
+    group: "{{ gitea_oci_uid }}"
+    mode: "0640"
+    modification_time: preserve
+    access_time: preserve
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('oci_log_t', omit) }}
+    selevel: "{{ gitea_se_level }}"
 
 - name: Install Gitea's Fail2ban filter
   ansible.builtin.template:

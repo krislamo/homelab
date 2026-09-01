@@ -1,0 +1,9 @@
+module gitea_ssh 1.0;
+
+require {
+    type sshd_t;
+    type ssh_exec_t;
+    class file { getattr read open map execute execute_no_trans };
+}
+
+allow sshd_t ssh_exec_t:file { getattr read open map execute execute_no_trans };

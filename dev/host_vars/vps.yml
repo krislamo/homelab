@@ -1,0 +1,68 @@
+##############
+#### base ####
+##############
+base_allow_reboot: true
+base_manage_network: false
+
+selinux:
+  state: enforcing
+  permissive_domains:
+    # logind drops its D-Bus connection under enforcing on trixie and never
+    # reconnects; pidfs/refpolicy gap. https://trello.com/c/x49s4EdL
+    - systemd_logind_t
+
+users:
+  git:
+    uid: 1001
+    gid: 1001
+    home: true
+    system: true
+
+root_gpgkeys:
+  - name: kris@lamoureux.io
+    id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+
+###############
+#### proxy ####
+###############
+base_domain: local.krislamo.org
+
+proxy:
+  servers:
+    - domain: "git.{{ base_domain }}"
+      proxy_pass: "http://127.0.0.1:3000"
+
+################
+#### podman ####
+################
+podman_compose:
+  git:
+    root: /opt/oci
+    trusted_keys:
+      - id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+    compose:
+      - name: gitea
+        url: https://github.com/krislamo/gitea
+        version: 84e5880484e803fdcf53c7f70b699988d28021d0
+        enabled: true
+        env:
+          DATA: "{{ gitea_data }}"
+          SSH_DIR: "{{ gitea_data }}/git/.ssh"
+          USER_UID: "{{ gitea_uid }}"
+          USER_GID: "{{ gitea_uid }}"
+          SE_LEVEL: "{{ gitea_se_level }}"
+          DOMAIN: "git.{{ base_domain }}"
+          PROXY_TRUSTED_PROXIES: "{{ gitea_trusted_proxies }}"
+          DB_HOST: "{{ gitea.DB_HOST }}"
+          DB_NAME: "{{ gitea.DB_NAME }}"
+          DB_USER: "{{ gitea.DB_USER }}"
+          DB_PASSWD: "{{ gitea.DB_PASSWD }}"
+
+###############
+#### gitea ####
+###############
+gitea:
+  DB_HOST: host.containers.internal
+  DB_NAME: gitea
+  DB_USER: gitea
+  DB_PASSWD: password

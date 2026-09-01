@@ -16,6 +16,13 @@
     policy: "{{ selinux.policy | default('default') }}"
   when: selinux is defined and selinux is not false
 
+- name: Set SELinux permissive domains
+  community.general.selinux_permissive:
+    domain: "{{ item }}"
+    permissive: true
+  loop: "{{ selinux.permissive_domains | default([]) }}"
+  when: selinux is defined and selinux is not false
+
 - name: Check for GRUB
   ansible.builtin.stat:
     path: /etc/default/grub
@@ -100,7 +107,7 @@
   community.crypto.openssh_keypair:
     path: "{{ base_scripts }}/.keys/id_ed25519"
     type: ed25519
-    comment: "{{ ansible_hostname }}-deploy-key"
+    comment: "{{ ansible_facts['hostname'] }}-deploy-key"
     mode: "400"
     state: present
   when: scripts is defined
