@@ -1,0 +1,17 @@
+module bitwarden 1.0;
+
+require {
+    type container_t;
+    type container_ro_file_t;
+    type oci_log_t;
+    class process ptrace;
+    class file { read getattr open lock ioctl write append create unlink setattr rename link map execmod };
+    class dir { read getattr search open lock ioctl write add_name remove_name create rmdir setattr rename reparent };
+    class lnk_file { read getattr create unlink rename };
+}
+
+allow container_t self:process ptrace;
+allow container_t container_ro_file_t:file execmod;
+allow container_t oci_log_t:dir { read getattr search open lock ioctl write add_name remove_name create rmdir setattr rename reparent };
+allow container_t oci_log_t:file { read getattr open lock ioctl write append create unlink setattr rename link map };
+allow container_t oci_log_t:lnk_file { read getattr create unlink rename };

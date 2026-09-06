@@ -30,6 +30,30 @@
     group: "{{ podman_user }}"
     mode: "0755"
 
+- name: Create podman API service override directory for user
+  ansible.builtin.file:
+    path: "/home/{{ podman_user }}/.config/systemd/user/podman.service.d"
+    state: directory
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0755"
+  when: podman_compose_config.api_keepalive | default(false)
+
+- name: Keep the podman API service alive for slow compose runs
+  ansible.builtin.copy:
+    content: |
+      # {{ lookup('ansible.builtin.config', 'DEFAULT_MANAGED_STR') }}
+      [Service]
+      ExecStart=
+      ExecStart=/usr/bin/podman $LOGGING system service --time=0
+    dest: >-
+      /home/{{ podman_user }}/.config/systemd/user/podman.service.d/timeout.conf
+    owner: "{{ podman_user }}"
+    group: "{{ podman_user }}"
+    mode: "0644"
+  when: podman_compose_config.api_keepalive | default(false)
+  notify: podman_compose_systemd
+
 - name: Install docker compose (podman) systemd service for user
   ansible.builtin.template:
     src: compose.service.j2
@@ -76,7 +100,11 @@
     group: "{{ podman_user }}"
     mode: "0600"
     state: present
-  when: podman_project is defined
+  become: true
+  become_user: "{{ podman_user }}"
+  when:
+    - podman_project is defined
+    - podman_project | length > 0
   tags: podman_compose
 
 - name: Import trusted GPG keys for docker compose (podman) projects

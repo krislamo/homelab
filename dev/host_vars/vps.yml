@@ -17,10 +17,20 @@ users:
     gid: 1001
     home: true
     system: true
+  bitwarden:
+    uid: 1002
+    gid: 1002
+    home: true
+    system: true
 
 root_gpgkeys:
   - name: kris@lamoureux.io
     id: 42A3A92C5DA0F3E5F71A3710105B748C1362EB96
+
+fail2ban_ignoreip:
+  - ::1
+  - 127.0.0.1/8
+  - 10.89.0.0/16
 
 ###############
 #### proxy ####
@@ -29,6 +39,8 @@ base_domain: local.krislamo.org
 
 proxy:
   servers:
+    - domain: "vault.{{ base_domain }}"
+      proxy_pass: "http://127.0.0.1:9080"
     - domain: "git.{{ base_domain }}"
       proxy_pass: "http://127.0.0.1:3000"
 
@@ -36,6 +48,10 @@ proxy:
 #### podman ####
 ################
 podman_compose:
+  bitwarden:
+    root: /srv/bitwarden
+    api_keepalive: true
+    compose: []
   git:
     root: /opt/oci
     trusted_keys:
@@ -57,6 +73,14 @@ podman_compose:
           DB_NAME: "{{ gitea.DB_NAME }}"
           DB_USER: "{{ gitea.DB_USER }}"
           DB_PASSWD: "{{ gitea.DB_PASSWD }}"
+
+###################
+#### bitwarden ####
+###################
+bitwarden:
+  domain: "vault.{{ base_domain }}"
+  install_id: 4ea840a3-532e-4cb6-a472-abd900728b23
+  install_key: 1yB3Z2gRI0KnnH90C6p
 
 ###############
 #### gitea ####

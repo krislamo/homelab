@@ -1,28 +1,43 @@
 - name: Stop Bitwarden for rebuild
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ bitwarden_name }}"
     state: stopped
+    scope: user
+  become: true
+  become_user: "{{ bitwarden_user }}"
+  environment: "{{ bitwarden_env }}"
   listen: rebuild_bitwarden
 
 - name: Rebuild Bitwarden
-  ansible.builtin.command: "{{ bitwarden_root }}/bitwarden.sh rebuild"
+  ansible.builtin.command: "{{ bitwarden_script }} rebuild"
+  become: true
+  become_user: "{{ bitwarden_user }}"
+  environment: "{{ bitwarden_env }}"
+  changed_when: true
+  listen: rebuild_bitwarden
+
+- name: Relabel Bitwarden's data directory
+  ansible.builtin.command: "restorecon -RF {{ bitwarden_root }}"
+  changed_when: true
+  when: selinux is defined and selinux is not false
   listen: rebuild_bitwarden
 
 - name: Reload systemd manager configuration
   ansible.builtin.systemd:
     daemon_reload: true
+    scope: user
+  become: true
+  become_user: "{{ bitwarden_user }}"
+  environment: "{{ bitwarden_env }}"
   listen: rebuild_bitwarden
 
 - name: Start Bitwarden after rebuild
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: "{{ bitwarden_name }}"
     state: started
     enabled: true
+    scope: user
+  become: true
+  become_user: "{{ bitwarden_user }}"
+  environment: "{{ bitwarden_env }}"
   listen: rebuild_bitwarden
-
-- name: Create Bitwarden's initial log file
-  ansible.builtin.file:
-    path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
-    state: touch
-    mode: "644"
-  listen: touch_bitwarden

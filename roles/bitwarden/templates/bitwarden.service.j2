@@ -1,13 +1,19 @@
 [Unit]
 Description=Bitwarden Password Manager Server
-PartOf=docker.service
-After=docker.service
+Requires=podman.socket
+After=podman.socket
+StartLimitIntervalSec=300
+StartLimitBurst=5
 
 [Service]
-Type=oneshot
+Type=exec
 RemainAfterExit=true
-ExecStart={{ bitwarden_root }}/bitwarden.sh start
-ExecStop={{ bitwarden_root }}/bitwarden.sh stop
+WorkingDirectory={{ bitwarden_root }}
+Environment=DOCKER_HOST=unix://%t/podman/podman.sock
+ExecStart={{ bitwarden_script }} start
+ExecStop={{ bitwarden_script }} stop
+Restart=on-failure
+RestartSec=10
 
 [Install]
-WantedBy=multi-user.target
+WantedBy=default.target

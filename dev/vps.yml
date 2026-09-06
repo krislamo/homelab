@@ -8,4 +8,5 @@
     - proxy
     - mariadb
     - podman
+    - bitwarden
     - gitea

@@ -1,8 +1,36 @@
 bitwarden_name: bitwarden
-bitwarden_root: "/var/lib/{{ bitwarden_name }}"
-bitwarden_logs_identity: "{{ bitwarden_root }}/bwdata/logs/identity/Identity"
-bitwarden_logs_identity_date: "{{ ansible_date_time.year }}{{ ansible_date_time.month }}{{ ansible_date_time.day }}"
+bitwarden_user: "{{ bitwarden_name }}"
+bitwarden_domain: "{{ bitwarden.domain }}"
+bitwarden_install_id: "{{ bitwarden.install_id }}"
+bitwarden_install_key: "{{ bitwarden.install_key }}"
+bitwarden_puid: "{{ users[bitwarden_user].uid }}"
+bitwarden_root: "{{ podman_compose[bitwarden_user].root }}"
+bitwarden_data: "{{ bitwarden_root }}/bwdata"
+bitwarden_script: "{{ bitwarden_root }}/bitwarden.sh"
+bitwarden_logs: "{{ podman_log_root }}/{{ bitwarden_name }}"
+bitwarden_logs_identity: "{{ bitwarden_logs }}/identity/Identity"
+bitwarden_logs_identity_date: "{{ ansible_facts['date_time']['date'] | replace('-', '') }}"
 bitwarden_database: "{{ bitwarden_name }}"
-bitwarden_realips: "172.16.0.0/12"
+bitwarden_realips: "10.89.0.0/16"
 bitwarden_standalone: false
 bitwarden_production: false
+bitwarden_http_port: "127.0.0.1:9080"
+bitwarden_https_port: "127.0.0.1:9443"
+bitwarden_se_level: "s0:c33,c333"
+bitwarden_se_opt: "label=level:{{ bitwarden_se_level }}"
+bitwarden_services:
+  - mssql
+  - web
+  - attachments
+  - api
+  - identity
+  - sso
+  - admin
+  - icons
+  - notifications
+  - events
+  - nginx
+bitwarden_env:
+  XDG_RUNTIME_DIR: "/run/user/{{ bitwarden_puid }}"
+  DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ bitwarden_puid }}/bus"
+  DOCKER_HOST: "unix:///run/user/{{ bitwarden_puid }}/podman/podman.sock"

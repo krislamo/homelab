@@ -3,57 +3,206 @@
     name: expect
     state: present
 
+- name: Create Bitwarden's containers config directory
+  ansible.builtin.file:
+    path: "/home/{{ bitwarden_user }}/.config/containers"
+    state: directory
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0755"
+
+- name: Configure keep-id user namespace for Bitwarden's containers
+  ansible.builtin.copy:
+    content: |
+      [containers]
+        userns = "keep-id"
+    dest: "/home/{{ bitwarden_user }}/.config/containers/containers.conf"
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0644"
+  notify: rebuild_bitwarden
+
+- name: Set SELinux context on Bitwarden's root directory
+  community.general.sefcontext:
+    target: "{{ bitwarden_root }}(/.*)?"
+    setype: container_file_t
+    selevel: "{{ bitwarden_se_level }}"
+    state: present
+  when: selinux is defined and selinux is not false
+
+- name: Set SELinux context on Bitwarden's logging directory
+  community.general.sefcontext:
+    target: "{{ bitwarden_logs }}(/.*)?"
+    setype: oci_log_t
+    selevel: "{{ bitwarden_se_level }}"
+    state: present
+  when: selinux is defined and selinux is not false
+
+- name: Install Bitwarden SELinux policy source
+  ansible.builtin.copy:
+    src: bitwarden.te
+    dest: "{{ podman_selinux_dir }}/bitwarden.te"
+    owner: root
+    group: root
+    mode: "0644"
+  register: bitwarden_selinux_src
+  when: selinux is defined and selinux is not false
+
+- name: Clear stale Bitwarden SELinux artifacts
+  ansible.builtin.file:
+    path: "{{ podman_selinux_dir }}/bitwarden.{{ item }}"
+    state: absent
+  loop: [mod, pp]
+  when:
+    - selinux is defined and selinux is not false
+    - bitwarden_selinux_src is changed
+
+- name: Compile Bitwarden SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      checkmodule -M -m -o {{ podman_selinux_dir }}/bitwarden.mod
+      {{ podman_selinux_dir }}/bitwarden.te
+    creates: "{{ podman_selinux_dir }}/bitwarden.mod"
+  when: selinux is defined and selinux is not false
+
+- name: Package Bitwarden SELinux policy module
+  ansible.builtin.command:
+    cmd: >-
+      semodule_package -o {{ podman_selinux_dir }}/bitwarden.pp
+      -m {{ podman_selinux_dir }}/bitwarden.mod
+    creates: "{{ podman_selinux_dir }}/bitwarden.pp"
+  when: selinux is defined and selinux is not false
+
+- name: List loaded SELinux policy modules for Bitwarden
+  ansible.builtin.command:
+    cmd: semodule -l
+  register: bitwarden_semodule_list
+  changed_when: false
+  when: selinux is defined and selinux is not false
+
+- name: Load Bitwarden SELinux policy module
+  ansible.builtin.command:
+    cmd: semodule -i {{ podman_selinux_dir }}/bitwarden.pp
+  register: bitwarden_semodule
+  changed_when: bitwarden_semodule.rc == 0
+  when:
+    - selinux is defined and selinux is not false
+    - bitwarden_selinux_src is changed or "bitwarden" not in bitwarden_semodule_list.stdout_lines
+  notify: rebuild_bitwarden
+
 - name: Create Bitwarden directory
   ansible.builtin.file:
     path: "{{ bitwarden_root }}"
     state: directory
-    mode: "755"
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0700"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
+
+- name: Check whether the Bitwarden script is already installed
+  ansible.builtin.stat:
+    path: "{{ bitwarden_script }}"
+  register: bitwarden_script_stat
 
 - name: Download Bitwarden script
   ansible.builtin.get_url:
     url: "https://raw.githubusercontent.com/\
-          bitwarden/self-host/master/bitwarden.sh"
-    dest: "{{ bitwarden_root }}"
-    mode: u+x
+      bitwarden/self-host/master/bitwarden.sh"
+    dest: "{{ bitwarden_script }}"
+    force: false
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0750"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
+  when: not bitwarden_script_stat.stat.exists
 
 - name: Install Bitwarden script wrapper
   ansible.builtin.template:
     src: bw_wrapper.j2
     dest: "{{ bitwarden_root }}/bw_wrapper"
-    mode: u+x
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0750"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
+
+- name: Pin the SELinux level on newly downloaded run scripts
+  ansible.builtin.blockinfile:
+    path: "{{ bitwarden_script }}"
+    insertafter: '^\s*mv \$tmp_script \$SCRIPTS_DIR/run\.sh$'
+    marker: "        # {mark} Ansible Managed: Add Bitwarden SELinux MCS level"
+    block: |2
+              sed -i \
+                "s|--name setup |&--security-opt {{ bitwarden_se_opt }} |g" \
+                "$SCRIPTS_DIR/run.sh"
+  when: selinux is defined and selinux is not false
+
+- name: Give Bitwarden's setup container a writable working directory
+  ansible.builtin.blockinfile:
+    path: "{{ bitwarden_script }}"
+    insertafter: '^\s*mv \$tmp_script \$SCRIPTS_DIR/run\.sh$'
+    marker: "        # {mark} Ansible Managed: Set Bitwarden's setup directory"
+    block: |2
+              sed -i \
+                "s|-it --rm --name setup |&-w /bitwarden |" \
+                "$SCRIPTS_DIR/run.sh"
 
 - name: Run Bitwarden installation script
   ansible.builtin.command: "{{ bitwarden_root }}/bw_wrapper"
   args:
-    creates: "{{ bitwarden_root }}/bwdata/config.yml"
+    creates: "{{ bitwarden_data }}/config.yml"
+  become: true
+  become_user: "{{ bitwarden_user }}"
+  environment: "{{ bitwarden_env }}"
+
+- name: Pin the SELinux level on Bitwarden's setup container
+  ansible.builtin.replace:
+    path: "{{ bitwarden_data }}/scripts/run.sh"
+    regexp: "--name setup(?! --security-opt)"
+    replace: "--name setup --security-opt label=level:{{ bitwarden_se_level }}"
+  when: selinux is defined and selinux is not false
+  notify: rebuild_bitwarden
 
 - name: Install compose override
   ansible.builtin.template:
     src: compose.override.yml.j2
-    dest: "{{ bitwarden_root }}/bwdata/docker/docker-compose.override.yml"
-    mode: "644"
-  when: bitwarden_override | default(true)
+    dest: "{{ bitwarden_data }}/docker/docker-compose.override.yml"
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0640"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('container_file_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
   notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTP on 80
   ansible.builtin.replace:
-    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    path: "{{ bitwarden_data }}/config.yml"
     regexp: "^http_port: 80$"
-    replace: "http_port: {{ bitwarden_http_port | default('127.0.0.1:9080') }}"
+    replace: "http_port: {{ bitwarden_http_port }}"
   when: not bitwarden_standalone
   notify: rebuild_bitwarden
 
 - name: Disable bitwarden-nginx HTTPS on 443
   ansible.builtin.replace:
-    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    path: "{{ bitwarden_data }}/config.yml"
     regexp: "^https_port: 443$"
-    replace: "https_port: {{ bitwarden_https_port | default('127.0.0.1:9443') }}"
+    replace: "https_port: {{ bitwarden_https_port }}"
   when: not bitwarden_standalone
   notify: rebuild_bitwarden
 
 - name: Disable Bitwarden managed Lets Encrypt
   ansible.builtin.replace:
-    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    path: "{{ bitwarden_data }}/config.yml"
     regexp: "^ssl_managed_lets_encrypt: true$"
     replace: "ssl_managed_lets_encrypt: false"
   when: not bitwarden_standalone or not bitwarden_production
@@ -61,7 +210,7 @@
 
 - name: Disable Bitwarden managed SSL
   ansible.builtin.replace:
-    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    path: "{{ bitwarden_data }}/config.yml"
     regexp: "^ssl: true$"
     replace: "ssl: false"
   when: not bitwarden_standalone
@@ -69,25 +218,60 @@
 
 - name: Define reverse proxy servers
   ansible.builtin.lineinfile:
-    path: "{{ bitwarden_root }}/bwdata/config.yml"
+    path: "{{ bitwarden_data }}/config.yml"
     line: "- {{ bitwarden_realips }}"
     insertafter: "^real_ips"
   notify: rebuild_bitwarden
 
+- name: Create user systemd directory for Bitwarden
+  ansible.builtin.file:
+    path: "/home/{{ bitwarden_user }}/.config/systemd/user"
+    state: directory
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0755"
+
 - name: Install Bitwarden systemd service
   ansible.builtin.template:
     src: bitwarden.service.j2
-    dest: "/etc/systemd/system/{{ bitwarden_name }}.service"
-    mode: "644"
-  register: bitwarden_systemd
+    dest: "/home/{{ bitwarden_user }}/.config/systemd/user/{{ bitwarden_name }}.service"
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0644"
   notify: rebuild_bitwarden
 
 - name: Create Bitwarden's initial logging directory
   ansible.builtin.file:
     path: "{{ bitwarden_logs_identity }}"
     state: directory
-    mode: "755"
-  notify: touch_bitwarden
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0755"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('oci_log_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
+
+- name: Create Bitwarden's log file for Fail2ban
+  ansible.builtin.file:
+    path: "{{ bitwarden_logs_identity }}/{{ bitwarden_logs_identity_date }}.txt"
+    state: touch
+    owner: "{{ bitwarden_user }}"
+    group: "{{ bitwarden_user }}"
+    mode: "0644"
+    modification_time: preserve
+    access_time: preserve
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('oci_log_t', omit) }}
+    selevel: "{{ bitwarden_se_level }}"
+
+- name: Install Bitwarden's Fail2ban filter
+  ansible.builtin.template:
+    src: fail2ban-filter.conf.j2
+    dest: /etc/fail2ban/filter.d/bitwarden.conf
+    mode: "0644"
+  notify: restart_fail2ban
 
 - name: Install Bitwarden's Fail2ban jail
   ansible.builtin.template:
