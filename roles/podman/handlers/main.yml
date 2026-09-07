@@ -17,17 +17,3 @@
   loop: "{{ podman_compose_restart_list | default([]) | unique }}"
   when: podman_compose_restart_list is defined
   listen: podman_compose_restart
-
-- name: Start docker compose (podman) services and enable on boot
-  ansible.builtin.systemd:
-    name: "compose@{{ item.service }}"
-    state: started
-    enabled: true
-    scope: user
-  become: true
-  become_user: "{{ item.user }}"
-  loop: "{{ podman_compose_enable_list | default([]) }}"
-  loop_control:
-    label: "{{ item.user }}/{{ item.service }}"
-  when: item.enabled is defined and item.enabled is true
-  listen: podman_compose_enable

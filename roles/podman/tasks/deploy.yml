@@ -178,9 +178,7 @@
     group: false
   delegate_to: "{{ inventory_hostname }}"
   register: podman_compose_update
-  notify:
-    - podman_compose_restart
-    - podman_compose_enable
+  notify: podman_compose_restart
   loop: "{{ podman_project | default([]) }}"
   loop_control:
     loop_var: project
@@ -224,9 +222,7 @@
     group: "{{ podman_user }}"
     mode: "0600"
   register: podman_compose_env_update
-  notify:
-    - podman_compose_restart
-    - podman_compose_enable
+  notify: podman_compose_restart
   no_log: true
   loop: "{{ podman_project }}"
   loop_control:
@@ -251,11 +247,15 @@
   when: item.changed | default(false)
   tags: podman_compose
 
-- name: Update list of enabled compose projects
-  ansible.builtin.set_fact:
-    podman_compose_enable_list: >-
-      {{ (podman_compose_enable_list | default([]))
-         + [{'user': podman_user, 'service': project.name}] }}
-  when: project.enabled | default(false)
-  notify: podman_compose_enable
+- name: Start docker compose (podman) services and enable on boot
+  ansible.builtin.systemd:
+    name: "compose@{{ project.name }}"
+    enabled: "{{ project.enabled | default(false) }}"
+    scope: user
+  become: true
+  become_user: "{{ podman_user }}"
+  loop: "{{ podman_project | default([]) }}"
+  loop_control:
+    loop_var: project
+    label: "{{ podman_user }}/{{ project.name }}"
   tags: podman_compose
