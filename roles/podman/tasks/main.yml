@@ -108,17 +108,18 @@
     database: passwd
     key: "{{ item }}"
   loop: "{{ podman_compose.keys() | list }}"
-  register: user_info
+  register: podman_users_info
   loop_control:
     label: "{{ item }}"
   when: podman_compose is defined
 
 - name: Set subuid base facts for podman users
   ansible.builtin.set_fact:
-    podman_subuid_base: "{{ podman_subuid_base | default({}) | combine({
-      item.item: 100000 + ((item.ansible_facts.getent_passwd[item.item][1]
-      | int - 1000) * 65536) }) }}"
-  loop: "{{ user_info.results }}"
+    podman_subuid_base: "{{ podman_subuid_base | default({}) | combine(sub) }}"
+  vars:
+    uid: "{{ item.ansible_facts.getent_passwd[item.item][1] }}"
+    sub: "{{ {item.item: 100000 + ((uid | int - 1000) * 65536)} }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -130,7 +131,7 @@
     create: true
     backup: true
     mode: "0644"
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -142,7 +143,7 @@
     create: true
     backup: true
     mode: "0644"
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -163,7 +164,7 @@
     mode: "0644"
     access_time: preserve
     modification_time: preserve
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -171,7 +172,7 @@
   ansible.builtin.systemd_service:
     name: "user@{{ item.ansible_facts.getent_passwd[item.item][1] }}.service"
     state: started
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -179,7 +180,7 @@
   ansible.builtin.wait_for:
     path: "/run/user/{{ item.ansible_facts.getent_passwd[item.item][1] }}/bus"
     timeout: 30
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 
@@ -196,7 +197,7 @@
     DBUS_SESSION_BUS_ADDRESS: "unix:path=/run/user/{{ uid }}/bus"
   become: true
   become_user: "{{ item.item }}"
-  loop: "{{ user_info.results }}"
+  loop: "{{ podman_users_info.results }}"
   loop_control:
     label: "{{ item.item }}"
 

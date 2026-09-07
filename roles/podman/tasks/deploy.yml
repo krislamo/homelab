@@ -188,7 +188,7 @@
     - podman_project | length > 0
   tags: podman_compose
 
-- name: Update list of compose projects updated
+- name: Update list of compose projects updated # noqa: no-handler
   ansible.builtin.set_fact:
     podman_compose_restart_list:
       "{{ (podman_compose_restart_list | default([])) +
@@ -231,7 +231,7 @@
   when: podman_project is defined and project.env is defined
   tags: podman_compose
 
-- name: Update list of compose projects who updated their .env
+- name: Update list of compose projects who updated their .env # noqa: no-handler
   ansible.builtin.set_fact:
     # noqa jinja[spacing]
     podman_compose_restart_list: "{{
