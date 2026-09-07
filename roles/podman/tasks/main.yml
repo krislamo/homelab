@@ -3,15 +3,6 @@
     name: ["podman", "docker-cli", "docker-compose"]
     state: present
 
-- name: Configure NSS subid lookups for rootless containers
-  ansible.builtin.lineinfile:
-    path: /etc/nsswitch.conf
-    line: "subid: files"
-    regexp: "^subid:"
-    owner: root
-    group: root
-    mode: "0644"
-
 - name: Allow rootless containers to use capabilities in their user namespace
   ansible.posix.seboolean:
     name: container_use_userns_all_caps
