@@ -213,3 +213,16 @@
     dest: /etc/fail2ban/jail.d/gitea.conf
     mode: "640"
   notify: restart_fail2ban
+
+- name: Ensure Gitea's compose service is running
+  ansible.builtin.systemd:
+    name: compose@gitea
+    state: started
+    scope: user
+  become: true
+  become_user: git
+  vars:
+    gitea_project: >-
+      {{ podman_compose.git.compose
+         | selectattr('name', 'equalto', 'gitea') | first | default({}) }}
+  when: gitea_project.enabled | default(false)
