@@ -1,0 +1,10 @@
+- name: Install VPS Server
+  hosts: "{{ PLAYBOOK_HOST | default('none') }}"
+  become: true
+  roles:
+    - base
+    - proxy
+    - mariadb
+    - podman
+    - bitwarden
+    - gitea
