@@ -21,6 +21,7 @@ base_packages:
   - vim
   - wget
 
-
 base_scripts: /srv/.scripts
 base_ssh_ufw_rule: limit
+base_swapfile_path: /swapfile
+base_swap_sysctl_file: /etc/sysctl.d/70-swap.conf

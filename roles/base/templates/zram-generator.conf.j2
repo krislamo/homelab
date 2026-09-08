@@ -1,0 +1,9 @@
+# Managed by Ansible
+[{{ item.key }}]
+zram-size = {{ item.value.size | default('ram') }}
+compression-algorithm = {{ item.value.algorithm | default('zstd') }}
+{% if item.value.writeback_device is defined %}
+writeback-device = {{ item.value.writeback_device }}
+{% endif %}
+swap-priority = {{ item.value.priority | default(100) }}
+fs-type = {{ item.value.fs_type | default('swap') }}

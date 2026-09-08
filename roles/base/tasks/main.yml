@@ -6,6 +6,11 @@
   ansible.builtin.import_tasks: system.yml
   tags: system
 
+- name: Import swap tasks
+  ansible.builtin.import_tasks: swap.yml
+  tags: swap
+  when: swap is defined
+
 - name: Import Firewall tasks
   ansible.builtin.import_tasks: firewall.yml
   tags: firewall

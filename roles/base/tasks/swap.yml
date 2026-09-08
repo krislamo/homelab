@@ -1,0 +1,117 @@
+- name: Install the zram generator
+  ansible.builtin.apt:
+    name: systemd-zram-generator
+    state: present
+  register: base_zram_pkg
+  when: swap.zram | default({}) | length > 0
+
+- name: Create the zram generator drop-in directory
+  ansible.builtin.file:
+    path: /etc/systemd/zram-generator.conf.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+  when: swap.zram | default({}) | length > 0
+
+- name: Configure zram swap devices
+  ansible.builtin.template:
+    src: zram-generator.conf.j2
+    dest: "/etc/systemd/zram-generator.conf.d/{{ item.key }}.conf"
+    owner: root
+    group: root
+    mode: "0644"
+  loop: "{{ swap.zram | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+  register: base_zram_conf
+
+- name: Reload systemd to run the zram generator
+  ansible.builtin.systemd_service:
+    daemon_reload: true
+  when: >-
+    base_zram_conf is changed
+    or base_zram_pkg is changed
+
+- name: Start zram swap devices
+  ansible.builtin.systemd_service:
+    name: "systemd-zram-setup@{{ item.key }}.service"
+    state: started
+  loop: "{{ swap.zram | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
+
+- name: Allocate the swapfile
+  ansible.builtin.command:
+    cmd: >-
+      dd if=/dev/zero of={{ base_swapfile_path }}
+      bs=1M count={{ swap.file.size_mb }}
+    creates: "{{ base_swapfile_path }}"
+  when: swap.file is defined
+
+- name: Secure and label the swapfile
+  ansible.builtin.file:
+    path: "{{ base_swapfile_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+    setype: >-
+      {{ (selinux is defined and selinux is not false)
+        | ternary('swapfile_t', omit) }}
+  when: swap.file is defined
+
+- name: Check the swapfile for a swap signature
+  ansible.builtin.command:
+    cmd: "blkid -p -s TYPE -o value {{ base_swapfile_path }}"
+  register: base_swapfile_sig
+  changed_when: false
+  failed_when: false
+  when: swap.file is defined
+
+- name: Format the swapfile
+  ansible.builtin.command:
+    cmd: "mkswap {{ base_swapfile_path }}"
+  register: base_mkswap
+  changed_when: base_mkswap.rc == 0
+  when:
+    - swap.file is defined
+    - (base_swapfile_sig.stdout | default('')) != 'swap'
+
+- name: Add the swapfile to fstab
+  ansible.posix.mount:
+    path: none
+    src: "{{ base_swapfile_path }}"
+    fstype: swap
+    opts: "sw,pri={{ swap.file.priority | default(10) }}"
+    state: present
+  when: swap.file is defined
+
+- name: List active swap devices
+  ansible.builtin.command:
+    cmd: swapon --show=NAME --noheadings
+  register: base_swap_active
+  changed_when: false
+  when: swap.file is defined
+
+- name: Enable the swapfile
+  ansible.builtin.command:
+    cmd: >-
+      swapon --priority {{ swap.file.priority | default(10) }}
+      {{ base_swapfile_path }}
+  register: base_swapon
+  changed_when: base_swapon.rc == 0
+  when:
+    - swap.file is defined
+    - base_swapfile_path not in (base_swap_active.stdout_lines | default([]))
+
+- name: Configure virtual memory sysctls
+  ansible.posix.sysctl:
+    name: "{{ item.key }}"
+    value: "{{ item.value }}"
+    sysctl_file: "{{ base_swap_sysctl_file }}"
+    sysctl_set: true
+    reload: true
+    state: present
+  loop: "{{ swap.sysctls | default({}) | dict2items }}"
+  loop_control:
+    label: "{{ item.key }}"
