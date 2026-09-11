@@ -2,12 +2,14 @@
   ansible.builtin.apt:
     name: python3-pymysql
     state: present
+  tags: gitea_db
 
 - name: Create Gitea database
   community.mysql.mysql_db:
     name: "{{ gitea.DB_NAME }}"
     state: present
     login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags: gitea_db
 
 - name: Create Gitea database user
   community.mysql.mysql_user:
@@ -17,6 +19,7 @@
     state: present
     priv: "{{ gitea.DB_NAME }}.*:ALL"
     login_unix_socket: /var/run/mysqld/mysqld.sock
+  tags: gitea_db
 
 - name: Create git's .ssh directory
   ansible.builtin.file:
