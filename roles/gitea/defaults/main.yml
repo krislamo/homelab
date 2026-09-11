@@ -13,6 +13,8 @@ gitea_dbtype: mysql
 gitea_dbhost: host.docker.internal
 gitea_dbname: "{{ gitea_name }}"
 gitea_dbuser: "{{ gitea_name }}"
+gitea_dbencoding: utf8mb4
+gitea_dbcollation: utf8mb4_bin
 
 # proxy settings
 gitea_proxy_limit: "1"

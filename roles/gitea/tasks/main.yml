@@ -8,6 +8,8 @@
   community.mysql.mysql_db:
     name: "{{ gitea.DB_NAME }}"
     state: present
+    encoding: "{{ gitea_dbencoding }}"
+    collation: "{{ gitea_dbcollation }}"
     login_unix_socket: /var/run/mysqld/mysqld.sock
   tags: gitea_db
 
