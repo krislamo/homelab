@@ -3,6 +3,7 @@
     name: "{{ base_packages }}"
     state: present
     update_cache: true
+  tags: base_software
 
 - name: Get the default policy and basic SELinux utilities
   ansible.builtin.apt:

@@ -6,17 +6,24 @@ base_locale_default: en_US.UTF-8
 
 base_packages:
   - apache2-utils
+  - bind9-dnsutils
+  - btop
   - cryptsetup
   - curl
-  - dnsutils
+  - debsecan
   - hashdeep
   - htop
   - jq
   - kpartx
   - ncdu
+  - pv
+  - pwgen
   - rsync
   - screen
   - strace
+  - tcpdump
+  - tmux
+  - trash-cli
   - tree
   - vim
   - wget
