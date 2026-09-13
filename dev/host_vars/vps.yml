@@ -59,7 +59,7 @@ podman_compose:
     compose:
       - name: gitea
         url: https://github.com/krislamo/gitea
-        version: 84e5880484e803fdcf53c7f70b699988d28021d0
+        version: ce5d5cb7323679beb7bf48d59496a4a30e2c4d82
         enabled: true
         env:
           DATA: "{{ gitea_data }}"
@@ -73,6 +73,7 @@ podman_compose:
           DB_NAME: "{{ gitea.DB_NAME }}"
           DB_USER: "{{ gitea.DB_USER }}"
           DB_PASSWD: "{{ gitea.DB_PASSWD }}"
+          SECRET_KEY: password
 
 ###################
 #### bitwarden ####
