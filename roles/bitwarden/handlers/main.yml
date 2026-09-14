@@ -41,3 +41,9 @@
   become_user: "{{ bitwarden_user }}"
   environment: "{{ bitwarden_env }}"
   listen: rebuild_bitwarden
+
+- name: Restart Bitwarden's Fail2ban reload timer
+  ansible.builtin.systemd_service:
+    name: "fail2ban-reload-{{ bitwarden_name }}.timer"
+    state: restarted
+  listen: reload_bitwarden_jail

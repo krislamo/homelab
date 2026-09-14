@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+[Unit]
+Description=Refresh the {{ bitwarden_name }} Fail2ban jail's log file list
+Documentation=man:fail2ban-client(1)
+After=fail2ban.service
+
+[Service]
+Type=oneshot
+ExecCondition=/usr/bin/systemctl is-active --quiet fail2ban.service
+ExecStart=/usr/bin/fail2ban-client reload {{ bitwarden_name }}

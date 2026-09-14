@@ -4,6 +4,7 @@ require {
     type container_t;
     type container_file_t;
     type container_ro_file_t;
+    type fail2ban_client_t;
     type oci_log_t;
     type unconfined_t;
     class process ptrace;
@@ -19,3 +20,4 @@ allow unconfined_t container_ro_file_t:file execmod;
 allow container_t oci_log_t:dir { read getattr search open lock ioctl write add_name remove_name create rmdir setattr rename reparent };
 allow container_t oci_log_t:file { read getattr open lock ioctl write append create unlink setattr rename link map };
 allow container_t oci_log_t:lnk_file { read getattr create unlink rename };
+allow fail2ban_client_t oci_log_t:dir read;
