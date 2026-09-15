@@ -167,6 +167,17 @@
   loop: "{{ cron }}"
   when: cron is defined and cron | length > 0
 
+- name: Install logrotate
+  ansible.builtin.apt:
+    name: logrotate
+    state: present
+
+- name: Enable and start the logrotate timer
+  ansible.builtin.systemd:
+    name: logrotate.timer
+    enabled: true
+    state: started
+
 - name: Install NTPsec
   ansible.builtin.apt:
     name: ntpsec
