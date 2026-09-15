@@ -3,3 +3,4 @@
     name: nginx
     state: reloaded
   listen: reload_nginx
+  tags: nginx_config

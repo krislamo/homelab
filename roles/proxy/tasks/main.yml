@@ -33,6 +33,7 @@
     dest: /etc/nginx/nginx.conf
     mode: "644"
   notify: reload_nginx
+  tags: nginx_config
 
 - name: Install nginx sites configuration
   ansible.builtin.template:
@@ -43,6 +44,7 @@
   loop_control:
     label: "{{ item.domain }}"
   notify: reload_nginx
+  tags: nginx_config
 
 - name: Enable nginx sites configuration
   ansible.builtin.file:
@@ -53,6 +55,7 @@
   loop_control:
     label: "{{ item.domain }}"
   notify: reload_nginx
+  tags: nginx_config
 
 - name: Generate self-signed certificate
   ansible.builtin.command:

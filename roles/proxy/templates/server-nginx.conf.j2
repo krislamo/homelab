@@ -35,6 +35,18 @@ server {
 {% if item.client_max_body_size is defined %}
   client_max_body_size {{ item.client_max_body_size }};
 {% endif %}
+{% set allow_robots = item.allow_robots | default(proxy.allow_robots | default(none)) %}
+{% if allow_robots is not none %}
+{% if allow_robots is boolean %}
+{% set robots_txt = proxy_robots_allow if allow_robots else proxy_robots_disallow %}
+{% else %}
+{% set robots_txt = allow_robots %}
+{% endif %}
+  location = /robots.txt {
+    default_type text/plain;
+    return 200 "{{ robots_txt | trim | replace('"', '\\"') | replace('\n', '\\n') }}\n";
+  }
+{% endif %}
   location / {
 {% if item.hsts is defined %}
     add_header Strict-Transport-Security "max-age={{ item.hsts }}" always;
