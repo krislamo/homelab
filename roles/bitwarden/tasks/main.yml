@@ -144,6 +144,7 @@
                 "s|--name setup |&--security-opt {{ bitwarden_se_opt }} |g" \
                 "$SCRIPTS_DIR/run.sh"
   when: selinux is defined and selinux is not false
+  tags: bitwarden_script
 
 - name: Give Bitwarden's setup container a writable working directory
   ansible.builtin.blockinfile:
@@ -154,6 +155,7 @@
               sed -i \
                 "s|-it --rm --name setup |&-w /bitwarden |" \
                 "$SCRIPTS_DIR/run.sh"
+  tags: bitwarden_script
 
 - name: Run Bitwarden installation script
   ansible.builtin.command: "{{ bitwarden_root }}/bw_wrapper"
