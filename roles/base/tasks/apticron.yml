@@ -1,0 +1,4 @@
+- name: Install apticron
+  ansible.builtin.apt:
+    name: apticron
+    state: present

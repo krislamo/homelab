@@ -26,6 +26,11 @@
   tags: mail
   when: mail is defined
 
+- name: Import apticron tasks
+  ansible.builtin.import_tasks: apticron.yml
+  tags: apticron
+  when: mail is defined and base_manage_apticron
+
 - name: Import ddclient tasks
   ansible.builtin.import_tasks: ddclient.yml
   tags: ddclient
